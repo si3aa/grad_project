@@ -6,13 +6,14 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final TextEditingController? controller;
-  final LoginController? loginController ;
+  final LoginController? loginController;
 
   const CustomButton(
       {super.key,
       required this.text,
       required this.onPressed,
-      this.controller,  this.loginController});
+      this.controller,
+      this.loginController});
 
   @override
   Widget build(BuildContext context) {

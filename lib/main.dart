@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:g_p/ui/provider/controller.dart';
 import 'package:g_p/ui/widgets/navigation.dart';
 import 'package:provider/provider.dart';
+
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ForgetPasswordController()),
+        ChangeNotifierProvider(create: (context) => VerifyCodeController()),
       ],
       child: const MyApp(),
     ),
