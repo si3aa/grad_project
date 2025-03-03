@@ -4,7 +4,7 @@ import 'package:g_p/ui/widgets/submit_button.dart';
 
 class SuccessScreen extends StatelessWidget {
   final String title;
-  const SuccessScreen({super.key, required this.title});
+  const SuccessScreen({super.key, this.title = 'Reset Success'});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class SuccessScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Reset Success",
+          'Success',
           style: TextStyle(
               color: kPrimaryColor, fontWeight: FontWeight.bold, fontSize: 30),
         ),
@@ -31,8 +31,9 @@ class SuccessScreen extends StatelessWidget {
           SizedBox(height: size.height * 0.05),
           Image.asset("assets/images/sucess.png", height: size.height * 0.25),
           const Spacer(),
-          const Text(
-            "Reset successful !!",
+          Text(
+            title,
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
@@ -45,7 +46,7 @@ class SuccessScreen extends StatelessWidget {
           CustomButton(
             text: "Login Now",
             onPressed: () => {
-              Navigator.pushNamed(context, '/login'),
+              Navigator.pushReplacementNamed(context, '/login'),
             },
           ),
           const Spacer(),

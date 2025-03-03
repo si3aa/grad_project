@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:g_p/constants.dart';
 import 'package:g_p/ui/provider/controller.dart';
+import 'package:g_p/ui/screens/verify_pass.dart';
 import 'package:g_p/ui/widgets/header_container.dart';
 import 'package:g_p/ui/widgets/header_text.dart';
 import 'package:g_p/ui/widgets/label_text_field.dart';
@@ -107,7 +108,15 @@ class _SignUpState extends State<SignUp> {
                             text: "Sign up",
                             loginController: _controller,
                             onPressed: () => {
-                              Navigator.pushNamed(context, '/home'),
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VerifyCodeScreen(
+                                    isNewAccount: false,
+                                    imagePath: "assets/images/verify_big.png",
+                                  ),
+                                ),
+                              ),
                             },
                           ),
                           const SizedBox(height: 10),

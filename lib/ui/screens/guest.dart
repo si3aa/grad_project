@@ -94,7 +94,9 @@ class _GuestScreenState extends State<GuestScreen> {
                           CustomButton(
                             text: 'continue',
                             controller:_nameController,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/home');
+                            },
                           ),
                         ],
                       ),

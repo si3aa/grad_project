@@ -91,12 +91,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 30),
                           CustomButton(
-                            text: "Login",
-                            loginController: _controller,
-                            onPressed: () => {
-                               Navigator.pushNamed(context, '/home'),
-                            }
-                          ),
+                              text: "Login",
+                              loginController: _controller,
+                              onPressed: () => {
+                                    Navigator.pushNamed(context, '/home'),
+                                  }),
                           const SizedBox(height: 10),
                           TextButton(
                             onPressed: () {

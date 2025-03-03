@@ -21,8 +21,6 @@ class NavigationController {
     '/home': (context) => const HomeScreen(),
     '/verify': (context) => const VerifyCodeScreen(),
     '/reset_pass': (context) => const ResetPass(),
-    '/success': (context) => const SuccessScreen(
-          title: '',
-        ),
+    '/success': (context) => const SuccessScreen(),
   };
 }

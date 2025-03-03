@@ -145,7 +145,6 @@ class VerifyCodeController extends ChangeNotifier {
     }
     isOtpFilled = false;
     notifyListeners();
-    // Reset focus to the first OTP field
     if (focusNodes.isNotEmpty) {
       FocusScope.of(focusNodes[0].context!).requestFocus(focusNodes[0]);
     }

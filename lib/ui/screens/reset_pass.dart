@@ -78,7 +78,7 @@ class _ResetPassState extends State<ResetPass> {
                 text: "Reset",
                 loginController: _controller,
                 onPressed: () => {
-                  Navigator.pushNamed(context, '/success'),
+                  Navigator.pushReplacementNamed(context, '/success'),
                 },
               ),
               const SizedBox(height: 10),

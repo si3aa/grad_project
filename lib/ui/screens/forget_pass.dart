@@ -70,13 +70,13 @@ class _ForgetPassState extends State<ForgetPass> {
                       hintText: "Enter your phone number",
                       icon: Icons.message,
                       isPassword: false,
-                      keyboardType: TextInputType.phone, // Accepts only numbers
+                      keyboardType: TextInputType.phone,
                     ),
                     SizedBox(height: 20),
                     CustomButton(
                       text: "Submit",
                       onPressed: () {
-                        Navigator.pushNamed(context, '/verify');
+                        Navigator.pushReplacementNamed(context, '/verify');
                       },
                     ),
                   ],
