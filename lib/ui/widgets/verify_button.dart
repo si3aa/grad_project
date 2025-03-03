@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:g_p/constants.dart';
+import 'package:Herfa/constants.dart';
 
 class SubmitButton extends StatelessWidget {
   final String text;

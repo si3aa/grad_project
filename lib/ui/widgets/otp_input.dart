@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:g_p/ui/provider/controller.dart';
+import 'package:Herfa/ui/provider/controller.dart';
 
 class OtpTextField extends StatelessWidget {
   final VerifyCodeController controller;

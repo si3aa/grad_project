@@ -1,8 +1,8 @@
+import 'package:Herfa/constants.dart';
+import 'package:Herfa/ui/provider/controller.dart';
+import 'package:Herfa/ui/screens/success_screen.dart';
+import 'package:Herfa/ui/widgets/otp_input.dart';
 import 'package:flutter/material.dart';
-import 'package:g_p/constants.dart';
-import 'package:g_p/ui/provider/controller.dart';
-import 'package:g_p/ui/screens/success_screen.dart';
-import 'package:g_p/ui/widgets/otp_input.dart';
 import 'package:provider/provider.dart';
 import '../widgets/verify_button.dart';
 

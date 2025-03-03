@@ -1,6 +1,6 @@
+import 'package:Herfa/ui/provider/controller.dart';
+import 'package:Herfa/ui/widgets/navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:g_p/ui/provider/controller.dart';
-import 'package:g_p/ui/widgets/navigation.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -10,13 +10,13 @@ void main() {
         ChangeNotifierProvider(create: (_) => ForgetPasswordController()),
         ChangeNotifierProvider(create: (context) => VerifyCodeController()),
       ],
-      child: const MyApp(),
+      child: const Herfa(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Herfa extends StatelessWidget {
+  const Herfa({super.key});
 
   @override
   Widget build(BuildContext context) {

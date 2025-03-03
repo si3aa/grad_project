@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:g_p/constants.dart';
-import 'package:g_p/ui/provider/controller.dart';
-import 'package:g_p/ui/widgets/label_text_field.dart';
-import 'package:g_p/ui/widgets/submit_button.dart';
-import 'package:g_p/ui/widgets/text_field.dart';
+import 'package:Herfa/constants.dart';
+import 'package:Herfa/ui/provider/controller.dart';
+import 'package:Herfa/ui/widgets/label_text_field.dart';
+import 'package:Herfa/ui/widgets/submit_button.dart';
+import 'package:Herfa/ui/widgets/text_field.dart';
 
 class ResetPass extends StatefulWidget {
   const ResetPass({super.key});

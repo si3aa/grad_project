@@ -1,9 +1,9 @@
+import 'package:Herfa/constants.dart';
+import 'package:Herfa/ui/widgets/header_container.dart';
+import 'package:Herfa/ui/widgets/header_text.dart';
+import 'package:Herfa/ui/widgets/label_text_field.dart';
+import 'package:Herfa/ui/widgets/submit_button.dart';
 import 'package:flutter/material.dart';
-import 'package:g_p/constants.dart';
-import 'package:g_p/ui/widgets/header_container.dart';
-import 'package:g_p/ui/widgets/header_text.dart';
-import 'package:g_p/ui/widgets/label_text_field.dart';
-import 'package:g_p/ui/widgets/submit_button.dart';
 
 class GuestScreen extends StatefulWidget {
   const GuestScreen({super.key});
