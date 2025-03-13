@@ -6,3 +6,4 @@ Image backgroundImage = Image.asset(
   'assets/images/background.jpg',
   fit: BoxFit.cover,
 );
+

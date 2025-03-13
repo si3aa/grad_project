@@ -1,10 +1,11 @@
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/ui/provider/controller.dart';
-import 'package:Herfa/ui/screens/success_screen.dart';
-import 'package:Herfa/ui/widgets/otp_input.dart';
+import 'package:Herfa/ui/screens/auth/success_screen.dart';
+import 'package:Herfa/ui/widgets/auth_widgets/otp_input.dart';
+import 'package:Herfa/ui/widgets/auth_widgets/verify_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/verify_button.dart';
+
 
 class VerifyCodeScreen extends StatelessWidget {
   final String? imagePath;

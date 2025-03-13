@@ -1,6 +1,6 @@
+import 'package:Herfa/ui/widgets/auth_widgets/submit_button.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/widgets/submit_button.dart';
 
 class SuccessScreen extends StatelessWidget {
   final String title;

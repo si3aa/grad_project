@@ -1,6 +1,6 @@
+import 'package:Herfa/ui/widgets/auth_widgets/home_screen_conainer.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/widgets/home_screen_conainer.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
