@@ -7,6 +7,7 @@ import 'package:Herfa/ui/screens/auth/splash.dart';
 import 'package:Herfa/ui/screens/auth/success_screen.dart';
 import 'package:Herfa/ui/screens/auth/verify_pass.dart';
 import 'package:Herfa/ui/screens/auth/welcom.dart';
+import 'package:Herfa/ui/screens/home/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/events_screen.dart';
 import 'package:Herfa/ui/screens/home/home_screen.dart';
 import 'package:Herfa/ui/screens/home/new_post_screen.dart';
@@ -30,5 +31,6 @@ class NavigationController {
     '/saved': (context) => const SavedScreen(),
     '/new-post': (context) => const NewPostScreen(),
     '/events': (context) => const EventsScreen(),
+    '/cart': (context) => const CartScreen(),
   };
 }

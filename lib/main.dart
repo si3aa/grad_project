@@ -1,4 +1,5 @@
 import 'package:Herfa/ui/provider/controller.dart';
+import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
@@ -26,6 +27,7 @@ void main() {
         BlocProvider(create: (_) => di.sl<SearchCubit>()),
         BlocProvider(create: (_) => di.sl<NewPostCubit>()),
         BlocProvider(create: (_) => di.sl<EventsCubit>()),
+        BlocProvider(create: (_) => di.sl<CartCubit>()),
       ],
       child: const Herfa(),
     ),

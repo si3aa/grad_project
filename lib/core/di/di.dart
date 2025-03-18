@@ -1,3 +1,4 @@
+import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
@@ -17,4 +18,5 @@ void setupDependencies() {
   sl.registerLazySingleton(() => SearchCubit());
   sl.registerLazySingleton(() => NewPostCubit());
   sl.registerLazySingleton(() => EventsCubit());
+  sl.registerLazySingleton(() => CartCubit());
 }
