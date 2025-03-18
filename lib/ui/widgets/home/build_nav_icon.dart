@@ -22,7 +22,7 @@ class BuildNavIcon extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         onTap();
-        Navigator.pushNamed(context, route);
+        Navigator.pushReplacementNamed(context, route);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

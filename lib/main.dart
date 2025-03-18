@@ -1,8 +1,11 @@
 import 'package:Herfa/ui/provider/controller.dart';
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
+import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
+import 'package:Herfa/ui/provider/cubit/new_post_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/saved_cubit.dart';
+import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
 import 'package:Herfa/ui/widgets/auth_widgets/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/core/di/di.dart' as di;
@@ -20,6 +23,9 @@ void main() {
         BlocProvider(create: (_) => di.sl<ContentCubit>()),
         BlocProvider(create: (_) => di.sl<NotificationCubit>()),
         BlocProvider(create: (_) => di.sl<SavedCubit>()),
+        BlocProvider(create: (_) => di.sl<SearchCubit>()),
+        BlocProvider(create: (_) => di.sl<NewPostCubit>()),
+        BlocProvider(create: (_) => di.sl<EventsCubit>()),
       ],
       child: const Herfa(),
     ),
