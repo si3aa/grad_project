@@ -1,82 +1,73 @@
-import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
 import 'package:Herfa/ui/widgets/home/build_cate_button.dart';
 import 'package:Herfa/ui/widgets/home/build_nav_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-class NavBarWidget extends StatefulWidget {
-  const NavBarWidget({super.key});
+
+class NavBarWidget extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
+  
+  const NavBarWidget({
+    super.key, 
+    required this.currentIndex,
+    required this.onTap,
+  });
 
   @override
-  State<NavBarWidget> createState() => _NavBarWidgetState();
-}
-
-class _NavBarWidgetState extends State<NavBarWidget> {
-  @override
-  // ignore: override_on_non_overriding_member
-  int _selectedIndex = 0;
-  void _onNavIconTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   Widget build(BuildContext context) {
-    return Expanded(
-      child: BlocBuilder<SearchCubit, SearchState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              const Expanded(child: SizedBox.shrink()),
-              Container(
-                height: 60,
-                // ignore: deprecated_member_use
-                color: kPrimaryColor.withOpacity(0.2),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    BuildNavIcon(
-                      icon: Icons.home,
-                      label: "Home",
-                      route: "/home",
-                      isSelected: _selectedIndex == 0,
-                      onTap: () => _onNavIconTap(0),
-                    ),
-                    BuildNavIcon(
-                      icon: Icons.event,
-                      label: "Events",
-                      route: "/events",
-                      isSelected: _selectedIndex == 1,
-                      onTap: () => _onNavIconTap(1),
-                    ),
-                    BuildNavIcon(
-                      icon: Icons.bookmark_border,
-                      label: "Saved",
-                      route: "/saved",
-                      isSelected: _selectedIndex == 2,
-                      onTap: () => _onNavIconTap(2),
-                    ),
-                    BuildNavIcon(
-                      icon: Icons.add,
-                      label: "Add",
-                      route: "/new-post",
-                      isSelected: _selectedIndex == 3,
-                      onTap: () => _onNavIconTap(3),
-                    ),
-                    BuildNavIcon(
-                      icon: Icons.shopping_cart,
-                      label: "Cart",
-                      route: "/cart",
-                      isSelected: _selectedIndex == 4,
-                      onTap: () => _onNavIconTap(4),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            // ignore: deprecated_member_use
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          BuildNavIcon(
+            icon: Icons.home,
+            label: "Home",
+            route: "/home",
+            isSelected: currentIndex == 0,
+            onTap: () => onTap(0),
+          ),
+          BuildNavIcon(
+            icon: Icons.event,
+            label: "Events",
+            route: "/events",
+            isSelected: currentIndex == 1,
+            onTap: () => onTap(1),
+          ),
+          BuildNavIcon(
+            icon: Icons.bookmark_border,
+            label: "Saved",
+            route: "/saved",
+            isSelected: currentIndex == 2,
+            onTap: () => onTap(2),
+          ),
+          BuildNavIcon(
+            icon: Icons.add,
+            label: "Add",
+            route: "/new-post",
+            isSelected: currentIndex == 3,
+            onTap: () => onTap(3),
+          ),
+          BuildNavIcon(
+            icon: Icons.shopping_cart,
+            label: "Cart",
+            route: "/cart",
+            isSelected: currentIndex == 4,
+            onTap: () => onTap(4),
+          ),
+        ],
       ),
     );
   }

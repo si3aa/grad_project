@@ -16,6 +16,13 @@ class NewPostCubit extends Cubit<NewPostState> {
     emit(state.copyWith(images: List.from(state.images)..add(imagePath)));
   }
 
+  void deleteImage(String imagePath) {
+    final updatedImages = List<String>.from(state.images);
+    updatedImages.remove(imagePath);
+    
+    emit(state.copyWith(images: updatedImages));
+  }
+
   void updateSpecifications({
     String? material,
     String? size,

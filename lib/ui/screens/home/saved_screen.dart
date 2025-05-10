@@ -22,86 +22,86 @@ class _SavedScreenState extends State<SavedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios),
-                        onPressed: () =>
-                            Navigator.pushReplacementNamed(context, '/home'),
-                        color: kPrimaryColor,
-                      ),
-                      const Spacer(),
-                      const Text(
-                        "Saved",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "32 items",
-                        style: TextStyle(
-                          color: kPrimaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, '/home'),
+                    color: kPrimaryColor,
                   ),
-                ),
-                Expanded(
-                  child: BlocBuilder<SavedCubit, SavedState>(
-                    builder: (context, state) {
-                      if (state is SavedLoaded) {
-                        if (state.savedItems.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/images/empty.png',
-                                  height: Responsive.isMobile(context)
-                                      ? 150
-                                      : Responsive.isTablet(context)
-                                          ? 200
-                                          : 250,
-                                ),
-                                const Text(
-                                  "No Saved Items",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                        return ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          itemCount: state.savedItems.length,
-                          itemBuilder: (context, index) {
-                            return SavedItemWidget(
-                              item: state.savedItems[index],
-                            );
-                          },
-                        );
-                      }
-                      return const Center(child: CircularProgressIndicator());
-                    },
+                  const Spacer(),
+                  const Text(
+                    "Saved",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                  const Spacer(),
+                  Text(
+                    "32 items",
+                    style: TextStyle(
+                      color: kPrimaryColor,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: BlocBuilder<SavedCubit, SavedState>(
+                builder: (context, state) {
+                  if (state is SavedLoaded) {
+                    if (state.savedItems.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/empty.png',
+                              height: Responsive.isMobile(context)
+                                  ? 150
+                                  : Responsive.isTablet(context)
+                                      ? 200
+                                      : 250,
+                            ),
+                            const Text(
+                              "No Saved Items",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.only(
+                        left: 16.0, 
+                        right: 16.0, 
+                        bottom: 80.0 // Add bottom padding for navigation bar
+                      ),
+                      itemCount: state.savedItems.length,
+                      itemBuilder: (context, index) {
+                        return SavedItemWidget(
+                          item: state.savedItems[index],
+                        );
+                      },
+                    );
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

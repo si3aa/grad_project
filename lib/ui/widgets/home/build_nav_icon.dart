@@ -20,15 +20,16 @@ class BuildNavIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        onTap();
-        Navigator.pushReplacementNamed(context, route);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        transform: Matrix4.identity()..scale(isSelected ? 1.2 : 1.0),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          // ignore: deprecated_member_use
+          color: isSelected ? kPrimaryColor.withOpacity(0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
@@ -36,14 +37,15 @@ class BuildNavIcon extends StatelessWidget {
               color: isSelected ? kPrimaryColor : Colors.grey,
               size: isSelected ? 28 : 24,
             ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? kPrimaryColor : Colors.grey,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            if (!isSelected)
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
-            ),
           ],
         ),
       ),

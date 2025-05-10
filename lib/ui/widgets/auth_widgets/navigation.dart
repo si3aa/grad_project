@@ -1,3 +1,4 @@
+import 'package:Herfa/ui/screens/home/add_new_post/views/new_post_screen.dart';
 import 'package:Herfa/ui/screens/auth/forget_pass.dart';
 import 'package:Herfa/ui/screens/auth/guest.dart';
 import 'package:Herfa/ui/screens/auth/login_page.dart';
@@ -10,7 +11,6 @@ import 'package:Herfa/ui/screens/auth/welcom.dart';
 import 'package:Herfa/ui/screens/home/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/events_screen.dart';
 import 'package:Herfa/ui/screens/home/home_screen.dart';
-import 'package:Herfa/ui/screens/home/new_post_screen.dart';
 import 'package:Herfa/ui/screens/home/notification_sc.dart';
 import 'package:Herfa/ui/screens/home/saved_screen.dart';
 import 'package:flutter/material.dart';

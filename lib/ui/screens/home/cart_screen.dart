@@ -21,89 +21,90 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios),
-                        onPressed: () => Navigator.pushReplacementNamed(context,'/home'),
-                        color: kPrimaryColor,
-                      ),
-                      const Spacer(),
-                      const Text(
-                        "Your Cart",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      BlocBuilder<CartCubit, CartState>(
-                        builder: (context, state) {
-                          return Text(
-                            "${state.itemCount} items",
-                            style: const TextStyle(fontSize: 16),
-                          );
-                        },
-                      ),
-                    ],
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: () => Navigator.pushReplacementNamed(context,'/home'),
+                    color: kPrimaryColor,
                   ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: BlocBuilder<CartCubit, CartState>(
-                      builder: (context, state) {
-                        if (state.itemCount == 0) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/images/cart.png',
-                                width: Responsive.screenWidth(context) * 0.5,
-                                height: Responsive.screenHeight(context) * 0.3,
-                              ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                "Your cart is empty !",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(context, '/home');
-                                },
-                                child: Text(
-                                  "add to cart",
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: kPrimaryColor,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                        return const Center(child: Text("Cart has items!"));
-                      },
+                  const Spacer(),
+                  const Text(
+                    "Your Cart",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
+                  const Spacer(),
+                  BlocBuilder<CartCubit, CartState>(
+                    builder: (context, state) {
+                      return Text(
+                        "${state.itemCount} items",
+                        style: const TextStyle(fontSize: 16),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Center(
+                child: BlocBuilder<CartCubit, CartState>(
+                  builder: (context, state) {
+                    if (state.itemCount == 0) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/cart.png',
+                            width: Responsive.screenWidth(context) * 0.5,
+                            height: Responsive.screenHeight(context) * 0.3,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Your cart is empty !",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacementNamed(context, '/home');
+                            },
+                            child: Text(
+                              "add to cart",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: kPrimaryColor,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                          // Add bottom padding for navigation bar
+                          SizedBox(height: 80),
+                        ],
+                      );
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 80.0), // Add bottom padding
+                      child: const Center(child: Text("Cart has items!")),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

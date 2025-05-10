@@ -43,6 +43,6 @@ class HomeAppBar extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
-    ]);
+    ],);
   }
 }

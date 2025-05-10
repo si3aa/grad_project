@@ -25,28 +25,23 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            _buildFeaturedEvents(),
-            SizedBox(height: 16),
-            _buildSearchBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildCategoryTabs(),
-                    _buildSectionTitle("Events"),
-                    _buildEventsGrid(),
-                    _buildSectionTitle("Workshops"),
-                    _buildWorkshopsGrid(),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
+              _buildFeaturedEvents(),
+              SizedBox(height: 16),
+              _buildSearchBar(),
+              _buildCategoryTabs(),
+              _buildSectionTitle("Events"),
+              _buildEventsGrid(),
+              _buildSectionTitle("Workshops"),
+              _buildWorkshopsGrid(),
+              // Add bottom padding to account for the navigation bar
+              SizedBox(height: 80),
+            ],
+          ),
         ),
       ),
     );
