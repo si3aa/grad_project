@@ -28,7 +28,7 @@ class Herfa extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           onGenerateRoute: RouteGenerator.getRoute,
-          initialRoute: Routes.homeRoute,
+          initialRoute: Routes.splashScreen,
         ),
       ),
     );
