@@ -21,7 +21,6 @@ class VerifyOTPScreen extends StatefulWidget {
     this.isNewAccount = true,
   });
 
-  // Add a factory constructor to handle arguments from Navigator
   factory VerifyOTPScreen.fromArguments(Map<String, dynamic> arguments) {
     return VerifyOTPScreen(
       email: arguments['email'] as String,
@@ -141,9 +140,13 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                BlocConsumer<AuthCubit, AuthState>(
+                BlocListener<AuthCubit, AuthState>(
                   listener: (context, state) {
+                        if (state is AuthLoading) {
+                                  UiUtils.showLoading(context);
+                                }
                     if (state is AuthSuccess) {
+                       UiUtils.hideLoading(context);
                       if (widget.isNewAccount) {
                         Navigator.pushReplacementNamed(
                           context,
@@ -160,24 +163,22 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
                       }
                       _otpController.clear();
                     } else if (state is AuthError) {
-                       UiUtils.showMessage(state.errorMessage);
-                       print(state.errorMessage);
-                    }
+                      UiUtils.showMessage(state.errorMessage);
+                      UiUtils.hideLoading(context);
+                      }
                   },
-                  builder: (context, state) {
-                    return SubmitButton(
-                      text: "Verify OTP",
-                      isEnabled: _isOtpFilled && state is! AuthLoading,
-                      onPressed: _isOtpFilled && state is! AuthLoading
-                          ? () {
-                              context.read<AuthCubit>().verifyOtp(
-                                    widget.email,
-                                    _otpController.text,
-                                  );
-                            }
-                          : null,
-                    );
-                  },
+                  child: SubmitButton(
+                    text: "Verify OTP",
+                    isEnabled: _isOtpFilled,
+                    onPressed: _isOtpFilled
+                        ? () {
+                            context.read<AuthCubit>().verifyOtp(
+                                  widget.email,
+                                  _otpController.text,
+                                );
+                          }
+                        : null,
+                  ),
                 ),
               ],
             ),
@@ -187,4 +188,3 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
     );
   }
 }
-

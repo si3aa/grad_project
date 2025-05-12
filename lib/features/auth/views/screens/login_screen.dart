@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 30),
                             BlocListener<AuthCubit, AuthState>(
                               listener: (context, state) {
-                                 if (state is AuthLoading) {
+                                if (state is AuthLoading) {
                                   UiUtils.showLoading(context);
                                 }
                                 if (state is AuthSuccess) {
@@ -134,10 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                     context,
                                     Routes.homeRoute,
                                   );
+
                                   _usernameController.clear();
                                   _passwordController.clear();
                                 } else if (state is AuthError) {
-                                   UiUtils.hideLoading(context);
+                                  UiUtils.hideLoading(context);
                                   UiUtils.showMessage(state.errorMessage);
                                   log(state.errorMessage);
                                 }
