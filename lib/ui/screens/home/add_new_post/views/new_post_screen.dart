@@ -315,21 +315,12 @@ class _NewPostViewState extends State<NewPostView> {
                 const SizedBox(height: 32),
 
                 // Submit Button
-                if (state.error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      state.error!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          _isFormValid() ? kPrimaryColor : Colors.grey[400],
+                      backgroundColor: _isFormValid() ? kPrimaryColor : Colors.grey[400],
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -337,6 +328,7 @@ class _NewPostViewState extends State<NewPostView> {
                     ),
                     onPressed: (!state.isLoading)
                         ? () async {
+                            print("Create Product button pressed");
                             // Check for images first
                             if (state.images.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -351,16 +343,23 @@ class _NewPostViewState extends State<NewPostView> {
                             }
                             
                             if (_formKey.currentState!.validate()) {
+                              print("Form is valid, submitting product");
                               final success = await viewModel.submitProduct();
+                              print("Product submission result: $success");
                               if (success && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content:
-                                        Text('Product created successfully'),
+                                    content: Text('Product created successfully'),
                                   ),
                                 );
-                                Navigator.pushReplacementNamed(
-                                    context, '/home');
+                                Navigator.pushReplacementNamed(context, '/home');
+                              } else if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Failed to create product: ${viewModel.state.error}'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
                               }
                             }
                           }
@@ -447,6 +446,9 @@ class _NewPostViewState extends State<NewPostView> {
     return ((_formKey.currentState?.validate() ?? false) && hasImages);
   }
 }
+
+
+
 
 
 

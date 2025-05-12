@@ -1,6 +1,20 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:Herfa/ui/screens/home/add_new_post/models/post_model.dart';
 import 'package:Herfa/ui/screens/home/prduct/models/product_repository.dart';
+
+class ApiResponse {
+  final bool success;
+  final String message;
+  final Map<String, dynamic>? data;
+
+  ApiResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+}
 
 class NewPostState {
   final List<String> images;
@@ -116,13 +130,13 @@ class NewPostViewModel extends ChangeNotifier {
 
   void toggleColor(Color color) {
     final updatedColors = List<Color>.from(_state.selectedColors);
-    
+
     if (updatedColors.contains(color)) {
       updatedColors.remove(color);
     } else {
       updatedColors.add(color);
     }
-    
+
     _state = _state.copyWith(selectedColors: updatedColors);
     notifyListeners();
   }
@@ -130,25 +144,21 @@ class NewPostViewModel extends ChangeNotifier {
   Future<bool> submitProduct() async {
     // Validate required fields
     if (_state.images.isEmpty) {
-      _state = _state.copyWith(
-        error: 'Please add at least one product image'
-      );
+      _state = _state.copyWith(error: 'Please add at least one product image');
       notifyListeners();
       return false;
     }
-    
-    if (_state.productName.isEmpty || 
-        _state.productTitle.isEmpty || 
+
+    if (_state.productName.isEmpty ||
+        _state.productTitle.isEmpty ||
         _state.description.isEmpty ||
         _state.price <= 0 ||
         _state.quantity <= 0 ||
-        _state.category.isEmpty ||
         _state.categoryId <= 0 ||
         _state.selectedColors.isEmpty) {
-      
       _state = _state.copyWith(
-        error: 'Please fill all required fields and select at least one color'
-      );
+          error:
+              'Please fill all required fields and select at least one color');
       notifyListeners();
       return false;
     }
@@ -157,34 +167,46 @@ class NewPostViewModel extends ChangeNotifier {
       _state = _state.copyWith(isLoading: true, error: null);
       notifyListeners();
 
-      if (repository != null) {
-        // Convert colors to string representation for API
-        final colorStrings = _state.selectedColors
-            // ignore: deprecated_member_use
-            .map((color) => '#${color.value.toRadixString(16).substring(2)}')
-            .toList();
-            
-        final product = ProductModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: _state.productName,
-          title: _state.productTitle,
-          description: _state.description,
-          price: _state.price,
-          quantity: _state.quantity,
-          category: _state.category,
-          categoryId: _state.categoryId, // Include the category ID
-          isActive: false, // Always false as requested
-          colors: colorStrings,
-          images: _state.images,
-        );
-        
-        await repository!.addProduct(product);
+      // Convert colors to string representation for API
+      final colorStrings = _state.selectedColors
+          // ignore: deprecated_member_use
+          .map((color) => '#${color.value.toRadixString(16).substring(2)}')
+          .toList();
+
+      final product = ProductModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _state.productName,
+        title: _state.productTitle,
+        description: _state.description,
+        price: _state.price,
+        quantity: _state.quantity,
+        category: _state.category,
+        categoryId: _state.categoryId,
+        isActive: false,
+        colors: colorStrings,
+        images: _state.images,
+      );
+
+      // Print product data for debugging
+      print('Product data before API call:');
+      print(product.toJson());
+
+      // Send data to API
+      final response = await sendProductToApi(product);
+      
+      // Print API response for debugging
+      print('API response success: ${response.success}');
+      print('API response message: ${response.message}');
+
+      if (!response.success) {
+        throw Exception(response.message);
       }
 
       _state = _state.copyWith(isLoading: false);
       notifyListeners();
       return true;
     } catch (e) {
+      print('Error in submitProduct: ${e.toString()}');
       _state = _state.copyWith(isLoading: false, error: e.toString());
       notifyListeners();
       return false;
@@ -195,15 +217,64 @@ class NewPostViewModel extends ChangeNotifier {
     _state = NewPostState();
     notifyListeners();
   }
+
+  // Method to send product data to API
+  Future<ApiResponse> sendProductToApi(ProductModel product) async {
+    try {
+      const String apiUrl = 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products';
+      
+      // Convert product to JSON
+      final Map<String, dynamic> productJson = product.toJson();
+      
+      // Print request data to console
+      print('Sending product data to API:');
+      print('URL: $apiUrl');
+      print('Request body: ${jsonEncode(productJson)}');
+      
+      // Make the actual API call
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(productJson),
+      );
+      
+      // Print response to console
+      print('API Response Status Code: ${response.statusCode}');
+      print('API Response Body: ${response.body}');
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Map<String, dynamic> responseData;
+        try {
+          responseData = jsonDecode(response.body);
+        } catch (e) {
+          print('Error decoding response: $e');
+          responseData = {'productId': product.id};
+        }
+        
+        return ApiResponse(
+          success: true,
+          message: 'Product created successfully',
+          data: responseData
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Failed to create product: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      // Print error to console
+      print('Error sending product to API: ${e.toString()}');
+      return ApiResponse(
+        success: false,
+        message: 'Error sending product to API: ${e.toString()}',
+      );
+    }
+  }
 }
-
-
-
-
-
-
-
-
 
 
 

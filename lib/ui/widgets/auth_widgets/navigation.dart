@@ -8,11 +8,11 @@ import 'package:Herfa/ui/screens/auth/splash.dart';
 import 'package:Herfa/ui/screens/auth/success_screen.dart';
 import 'package:Herfa/ui/screens/auth/verify_pass.dart';
 import 'package:Herfa/ui/screens/auth/welcom.dart';
-import 'package:Herfa/ui/screens/home/cart_screen.dart';
-import 'package:Herfa/ui/screens/home/events_screen.dart';
-import 'package:Herfa/ui/screens/home/home_screen.dart';
-import 'package:Herfa/ui/screens/home/notification_sc.dart';
-import 'package:Herfa/ui/screens/home/saved_screen.dart';
+import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
+import 'package:Herfa/ui/screens/home/views/events_screen.dart';
+import 'package:Herfa/ui/screens/home/views/home_screen.dart';
+import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
+import 'package:Herfa/ui/screens/home/views/saved_screen.dart';
 import 'package:flutter/material.dart';
 
 class NavigationController {

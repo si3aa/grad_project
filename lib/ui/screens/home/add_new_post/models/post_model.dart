@@ -49,11 +49,13 @@ class ProductModel {
       'description': description,
       'price': price,
       'quantity': quantity,
-      'category': category,
-      'categoryId': categoryId,
+      'categoryId': categoryId, 
       'isActive': isActive,
       'colors': colors,
       'images': images,
     };
   }
 }
+
+
+

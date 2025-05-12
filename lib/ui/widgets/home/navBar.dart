@@ -1,6 +1,6 @@
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
-import 'package:Herfa/ui/screens/home/home_content.dart';
-import 'package:Herfa/ui/screens/home/home_screen.dart';
+import 'package:Herfa/ui/screens/home/views/home_content.dart';
+import 'package:Herfa/ui/screens/home/views/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
