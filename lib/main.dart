@@ -1,4 +1,3 @@
-import 'package:Herfa/ui/provider/controller.dart';
 import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
@@ -8,28 +7,34 @@ import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
 import 'package:Herfa/ui/screens/home/prduct/viewmodels/product_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/saved_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/navigation.dart';
+import 'package:Herfa/core/route_manger/route_generator.dart';
+import 'package:Herfa/core/route_manger/routes.dart';
+import 'package:Herfa/core/app_bloc_observer.dart';
+import 'package:Herfa/features/auth/viewmodel/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:Herfa/core/di/di.dart' as di;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void main() {
-  di.setupDependencies();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set bloc observer
+  Bloc.observer = AppBlocObserver();
+  
   runApp(
     MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ForgetPasswordController()),
-        ChangeNotifierProvider(create: (context) => VerifyCodeController()),
-        BlocProvider(create: (_) => di.sl<HomeCubit>()),
-        BlocProvider(create: (_) => di.sl<ContentCubit>()),
-        BlocProvider(create: (_) => di.sl<NotificationCubit>()),
-        BlocProvider(create: (_) => di.sl<SavedCubit>()),
-        BlocProvider(create: (_) => di.sl<SearchCubit>()),
-        BlocProvider(create: (_) => di.sl<NewPostCubit>()),
-        BlocProvider(create: (_) => di.sl<EventsCubit>()),
-        BlocProvider(create: (_) => di.sl<CartCubit>()),
-        BlocProvider(create: (_) => di.sl<ProductCubit>())
+        BlocProvider(create: (_) => HomeCubit()),
+        BlocProvider(create: (_) => ContentCubit()),
+        BlocProvider(create: (_) => NotificationCubit()),
+        BlocProvider(create: (_) => SavedCubit()),
+        BlocProvider(create: (_) => SearchCubit()),
+        BlocProvider(create: (_) => NewPostCubit()),
+        BlocProvider(create: (_) => EventsCubit()),
+        BlocProvider(create: (_) => CartCubit()),
+        BlocProvider(create: (_) => ProductCubit()),
+        BlocProvider(create: (_) => AuthCubit()),
       ],
       child: const Herfa(),
     ),
@@ -41,10 +46,15 @@ class Herfa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: NavigationController.routes,
+    return ScreenUtilInit(
+      designSize: const Size(430, 932),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        onGenerateRoute: RouteGenerator.getRoute,
+        initialRoute: Routes.splashScreen,
+      ),
     );
   }
 }

@@ -1,19 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/provider/controller.dart';
+import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
-  final TextEditingController? controller;
-  final LoginController? loginController;
+  final VoidCallback? onPressed;
+  final bool isEnabled;
 
-  const CustomButton(
-      {super.key,
-      required this.text,
-      required this.onPressed,
-      this.controller,
-      this.loginController});
+  const CustomButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isEnabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +21,7 @@ class CustomButton extends StatelessWidget {
       width: screenWidth * 0.8,
       height: 50,
       child: ElevatedButton(
-        onPressed: () {
-          controller?.clear();
-          loginController?.emailController.clear();
-          loginController?.passwordController.clear();
-          onPressed();
-        },
+        onPressed: isEnabled ? onPressed : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: kPrimaryColor,
           shape: RoundedRectangleBorder(
@@ -37,8 +30,11 @@ class CustomButton extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: TextStyle(
-              fontSize: 20, color: Colors.white, fontWeight: FontWeight.w900),
+          style: const TextStyle(
+            fontSize: 20,
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     );

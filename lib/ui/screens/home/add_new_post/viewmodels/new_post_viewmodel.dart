@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:Herfa/ui/screens/home/add_new_post/models/post_model.dart';
 import 'package:Herfa/ui/screens/home/prduct/models/product_repository.dart';
 
@@ -157,8 +157,7 @@ class NewPostViewModel extends ChangeNotifier {
         _state.categoryId <= 0 ||
         _state.selectedColors.isEmpty) {
       _state = _state.copyWith(
-          error:
-              'Please fill all required fields and select at least one color');
+          error: 'Please fill all required fields and select at least one color');
       notifyListeners();
       return false;
     }
@@ -173,6 +172,16 @@ class NewPostViewModel extends ChangeNotifier {
           .map((color) => '#${color.value.toRadixString(16).substring(2)}')
           .toList();
 
+      // Convert image paths to base64 or URLs as needed by your API
+      final imageStrings = _state.images.map((image) {
+        // If your API expects base64 encoded images:
+        // final bytes = File(image).readAsBytesSync();
+        // return base64Encode(bytes);
+        
+        // If your API expects image paths:
+        return image;
+      }).toList();
+
       final product = ProductModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _state.productName,
@@ -180,11 +189,10 @@ class NewPostViewModel extends ChangeNotifier {
         description: _state.description,
         price: _state.price,
         quantity: _state.quantity,
-        category: _state.category,
         categoryId: _state.categoryId,
-        isActive: false,
+        isActive: true,
         colors: colorStrings,
-        images: _state.images,
+        images: imageStrings,
       );
 
       // Print product data for debugging
@@ -223,6 +231,17 @@ class NewPostViewModel extends ChangeNotifier {
     try {
       const String apiUrl = 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products';
       
+      // Create a Dio instance (similar to what you use in auth)
+      final dio = Dio(BaseOptions(
+        baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ));
+      
       // Convert product to JSON
       final Map<String, dynamic> productJson = product.toJson();
       
@@ -231,43 +250,47 @@ class NewPostViewModel extends ChangeNotifier {
       print('URL: $apiUrl');
       print('Request body: ${jsonEncode(productJson)}');
       
-      // Make the actual API call
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(productJson),
+      // Make the API call using Dio (similar to your auth implementation)
+      final response = await dio.post(
+        '/products',
+        data: productJson,
+        options: Options(
+          validateStatus: (status) => true,
+          followRedirects: false,
+        ),
       );
       
       // Print response to console
       print('API Response Status Code: ${response.statusCode}');
-      print('API Response Body: ${response.body}');
+      print('API Response Data: ${response.data}');
       
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Map<String, dynamic> responseData;
-        try {
-          responseData = jsonDecode(response.body);
-        } catch (e) {
-          print('Error decoding response: $e');
-          responseData = {'productId': product.id};
-        }
-        
         return ApiResponse(
           success: true,
           message: 'Product created successfully',
-          data: responseData
+          data: response.data is Map ? response.data : {'productId': product.id}
         );
       } else {
+        final errorMessage = response.data is Map
+            ? response.data['message'] ?? 'Failed to create product'
+            : 'Failed to create product: ${response.statusCode}';
+        
         return ApiResponse(
           success: false,
-          message: 'Failed to create product: ${response.statusCode} - ${response.body}',
+          message: errorMessage,
         );
       }
     } catch (e) {
       // Print error to console
       print('Error sending product to API: ${e.toString()}');
+      if (e is DioException) {
+        print('Dio error type: ${e.type}');
+        print('Dio error message: ${e.message}');
+        if (e.response != null) {
+          print('Dio error response: ${e.response?.data}');
+        }
+      }
+      
       return ApiResponse(
         success: false,
         message: 'Error sending product to API: ${e.toString()}',

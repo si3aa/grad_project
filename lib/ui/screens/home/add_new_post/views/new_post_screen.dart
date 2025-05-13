@@ -446,18 +446,3 @@ class _NewPostViewState extends State<NewPostView> {
     return ((_formKey.currentState?.validate() ?? false) && hasImages);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
