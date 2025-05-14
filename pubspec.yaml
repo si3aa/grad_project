@@ -19,12 +19,21 @@ dependencies:
   provider: ^6.1.2
   flutter_bloc: ^9.1.0
   get_it: ^8.0.3
-  dartz: ^0.10.1
-  injectable: ^2.4.4
+  
+  # Networking and data
+  http: ^1.1.0
   dio: ^5.7.0
+  dartz: ^0.10.1
   shared_preferences: ^2.3.2
-  flutter_screenutil: ^5.9.3
+  
+  # Utilities
+  image_picker: ^1.0.4
+  permission_handler: ^11.0.0
   fluttertoast: ^8.2.0
+  injectable: ^2.4.4
+  
+  # Error tracking
+  sentry_flutter: ^7.16.0
 
 dev_dependencies:
   flutter_test:
