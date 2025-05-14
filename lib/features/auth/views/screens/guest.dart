@@ -1,18 +1,17 @@
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/header_container.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/header_text.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/label_text_field.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/submit_button.dart';
+import 'package:Herfa/features/auth/views/widgets/header_container.dart';
+import 'package:Herfa/features/auth/views/widgets/header_text.dart';
+import 'package:Herfa/features/auth/views/widgets/label_text_field.dart';
+import 'package:Herfa/features/auth/views/widgets/submit_button.dart';
 import 'package:flutter/material.dart';
 
 class GuestScreen extends StatefulWidget {
   const GuestScreen({super.key});
   @override
-  // ignore: library_private_types_in_public_api
   _GuestScreenState createState() => _GuestScreenState();
 }
 
-// ignore: unused_element
+
 class _GuestScreenState extends State<GuestScreen> {
   final TextEditingController _nameController = TextEditingController();
 

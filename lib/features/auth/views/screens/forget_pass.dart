@@ -1,5 +1,5 @@
-import 'package:Herfa/ui/widgets/auth_widgets/submit_button.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/text_field.dart';
+import 'package:Herfa/features/auth/views/widgets/submit_button.dart';
+import 'package:Herfa/features/auth/views/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
 

@@ -14,5 +14,5 @@ class Routes {
   static const String newPostRoute = '/newPost';
   static const String eventsRoute = '/events';
   static const String cartRoute = '/cart';
-
+  static const String profileRoute = '/profile';
 }

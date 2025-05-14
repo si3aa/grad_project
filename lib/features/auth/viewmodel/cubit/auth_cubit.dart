@@ -46,7 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
           name: 'AuthCubit');
 
       if (response.success == true && response.token != null) {
-        emit(AuthSuccess());
+        emit(AuthLoggedIn(response.token!));
       } else if (response.message?.contains('email is not verified') == true) {
         emit(AuthError(
             'Please verify your email first. Check your inbox for the verification code.'));

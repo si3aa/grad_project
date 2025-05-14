@@ -1,4 +1,4 @@
-import 'package:Herfa/ui/widgets/auth_widgets/action_button.dart';
+import 'package:Herfa/features/auth/views/widgets/action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
 

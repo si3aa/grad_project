@@ -4,11 +4,11 @@ import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/core/utils/ui_utils.dart';
 import 'package:Herfa/features/auth/data/models/login_request.dart';
 import 'package:Herfa/features/auth/viewmodel/cubit/auth_cubit.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/header_container.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/header_text.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/label_text_field.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/submit_button.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/text_field.dart';
+import 'package:Herfa/features/auth/views/widgets/header_container.dart';
+import 'package:Herfa/features/auth/views/widgets/header_text.dart';
+import 'package:Herfa/features/auth/views/widgets/label_text_field.dart';
+import 'package:Herfa/features/auth/views/widgets/submit_button.dart';
+import 'package:Herfa/features/auth/views/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/core/utils/validator.dart';
@@ -128,31 +128,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (state is AuthLoading) {
                                   UiUtils.showLoading(context);
                                 }
-                                if (state is AuthSuccess) {
+                                if (state is AuthLoggedIn) {
                                   UiUtils.hideLoading(context);
-                                  Navigator.pushNamed(
+                                  Navigator.pushNamedAndRemoveUntil(
                                     context,
                                     Routes.homeRoute,
+                                    (route) => false,
+                                    arguments: {'token': state.token},
                                   );
-
-                                  _usernameController.clear();
-                                  _passwordController.clear();
                                 } else if (state is AuthError) {
                                   UiUtils.hideLoading(context);
                                   UiUtils.showMessage(state.errorMessage);
-                                  log(state.errorMessage);
                                 }
                               },
                               child: CustomButton(
-                                text: "Login",
+                                text: "Sign in",
+                                isEnabled:
+                                    _formKey.currentState?.validate() ?? false,
                                 onPressed: () {
                                   if (_formKey.currentState?.validate() ??
                                       false) {
-                                    final request = LoginRequest(
-                                      username: _usernameController.text,
-                                      password: _passwordController.text,
-                                    );
-                                    context.read<AuthCubit>().login(request);
+                                    context.read<AuthCubit>().login(
+                                          LoginRequest(
+                                            username: _usernameController.text,
+                                            password: _passwordController.text,
+                                          ),
+                                        );
                                   }
                                 },
                               ),

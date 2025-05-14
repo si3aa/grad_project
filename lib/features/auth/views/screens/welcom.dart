@@ -1,4 +1,4 @@
-import 'package:Herfa/ui/widgets/auth_widgets/home_screen_conainer.dart';
+import 'package:Herfa/features/auth/views/widgets/home_screen_conainer.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
 

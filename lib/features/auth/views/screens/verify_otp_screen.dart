@@ -3,8 +3,8 @@ import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/core/utils/ui_utils.dart';
 
 import 'package:Herfa/features/auth/viewmodel/cubit/auth_cubit.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/otp_input.dart';
-import 'package:Herfa/ui/widgets/auth_widgets/verify_button.dart';
+import 'package:Herfa/features/auth/views/widgets/otp_input.dart';
+import 'package:Herfa/features/auth/views/widgets/verify_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';

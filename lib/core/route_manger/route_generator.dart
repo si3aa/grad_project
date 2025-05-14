@@ -1,20 +1,26 @@
 import 'package:Herfa/core/route_manger/routes.dart';
-import 'package:Herfa/features/auth/forget_pass.dart';
-import 'package:Herfa/features/auth/guest.dart';
+import 'package:Herfa/features/auth/views/screens/forget_pass.dart';
+import 'package:Herfa/features/auth/views/screens/guest.dart';
 import 'package:Herfa/features/auth/views/screens/login_screen.dart';
-import 'package:Herfa/features/auth/reset_pass.dart';
+import 'package:Herfa/features/auth/views/screens/reset_pass.dart';
 import 'package:Herfa/features/auth/views/screens/register_screen.dart';
-import 'package:Herfa/features/auth/splash.dart';
-import 'package:Herfa/features/auth/success_screen.dart';
+import 'package:Herfa/features/auth/views/screens/splash.dart';
+import 'package:Herfa/features/auth/views/screens/success_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
-import 'package:Herfa/features/auth/welcom.dart';
+import 'package:Herfa/features/auth/views/screens/welcom.dart';
 import 'package:Herfa/ui/screens/home/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/events_screen.dart';
 import 'package:Herfa/ui/screens/home/home_screen.dart';
 import 'package:Herfa/ui/screens/home/new_post_screen.dart';
 import 'package:Herfa/ui/screens/home/notification_sc.dart';
 import 'package:Herfa/ui/screens/home/saved_screen.dart';
+import 'package:Herfa/features/profile/views/screens/profile_screen.dart';
+import 'package:Herfa/features/profile/viewmodel/cubit/profile_cubit.dart';
+import 'package:Herfa/features/profile/data/repositories/profile_repository.dart';
+import 'package:Herfa/features/profile/data/data_source/remote/profile_remote_data_source.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -34,7 +40,8 @@ class RouteGenerator {
       case Routes.forgetPassRoute:
         return MaterialPageRoute(builder: (_) => const ForgetPass());
       case Routes.homeRoute:
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        final token = arguments?['token'] as String?;
+        return MaterialPageRoute(builder: (_) => HomeScreen(token: token));
       case Routes.verifyRoute:
         return MaterialPageRoute(
           builder: (_) => VerifyOTPScreen.fromArguments(arguments ?? {}),
@@ -57,6 +64,21 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const EventsScreen());
       case Routes.cartRoute:
         return MaterialPageRoute(builder: (_) => const CartScreen());
+      case Routes.profileRoute:
+        final token = arguments?['token'] as String?;
+        if (token != null) {
+          return MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => ProfileCubit(
+                repository: ProfileRepository(ProfileRemoteDataSource(Dio())),
+                token: token,
+              ),
+              child: ProfileScreen(token: token),
+            ),
+          );
+        } else {
+          return _undefinedRoute();
+        }
       default:
         return _undefinedRoute();
     }
