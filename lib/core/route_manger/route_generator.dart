@@ -8,7 +8,7 @@ import 'package:Herfa/features/auth/splash.dart';
 import 'package:Herfa/features/auth/success_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/new_post_screen.dart';
+import 'package:Herfa/ui/screens/home/add_new_post/views/screens/new_post_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/events_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';

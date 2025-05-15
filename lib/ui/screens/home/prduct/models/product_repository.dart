@@ -1,4 +1,4 @@
-import 'package:Herfa/ui/screens/home/add_new_post/models/post_model.dart';
+import 'package:Herfa/ui/screens/home/add_new_post/data/models/post_model.dart';
 
 class ProductRepository {
   Future<void> addProduct(ProductModel product) async {
