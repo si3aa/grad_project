@@ -174,7 +174,7 @@ class NewPostCubit extends Cubit<NewPostState> {
         'name': product.name,
         'title': product.title,
         'shortDescription': product.description,
-        'longDescription': "description" * 3,
+        'longDescription': product.description, //must be longer than 20 chars
         'price': product.price.toString(),
         'quantity': product.quantity.toString(),
         'categoryId': product.categoryId.toString(),
