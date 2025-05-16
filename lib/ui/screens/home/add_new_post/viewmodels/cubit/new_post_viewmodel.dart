@@ -170,10 +170,9 @@ class NewPostCubit extends Cubit<NewPostState> {
 
       // Convert all product fields to strings
       final productData = {
-        'id': product.id,
         'name': product.name,
-        'title': product.title,
-        'shortDescription': product.description,
+
+        'shortDescription': product.title,
         'longDescription': product.description, //must be longer than 20 chars
         'price': product.price.toString(),
         'quantity': product.quantity.toString(),
