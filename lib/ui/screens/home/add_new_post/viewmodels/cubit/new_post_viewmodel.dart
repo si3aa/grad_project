@@ -1,4 +1,10 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+import 'package:Herfa/app_interceptors.dart';
+import 'package:Herfa/app_strings.dart';
+import 'package:Herfa/exceptions.dart';
+import 'package:Herfa/status_codes.dart';
 import 'package:Herfa/ui/screens/home/add_new_post/data/data_source/api_respose.dart';
 import 'package:Herfa/ui/screens/home/add_new_post/data/models/post_model.dart';
 import 'package:dio/dio.dart';
@@ -67,7 +73,8 @@ class NewPostCubit extends Cubit<NewPostState> {
       selectedColors: updatedColors,
       selectedColorNames: updatedColorNames,
     ));
-    print("Color toggled: $colorName - Selected colors: ${state.selectedColorNames}");
+    print(
+        "Color toggled: $colorName - Selected colors: ${state.selectedColorNames}");
   }
 
   Future<bool> submitProduct() async {
@@ -86,7 +93,8 @@ class NewPostCubit extends Cubit<NewPostState> {
         state.categoryId <= 0 ||
         state.selectedColors.isEmpty) {
       emit(state.copyWith(
-          error: 'Please fill all required fields and select at least one color'));
+          error:
+              'Please fill all required fields and select at least one color'));
       print("Validation Error: Missing required fields");
       print("Product Name: ${state.productName.isEmpty ? 'MISSING' : 'OK'}");
       print("Product Title: ${state.productTitle.isEmpty ? 'MISSING' : 'OK'}");
@@ -157,59 +165,41 @@ class NewPostCubit extends Cubit<NewPostState> {
   // Method to send product data to API
   Future<ApiResponse> sendProductToApi(ProductModel product) async {
     try {
-      const String apiUrl = 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products';
-
-      // Create a Dio instance
-      final dio = Dio(BaseOptions(
-        baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-      ));
+      const String apiUrl =
+          'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products';
 
       // Convert all product fields to strings
       final productData = {
         'id': product.id,
         'name': product.name,
         'title': product.title,
-        'description': product.description,
+        'shortDescription': product.description,
+        'longDescription': "description" * 3,
         'price': product.price.toString(),
         'quantity': product.quantity.toString(),
         'categoryId': product.categoryId.toString(),
-        'isActive': product.isActive.toString(),
-        'colors': jsonEncode(product.colors),
+        'active': product.isActive.toString(),
+        'colors': "[${product.colors.join(',').toString()}]",
       };
 
       // Create FormData for multipart request
-      final formData = FormData.fromMap({
-        'product_data': jsonEncode(productData),
-        ...await Future.wait(
-          product.images.asMap().entries.map((entry) async {
-            final index = entry.key;
-            final image = entry.value;
-            return MapEntry(
-              'image_$index',
-              await MultipartFile.fromFile(image),
-            );
-          }),
-        ).then((entries) => Map.fromEntries(entries)),
-      });
+      final formData = FormData.fromMap(productData);
+      formData.files.add(MapEntry(
+          "file", await MultipartFile.fromFileSync(product.images[0])));
 
       // Print request data to console
-      print('Sending product data to API:');
-      print('URL: $apiUrl');
-      print('FormData: product_data=${jsonEncode(productData)}');
-      for (var i = 0; i < product.images.length; i++) {
-        print('FormData: image_$i=${product.images[i]}');
-      }
+      // print('Sending product data to API:');
+      // print('URL: $apiUrl');
+      // print('FormData: product_data=${jsonEncode(productData)}');
+      // for (var i = 0; i < product.images.length; i++) {
+      //   print('FormData: image_$i=${product.images[i]}');
+      // }
 
       // Make the API call using Dio
-      final response = await dio.post(
+      final response = await postFormData(
         '/products',
-        data: formData,
-        options: Options(
-          validateStatus: (status) => true,
-          followRedirects: false,
-        ),
+        body: productData,
+        files: {'file': File(product.images[0])},
       );
 
       // Print response to console
@@ -265,5 +255,79 @@ class NewPostCubit extends Cubit<NewPostState> {
     print("Selected Colors: ${state.selectedColorNames}");
     print("Images Count: ${state.images.length}");
     print("====================");
+  }
+}
+
+Future postFormData(String path,
+    {Map<String, dynamic>? body,
+    Map<String, File>? files,
+    Map<String, dynamic>? queryParameters,
+    Map<String, String>? headers}) async {
+  try {
+    final dio = Dio(BaseOptions(
+        baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        validateStatus: (status) => true,
+        headers: {
+          "Authorization":
+              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M",
+          "Content-Type": "multipart/form-data",
+        }));
+
+    dio.interceptors.add(AppIntercepters());
+    FormData formData = FormData.fromMap(body ?? {});
+    // formData.fields.add(MapEntry("_method", "patch"));
+    if (files != null && files.isNotEmpty) {
+      for (var file in files.entries) {
+        formData.files.add(
+            MapEntry(file.key, await MultipartFile.fromFile(file.value.path)));
+      }
+    }
+    log("formData: ${formData.fields}");
+
+    final response = await dio.post(path,
+        data: formData,
+        options: Options(
+          headers: {
+            AppStrings.contentType: AppStrings.multipartFile,
+            ...headers ?? {}
+          },
+        ),
+        queryParameters: queryParameters);
+
+    return response;
+  } on DioException catch (error) {
+    _handleDioError(error);
+  }
+}
+
+dynamic _handleDioError(DioException error) {
+  switch (error.type) {
+    case DioExceptionType.connectionTimeout:
+    case DioExceptionType.sendTimeout:
+    case DioExceptionType.receiveTimeout:
+      throw const FetchDataException();
+
+    case DioExceptionType.badResponse:
+      switch (error.response?.statusCode) {
+        case StatusCode.badRequest:
+          throw const BadRequestException();
+        case StatusCode.forbidden:
+          throw const UnauthorizedException();
+        case StatusCode.notFound:
+          throw const NotFoundException();
+        case StatusCode.conflict:
+          throw const ConflictException();
+        case StatusCode.internalServerError:
+          throw const InternalServerErrorException();
+      }
+      break;
+    case DioExceptionType.cancel:
+      break;
+    case DioExceptionType.unknown:
+      throw const NoInternetConnectionException();
+    default:
+      throw Exception('Unhandled Dio Error: ${error.type}');
   }
 }
