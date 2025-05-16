@@ -1,72 +1,57 @@
-import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
-class NewPostState extends Equatable {
-  final List<String> images;
+class NewPostState {
   final String productName;
   final String productTitle;
   final String description;
   final double price;
   final int quantity;
   final int categoryId;
-  final List<String> selectedColorNames;
-  final String error;
+  final List<Color> selectedColors;
+  final List<String>? selectedColorNames;
+  final List<String> images;
   final bool isLoading;
-  final bool isActive;
+  final String? error;
 
   NewPostState({
-    this.images = const [],
     this.productName = '',
     this.productTitle = '',
     this.description = '',
     this.price = 0.0,
     this.quantity = 0,
     this.categoryId = 0,
+    this.selectedColors = const [],
     this.selectedColorNames = const [],
-    this.error = '',
+    this.images = const [],
     this.isLoading = false,
-    this.isActive = false,
+    this.error,
   });
 
   NewPostState copyWith({
-    List<String>? images,
     String? productName,
     String? productTitle,
     String? description,
     double? price,
     int? quantity,
     int? categoryId,
+    List<Color>? selectedColors,
     List<String>? selectedColorNames,
-    String? error,
+    List<String>? images,
     bool? isLoading,
-    bool? isActive,
+    String? error,
   }) {
     return NewPostState(
-      images: images ?? this.images,
       productName: productName ?? this.productName,
       productTitle: productTitle ?? this.productTitle,
       description: description ?? this.description,
       price: price ?? this.price,
       quantity: quantity ?? this.quantity,
       categoryId: categoryId ?? this.categoryId,
+      selectedColors: selectedColors ?? this.selectedColors,
       selectedColorNames: selectedColorNames ?? this.selectedColorNames,
-      error: error ?? this.error,
+      images: images ?? this.images,
       isLoading: isLoading ?? this.isLoading,
-      isActive: isActive ?? this.isActive,
+      error: error ?? this.error,
     );
   }
-
-  @override
-  List<Object?> get props => [
-        images,
-        productName,
-        productTitle,
-        description,
-        price,
-        quantity,
-        categoryId,
-        selectedColorNames,
-        error,
-        isLoading,
-        isActive,
-      ];
 }
