@@ -11,17 +11,24 @@ import 'package:Herfa/core/route_manger/route_generator.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/core/app_bloc_observer.dart';
 import 'package:Herfa/features/auth/viewmodel/cubit/auth_cubit.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set bloc observer
   Bloc.observer = AppBlocObserver();
-  
+  LogInterceptor(
+      responseBody: true,
+      error: true,
+      requestHeader: true,
+      responseHeader: true,
+      request: true,
+      requestBody: true);
+
   runApp(
     MultiBlocProvider(
       providers: [
