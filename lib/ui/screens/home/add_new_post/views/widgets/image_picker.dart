@@ -33,10 +33,7 @@ class ImagePickerWidget extends StatelessWidget {
         _getImage(context, source);
       }
     } else {
-      // For gallery access, we'll use a different approach
-      // The image_picker package handles permissions internally on newer Android versions
-
-      // First show an explanation dialog
+    
       _showGalleryPermissionExplanation(context);
     }
   }
