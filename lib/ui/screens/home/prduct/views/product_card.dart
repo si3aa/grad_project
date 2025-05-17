@@ -43,13 +43,13 @@ class ProductCard extends StatelessWidget {
             const SizedBox(height: 10),
             ProductImage(
               productImage: product.productImage,
-              onCart: onCart,
             ),
             const SizedBox(height: 10),
             ProductDetails(
               productName: product.productName,
               originalPrice: product.originalPrice,
               description: product.description,
+              onCart: onCart,
             ),
             const SizedBox(height: 10),
             ProductInteractions(
@@ -64,6 +64,8 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
+
+
 
 
 

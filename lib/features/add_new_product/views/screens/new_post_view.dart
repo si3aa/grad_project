@@ -129,12 +129,18 @@ static final _colorNames = {
                     ProductTitleField(
                       controller: _productTitleController,
                       onChanged: cubit.updateProductTitle,
+                      errorText: state.error != null && state.error!.toLowerCase().contains('title') 
+                          ? state.error 
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
                     DescriptionField(
                       controller: _descriptionController,
                       onChanged: cubit.updateDescription,
+                      errorText: state.error != null && state.error!.toLowerCase().contains('description') 
+                          ? state.error 
+                          : null,
                     ),
                     const SizedBox(height: 16),
 

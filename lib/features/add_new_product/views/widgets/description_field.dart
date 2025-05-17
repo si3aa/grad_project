@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class DescriptionField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final String? errorText;
 
   const DescriptionField({
     super.key,
     required this.controller,
     required this.onChanged,
+    this.errorText,
   });
 
   @override
@@ -20,7 +22,8 @@ class DescriptionField extends StatelessWidget {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         prefixIcon: const Icon(Icons.description),
         alignLabelWithHint: true,
-        helperText: 'Must be at least 20 characters',
+        helperText: errorText == null ? 'Must be at least 20 characters' : null,
+        errorText: errorText,
       ),
       maxLines: 3,
       validator: (value) {
@@ -32,7 +35,10 @@ class DescriptionField extends StatelessWidget {
         }
         return null;
       },
-      onChanged: onChanged,
+      onChanged: (value) {
+        onChanged(value);
+      },
     );
   }
 }
+

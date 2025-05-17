@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class UserInfo extends StatelessWidget {
+class UserInfo extends StatefulWidget {
   final String userName;
   final String userHandle;
   final String userImage;
@@ -15,12 +15,19 @@ class UserInfo extends StatelessWidget {
   });
 
   @override
+  State<UserInfo> createState() => _UserInfoState();
+}
+
+class _UserInfoState extends State<UserInfo> {
+  bool isFollowing = false;
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         CircleAvatar(
           radius: 20,
-          backgroundImage: AssetImage(userImage),
+          backgroundImage: AssetImage(widget.userImage),
           onBackgroundImageError: (exception, stackTrace) {
             return;
           },
@@ -31,7 +38,7 @@ class UserInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                userName,
+                widget.userName,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -40,7 +47,7 @@ class UserInfo extends StatelessWidget {
                 maxLines: 1,
               ),
               Text(
-                userHandle,
+                widget.userHandle,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -51,12 +58,55 @@ class UserInfo extends StatelessWidget {
             ],
           ),
         ),
+        // Follow button
+        TextButton.icon(
+          onPressed: () {
+            setState(() {
+              isFollowing = !isFollowing;
+            });
+            // Here you would typically call an API to follow/unfollow the user
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(isFollowing 
+                  ? 'You are now following ${widget.userName}' 
+                  : 'You unfollowed ${widget.userName}'),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          },
+          icon: Icon(
+            isFollowing ? Icons.check : Icons.add,
+            size: 16,
+            color: isFollowing ? Colors.green : Colors.blue,
+          ),
+          label: Text(
+            isFollowing ? 'Following' : 'Follow',
+            style: TextStyle(
+              color: isFollowing ? Colors.green : Colors.blue,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            backgroundColor: isFollowing 
+              // ignore: deprecated_member_use
+              ? Colors.green.withOpacity(0.1) 
+              // ignore: deprecated_member_use
+              : Colors.blue.withOpacity(0.1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
         IconButton(
           icon: const Icon(
             Icons.more_horiz,
             semanticLabel: 'More options',
           ),
-          onPressed: onMore,
+          onPressed: widget.onMore,
         ),
       ],
     );

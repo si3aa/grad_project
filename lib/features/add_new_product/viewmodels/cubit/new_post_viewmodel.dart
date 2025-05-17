@@ -32,13 +32,25 @@ class NewPostCubit extends Cubit<NewPostState> {
   }
 
   void updateProductTitle(String title) {
-    emit(state.copyWith(productTitle: title));
-    _printCurrentState("Product Title updated");
+    String? error = state.error;
+    // Clear the error if it was specifically about the title length
+    if (error != null && error.contains('title must be at least')) {
+      if (title.length >= 10) {
+        error = null;
+      }
+    }
+    emit(state.copyWith(productTitle: title, error: error));
   }
 
   void updateDescription(String description) {
-    emit(state.copyWith(description: description));
-    _printCurrentState("Description updated");
+    String? error = state.error;
+    // Clear the error if it was specifically about the description length
+    if (error != null && error.contains('description must be at least')) {
+      if (description.length >= 20) {
+        error = null;
+      }
+    }
+    emit(state.copyWith(description: description, error: error));
   }
 
   void updatePrice(double price) {
@@ -331,4 +343,5 @@ dynamic _handleDioError(DioException error) {
       throw Exception('Unhandled Dio Error: ${error.type}');
   }
 }
+
 

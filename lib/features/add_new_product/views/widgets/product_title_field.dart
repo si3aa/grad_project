@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class ProductTitleField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final String? errorText;
 
   const ProductTitleField({
     super.key,
     required this.controller,
     required this.onChanged,
+    this.errorText,
   });
 
   @override
@@ -19,7 +21,8 @@ class ProductTitleField extends StatelessWidget {
         labelText: 'Product Title',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         prefixIcon: const Icon(Icons.title),
-        helperText: 'Must be at least 10 characters',
+        helperText: errorText == null ? 'Must be at least 10 characters' : null,
+        errorText: errorText,
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -30,7 +33,10 @@ class ProductTitleField extends StatelessWidget {
         }
         return null;
       },
-      onChanged: onChanged,
+      onChanged: (value) {
+        onChanged(value);
+      },
     );
   }
 }
+
