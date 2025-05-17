@@ -4,8 +4,8 @@ import 'package:Herfa/app_interceptors.dart';
 import 'package:Herfa/app_strings.dart';
 import 'package:Herfa/exceptions.dart';
 import 'package:Herfa/status_codes.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/data/data_source/api_respose.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/data/models/post_model.dart';
+import 'package:Herfa/features/add_new_product/data/data_source/api_respose.dart';
+import 'package:Herfa/features/add_new_product/data/models/post_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
@@ -86,18 +86,28 @@ class NewPostCubit extends Cubit<NewPostState> {
 
     if (state.productName.isEmpty ||
         state.productTitle.isEmpty ||
+        state.productTitle.length < 10 ||
         state.description.isEmpty ||
+        state.description.length < 20 ||
         state.price <= 0 ||
         state.quantity <= 0 ||
         state.categoryId <= 0 ||
         state.selectedColors.isEmpty) {
-      emit(state.copyWith(
-          error:
-              'Please fill all required fields and select at least one color'));
-      print("Validation Error: Missing required fields");
+      
+      String errorMessage = 'Please fill all required fields and select at least one color';
+      
+      if (state.productTitle.isNotEmpty && state.productTitle.length < 10) {
+        errorMessage = 'Product title must be at least 10 characters';
+      } else if (state.description.isNotEmpty && state.description.length < 20) {
+        errorMessage = 'Product description must be at least 20 characters';
+      }
+      
+      emit(state.copyWith(error: errorMessage));
+      
+      print("Validation Error: Missing required fields or length requirements");
       print("Product Name: ${state.productName.isEmpty ? 'MISSING' : 'OK'}");
-      print("Product Title: ${state.productTitle.isEmpty ? 'MISSING' : 'OK'}");
-      print("Description: ${state.description.isEmpty ? 'MISSING' : 'OK'}");
+      print("Product Title: ${state.productTitle.isEmpty ? 'MISSING' : (state.productTitle.length < 10 ? 'TOO SHORT' : 'OK')}");
+      print("Description: ${state.description.isEmpty ? 'MISSING' : (state.description.length < 20 ? 'TOO SHORT' : 'OK')}");
       print("Price: ${state.price <= 0 ? 'MISSING' : 'OK'}");
       print("Quantity: ${state.quantity <= 0 ? 'MISSING' : 'OK'}");
       print("Category ID: ${state.categoryId <= 0 ? 'MISSING' : 'OK'}");
@@ -321,3 +331,4 @@ dynamic _handleDioError(DioException error) {
       throw Exception('Unhandled Dio Error: ${error.type}');
   }
 }
+

@@ -20,10 +20,18 @@ class DescriptionField extends StatelessWidget {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         prefixIcon: const Icon(Icons.description),
         alignLabelWithHint: true,
+        helperText: 'Must be at least 20 characters',
       ),
       maxLines: 3,
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Please enter product description' : null,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter product description';
+        }
+        if (value.length < 20) {
+          return 'Description must be at least 20 characters';
+        }
+        return null;
+      },
       onChanged: onChanged,
     );
   }

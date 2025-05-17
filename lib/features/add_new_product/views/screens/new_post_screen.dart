@@ -1,5 +1,5 @@
-import 'package:Herfa/ui/screens/home/add_new_post/viewmodels/cubit/new_post_viewmodel.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/screens/new_post_view.dart';
+import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
+import 'package:Herfa/features/add_new_product/views/screens/new_post_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

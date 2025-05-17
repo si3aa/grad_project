@@ -1,4 +1,6 @@
+import 'dart:developer' as developer;
 import 'package:Herfa/ui/screens/home/prduct/models/product_model.dart';
+import 'package:Herfa/ui/screens/home/prduct/repository/product_api_repository.dart';
 import 'package:Herfa/ui/screens/home/prduct/views/product_class.dart';
 import 'package:bloc/bloc.dart';
 
@@ -10,29 +12,38 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void> _loadProducts() async {
     emit(const ProductLoading());
     try {
-      // Simulate a network delay
-      await Future.delayed(const Duration(seconds: 2));
-      final products = List.generate(
-        5,
-        (index) => Product(
-          userName: 'Salma',
-          userHandle: '@sammohammed',
-          userImage: 'assets/images/arrow-small-left.png',
-          productImage: 'assets/images/product_img.png',
-          productName: 'Product Name $index',
-          originalPrice: 46.00 + index,
-          discountedPrice: 32.00 + index,
-          likes: 110 + index,
-          comments: 32 + index,
-          description: 'whether you are looking for a job or you are a...',
-        ),
-      );
+      developer.log('Loading products from repository', name: 'ProductCubit');
+      final repository = ProductApiRepository();
+      final apiProducts = await repository.getProducts();
+      
+      developer.log('Received ${apiProducts.length} products from API', name: 'ProductCubit');
+      
+      // Convert API products to UI Product model
+      final products = apiProducts.map((apiProduct) {
+        developer.log('Processing product: ${apiProduct.id} - ${apiProduct.name}', name: 'ProductCubit');
+        return Product(
+          userName: 'Merchant', // Default or fetch from user API
+          userHandle: '@merchant',
+          userImage: 'assets/images/arrow-small-left.png', // Default image
+          productImage: apiProduct.media ?? 'assets/images/product_img.png',
+          productName: apiProduct.name ?? 'Unknown Product',
+          originalPrice: apiProduct.price ?? 0.0,
+          discountedPrice: apiProduct.discountedPrice ?? 0.0, // Now correctly handled as double
+          likes: 0, // Default value since it's not from API
+          comments: 0, // Default value since it's not from API
+          description: apiProduct.shortDescription ?? '',
+        );
+      }).toList();
+      
+      developer.log('Converted ${products.length} products to UI model', name: 'ProductCubit');
+      
       emit(ProductLoaded(
         products: products,
         filteredProducts: products,
       ));
     } catch (e) {
-      emit(const ProductError('Failed to load products'));
+      developer.log('Error loading products', name: 'ProductCubit', error: e);
+      emit(ProductError('Failed to load products: $e'));
     }
   }
 
@@ -64,6 +75,14 @@ class ProductCubit extends Cubit<ProductState> {
 
   /// Handle comment action (placeholder for now).
   void commentProduct(Product product) {
+    final state = this.state;
+    if (state is ProductLoaded) {
+      product.comments++;
+      emit(ProductLoaded(
+        products: state.products,
+        filteredProducts: List.from(state.filteredProducts),
+      ));
+    }
   }
 
   /// Handle cart action (placeholder for now).
@@ -76,3 +95,6 @@ class ProductCubit extends Cubit<ProductState> {
     // Placeholder: In a real app, this might show a menu
   }
 }
+
+
+

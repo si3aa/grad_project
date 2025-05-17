@@ -1,4 +1,4 @@
-import 'package:Herfa/ui/screens/home/add_new_post/views/screens/new_post_screen.dart';
+import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/events_screen.dart';
 import 'package:Herfa/ui/screens/home/views/posts_tab.dart';

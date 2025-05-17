@@ -19,9 +19,17 @@ class ProductTitleField extends StatelessWidget {
         labelText: 'Product Title',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         prefixIcon: const Icon(Icons.title),
+        helperText: 'Must be at least 10 characters',
       ),
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Please enter product title' : null,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter product title';
+        }
+        if (value.length < 10) {
+          return 'Title must be at least 10 characters';
+        }
+        return null;
+      },
       onChanged: onChanged,
     );
   }

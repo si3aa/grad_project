@@ -1,5 +1,5 @@
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/viewmodels/states/new_post_state.dart';
+import 'package:Herfa/features/add_new_product/viewmodels/states/new_post_state.dart';
 import 'package:flutter/material.dart';
 
 

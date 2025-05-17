@@ -1,15 +1,15 @@
-import 'package:Herfa/ui/screens/home/add_new_post/viewmodels/cubit/new_post_viewmodel.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/viewmodels/states/new_post_state.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/active_status.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/category_selection.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/color_selection.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/description_field.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/image_picker.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/price_field.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/product_name_field.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/product_title_field.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/quantity_field.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/widgets/submit_button.dart';
+import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
+import 'package:Herfa/features/add_new_product/viewmodels/states/new_post_state.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/active_status.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/category_selection.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/color_selection.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/description_field.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/image_picker.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/price_field.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/product_name_field.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/product_title_field.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/quantity_field.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/submit_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

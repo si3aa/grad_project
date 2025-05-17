@@ -1,0 +1,80 @@
+import 'dart:developer' as developer;
+import 'package:dio/dio.dart';
+import 'package:Herfa/ui/screens/home/prduct/models/all_product_data_model.dart';
+import 'package:Herfa/app_interceptors.dart';
+
+class ProductApiRepository {
+  final Dio _dio = Dio(BaseOptions(
+    baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    validateStatus: (status) => true,
+    headers: {
+      "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M",
+    }
+  ));
+
+  ProductApiRepository() {
+    _dio.interceptors.add(AppIntercepters());
+  }
+
+  Future<List<AllproductDataModel>> getProducts() async {
+    try {
+      developer.log('Fetching products from API', name: 'ProductAPI');
+      final response = await _dio.get('/products');
+      
+      developer.log('API Response status: ${response.statusCode}', name: 'ProductAPI');
+      developer.log('API Response data type: ${response.data.runtimeType}', name: 'ProductAPI');
+      developer.log('API Response data: ${response.data}', name: 'ProductAPI');
+      
+      if (response.statusCode == 200) {
+        // Check if response.data is a Map with a 'data' field that contains the list
+        if (response.data is Map && response.data['data'] != null) {
+          final List<dynamic> data = response.data['data'];
+          return data.map((json) => AllproductDataModel.fromJson(json)).toList();
+        } 
+        // Check if response.data is a Map with a 'content' field that contains the list
+        else if (response.data is Map && response.data['content'] != null) {
+          final List<dynamic> data = response.data['content'];
+          return data.map((json) => AllproductDataModel.fromJson(json)).toList();
+        }
+        // Check if response.data itself is the list
+        else if (response.data is List) {
+          final List<dynamic> data = response.data;
+          return data.map((json) => AllproductDataModel.fromJson(json)).toList();
+        }
+        // If we can't find a list in the response, log the error and return an empty list
+        else {
+          developer.log('API Response format unexpected: ${response.data}', name: 'ProductAPI');
+          // Try to extract any products if possible
+          if (response.data is Map) {
+            // Look for any array in the response
+            for (var key in (response.data as Map).keys) {
+              if (response.data[key] is List) {
+                final List<dynamic> data = response.data[key];
+                developer.log('Found list in response under key: $key', name: 'ProductAPI');
+                return data.map((json) => AllproductDataModel.fromJson(json)).toList();
+              }
+            }
+          }
+          developer.log('Could not find product list in response', name: 'ProductAPI');
+          return [];
+        }
+      } else {
+        developer.log('API Error: ${response.statusCode} - ${response.statusMessage}', name: 'ProductAPI', error: response.data);
+        throw Exception('Failed to load products: ${response.statusCode} - ${response.statusMessage}');
+      }
+    } catch (e) {
+      developer.log('Exception in getProducts', name: 'ProductAPI', error: e);
+      if (e is DioException) {
+        developer.log('Dio error type: ${e.type}', name: 'ProductAPI');
+        developer.log('Dio error message: ${e.message}', name: 'ProductAPI');
+        if (e.response != null) {
+          developer.log('Dio error response: ${e.response?.data}', name: 'ProductAPI');
+        }
+      }
+      throw Exception('Error fetching products: $e');
+    }
+  }
+}
+

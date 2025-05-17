@@ -49,7 +49,6 @@ class ProductCard extends StatelessWidget {
             ProductDetails(
               productName: product.productName,
               originalPrice: product.originalPrice,
-              discountedPrice: product.discountedPrice,
               description: product.description,
             ),
             const SizedBox(height: 10),
@@ -65,3 +64,6 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
+
+
+
