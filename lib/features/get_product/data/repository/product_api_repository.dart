@@ -1,5 +1,5 @@
 import 'dart:developer' as developer;
-import 'package:Herfa/features/prduct/models/all_product_data_model.dart';
+import 'package:Herfa/features/get_product/data/models/all_product_data_model.dart';
 import 'package:dio/dio.dart';
 import 'package:Herfa/app_interceptors.dart';
 
@@ -21,7 +21,7 @@ class ProductApiRepository {
   Future<List<AllproductDataModel>> getProducts() async {
     try {
       developer.log('Fetching products from API', name: 'ProductAPI');
-      final response = await _dio.get('/products');
+      final response = await _dio.get('/products/active');
       
       developer.log('API Response status: ${response.statusCode}', name: 'ProductAPI');
       developer.log('API Response data type: ${response.data.runtimeType}', name: 'ProductAPI');
@@ -77,4 +77,5 @@ class ProductApiRepository {
     }
   }
 }
+
 

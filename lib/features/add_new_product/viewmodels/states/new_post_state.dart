@@ -12,6 +12,7 @@ class NewPostState {
   final List<String> images;
   final bool isLoading;
   final String? error;
+  final int? productId;
 
   NewPostState({
     this.productName = '',
@@ -25,6 +26,7 @@ class NewPostState {
     this.images = const [],
     this.isLoading = false,
     this.error,
+    this.productId,
   });
 
   NewPostState copyWith({
@@ -39,6 +41,7 @@ class NewPostState {
     List<String>? images,
     bool? isLoading,
     String? error,
+    int? productId,
   }) {
     return NewPostState(
       productName: productName ?? this.productName,
@@ -52,6 +55,7 @@ class NewPostState {
       images: images ?? this.images,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
+      productId: productId ?? this.productId,
     );
   }
 }

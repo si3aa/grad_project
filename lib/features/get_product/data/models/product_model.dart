@@ -1,5 +1,5 @@
 
-import 'package:Herfa/features/prduct/views/product_class.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 
 /// Abstrac base state for the ProductCubit.
 abstract class ProductState {

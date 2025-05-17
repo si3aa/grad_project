@@ -105,17 +105,17 @@ class NewPostCubit extends Cubit<NewPostState> {
         state.quantity <= 0 ||
         state.categoryId <= 0 ||
         state.selectedColors.isEmpty) {
-      
+
       String errorMessage = 'Please fill all required fields and select at least one color';
-      
+
       if (state.productTitle.isNotEmpty && state.productTitle.length < 10) {
         errorMessage = 'Product title must be at least 10 characters';
       } else if (state.description.isNotEmpty && state.description.length < 20) {
         errorMessage = 'Product description must be at least 20 characters';
       }
-      
+
       emit(state.copyWith(error: errorMessage));
-      
+
       print("Validation Error: Missing required fields or length requirements");
       print("Product Name: ${state.productName.isEmpty ? 'MISSING' : 'OK'}");
       print("Product Title: ${state.productTitle.isEmpty ? 'MISSING' : (state.productTitle.length < 10 ? 'TOO SHORT' : 'OK')}");
@@ -181,6 +181,166 @@ class NewPostCubit extends Cubit<NewPostState> {
 
   void resetState() {
     emit(NewPostState());
+  }
+
+  void setProductId(int id) {
+    emit(state.copyWith(productId: id));
+    _printCurrentState("Product ID set to $id");
+  }
+
+  /// Update an existing product
+  Future<bool> updateProduct() async {
+    // Validate all required fields
+    if (state.productName.isEmpty ||
+        state.productTitle.isEmpty ||
+        state.productTitle.length < 10 ||
+        state.description.isEmpty ||
+        state.description.length < 20 ||
+        state.price <= 0 ||
+        state.quantity <= 0 ||
+        state.categoryId <= 0 ||
+        state.selectedColors.isEmpty) {
+
+      String errorMessage = 'Please fill all required fields and select at least one color';
+
+      if (state.productTitle.isNotEmpty && state.productTitle.length < 10) {
+        errorMessage = 'Product title must be at least 10 characters';
+      } else if (state.description.isNotEmpty && state.description.length < 20) {
+        errorMessage = 'Product description must be at least 20 characters';
+      }
+
+      emit(state.copyWith(error: errorMessage));
+      return false;
+    }
+
+    try {
+      emit(state.copyWith(isLoading: true, error: null));
+
+      // Use the stored productId if available, otherwise generate a temporary one
+      final productId = state.productId != null
+          ? state.productId.toString()
+          : DateTime.now().millisecondsSinceEpoch.toString();
+
+      final product = ProductModel(
+        id: productId,
+        name: state.productName.trim(),
+        title: state.productTitle.trim(),
+        description: state.description.trim(),
+        price: state.price,
+        quantity: state.quantity,
+        categoryId: state.categoryId,
+        isActive: true,
+        colors: state.selectedColorNames ?? [],
+        images: state.images,
+      );
+
+      // Print product data for debugging
+      print('======= UPDATING PRODUCT DATA =======');
+      print('Product ID: ${product.id}');
+      print('Product Name: ${product.name}');
+      print('Product Title: ${product.title}');
+      print('Description: ${product.description}');
+      print('Price: ${product.price}');
+      print('Quantity: ${product.quantity}');
+      print('Category ID: ${product.categoryId}');
+      print('Colors: ${product.colors}');
+      print('Images: ${product.images}');
+      print('======================================');
+
+      // Send data to API
+      final response = await updateProductApi(product);
+
+      // Print API response for debugging
+      print('API response success: ${response.success}');
+      print('API response message: ${response.message}');
+      if (response.data != null) {
+        print('API response data: ${response.data}');
+      }
+
+      if (!response.success) {
+        throw Exception(response.message);
+      }
+
+      emit(state.copyWith(isLoading: false, error: null));
+      return true;
+    } catch (e) {
+      print('Error updating product: $e');
+      emit(state.copyWith(isLoading: false, error: 'Failed to update product: $e'));
+      return false;
+    }
+  }
+
+  // Method to update product data via API
+  Future<ApiResponse> updateProductApi(ProductModel product) async {
+    try {
+      // API URL: https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products
+
+      // Convert all product fields to strings
+      final productData = {
+        'id': product.id,
+        'name': product.name,
+        'shortDescription': product.title,
+        'longDescription': product.description,
+        'price': product.price.toString(),
+        'quantity': product.quantity.toString(),
+        'categoryId': product.categoryId.toString(),
+        'active': product.isActive.toString(),
+        'colors': "[${product.colors.join(',').toString()}]",
+      };
+
+      // Create FormData for multipart request
+      final formData = FormData.fromMap(productData);
+      if (product.images.isNotEmpty) {
+        formData.files.add(MapEntry(
+            "file", await MultipartFile.fromFileSync(product.images[0])));
+      }
+
+      // Make the API call using Dio
+      final response = await postFormData(
+        '/products',
+        body: productData,
+        files: product.images.isNotEmpty ? {'file': File(product.images[0])} : null,
+      );
+
+      // Print response to console
+      print('API Response Status Code: ${response.statusCode}');
+      print('API Response Data: ${response.data}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Attempt to parse response data as JSON
+        final responseData = response.data is Map<String, dynamic>
+            ? response.data
+            : {'productId': product.id};
+        return ApiResponse(
+          success: true,
+          message: 'Product updated successfully',
+          data: responseData,
+        );
+      } else {
+        final errorMessage = response.data is Map<String, dynamic>
+            ? response.data['message'] ?? 'Failed to update product'
+            : 'Failed to update product: ${response.statusCode}';
+        return ApiResponse(
+          success: false,
+          message: errorMessage,
+        );
+      }
+    } catch (e) {
+      // Print error to console
+      print('Error updating product via API: ${e.toString()}');
+      if (e is DioException) {
+        print('Dio error type: ${e.type}');
+        print('Dio error message: ${e.message}');
+        if (e.response != null) {
+          print('Dio error response: ${e.response?.data}');
+        }
+      }
+
+      return ApiResponse(
+        success: false,
+        message: 'Error updating product: ${e.toString()}',
+      );
+    }
   }
 
   // Method to send product data to API
@@ -343,5 +503,9 @@ dynamic _handleDioError(DioException error) {
       throw Exception('Unhandled Dio Error: ${error.type}');
   }
 }
+
+
+
+
 
 

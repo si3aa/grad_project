@@ -1,7 +1,10 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/features/prduct/models/product_model.dart';
-import 'package:Herfa/features/prduct/views/product_class.dart';
-import 'package:Herfa/features/prduct/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
+import 'package:Herfa/features/get_product/data/models/product_model.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
@@ -59,6 +62,121 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  void _navigateToEditProduct(Product product) {
+    // Navigate to edit product screen with product ID
+    // Since the Product class doesn't have an ID, we'll use a hardcoded ID for now
+    // In a real app, you would get the ID from the API
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProductScreen(
+          product: product,
+          productId: 1, 
+        ),
+      ),
+    ).then((edited) {
+      if (edited == true) {
+        // Refresh product data if edited
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product updated successfully'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    });
+  }
+
+  // ignore: unused_element
+  void _showEditOptions(Product product) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Product Options',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: Icon(Icons.edit, color: kPrimaryColor),
+              title: const Text('Edit Product'),
+              onTap: () {
+                Navigator.pop(context);
+                _navigateToEditProduct(product);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: const Text('Delete Product'),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteConfirmation(product);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.visibility_off_outlined),
+              title: const Text('Hide Product'),
+              onTap: () {
+                Navigator.pop(context);
+                // Implement hide product functionality
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Product hidden from marketplace'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(Product product) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Product'),
+        content: const Text(
+          'Are you sure you want to delete this product? This action cannot be undone.'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Implement delete product functionality
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Product deleted successfully'),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              Navigator.pop(context); // Return to previous screen
+            },
+            child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _applyCoupon() {
     // In a real app, you would validate the coupon code with an API
     // For this example, we'll just apply a fixed discount for any coupon
@@ -66,10 +184,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       setState(() {
         couponCode = _couponController.text;
         // Apply a 10% discount for demonstration
-        final price = widget.product.discountedPrice ?? widget.product.originalPrice;
+        final price = widget.product.discountedPrice;
         discountAmount = price * 0.1;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Coupon "$couponCode" applied successfully!'),
@@ -83,7 +201,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _addToCart() {
     // Get the ProductCubit instance
     final productCubit = context.read<ProductCubit>();
-    
+
     // Create a copy of the product with updated quantity
     final updatedProduct = Product(
       userName: widget.product.userName,
@@ -99,16 +217,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       description: widget.product.description,
       quantity: widget.product.quantity - selectedQuantity, // Decrease the available quantity
     );
-    
+
     // Update the product in the state
     productCubit.updateProductQuantity(updatedProduct);
-    
+
     setState(() {
       isInCart = true;
       // Reset selected quantity to 1 after adding to cart
       selectedQuantity = 1;
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${widget.product.productName} added to cart'),
@@ -126,14 +244,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget _buildProductImage() {
     return Hero(
       tag: 'product-${widget.product.productName}',
-      child: widget.product.productImage.startsWith('http') 
+      child: widget.product.productImage.startsWith('http')
         ? Image.network(
             widget.product.productImage,
             width: double.infinity,
             height: 300,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              developer.log('Error loading image: ${widget.product.productImage}', 
+              developer.log('Error loading image: ${widget.product.productImage}',
                 name: 'ProductDetailScreen', error: error);
               return Container(
                 width: double.infinity,
@@ -176,7 +294,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             height: 300,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              developer.log('Error loading asset image: ${widget.product.productImage}', 
+              developer.log('Error loading asset image: ${widget.product.productImage}',
                 name: 'ProductDetailScreen', error: error);
               return Container(
                 width: double.infinity,
@@ -249,8 +367,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               height: 1.5,
             ),
           ),
-          crossFadeState: _isDescriptionExpanded 
-              ? CrossFadeState.showSecond 
+          crossFadeState: _isDescriptionExpanded
+              ? CrossFadeState.showSecond
               : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 300),
         ),
@@ -260,9 +378,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final price = widget.product.discountedPrice ?? widget.product.originalPrice;
+    final price = widget.product.discountedPrice;
     final totalPrice = (price - discountAmount) * selectedQuantity;
-    
+
     return BlocBuilder<ProductCubit, ProductState>(
       builder: (context, state) {
         // If the state is loaded, we can access the updated product
@@ -272,7 +390,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             (p) => p.productName == widget.product.productName,
             orElse: () => widget.product,
           );
-          
+
           return Scaffold(
             appBar: AppBar(
               title: const Text('Product Details'),
@@ -286,7 +404,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     setState(() {
                       isSaved = !isSaved;
                     });
-                    
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -317,7 +435,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   // Product Image with error handling
                   _buildProductImage(),
-                  
+
                   // Product Info
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -367,9 +485,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Product Name and Title
                         Text(
                           currentProduct.productName,
@@ -389,7 +507,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           const SizedBox(height: 8),
                         ],
-                        
+
                         // Price information
                         Row(
                           children: [
@@ -405,7 +523,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               const SizedBox(width: 8),
                             ],
                             Text(
-                              '\$${(currentProduct.discountedPrice ?? currentProduct.originalPrice).toStringAsFixed(2)}',
+                              '\$${(currentProduct.discountedPrice).toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -421,7 +539,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
-                                  '${(100 - (currentProduct.discountedPrice! / currentProduct.originalPrice * 100)).toStringAsFixed(0)}% OFF',
+                                  '${(100 - (currentProduct.discountedPrice / currentProduct.originalPrice * 100)).toStringAsFixed(0)}% OFF',
                                   style: TextStyle(
                                     color: Colors.red.shade700,
                                     fontWeight: FontWeight.bold,
@@ -431,14 +549,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ],
                           ],
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Description with expandable text
                         _buildDescription(),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Quantity Selector
                         const Text(
                           'Quantity',
@@ -474,11 +592,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.add),
-                                    onPressed: selectedQuantity < currentProduct.quantity 
-                                        ? _increaseQuantity 
+                                    onPressed: selectedQuantity < currentProduct.quantity
+                                        ? _increaseQuantity
                                         : null,
-                                    color: selectedQuantity < currentProduct.quantity 
-                                        ? kPrimaryColor 
+                                    color: selectedQuantity < currentProduct.quantity
+                                        ? kPrimaryColor
                                         : Colors.grey,
                                   ),
                                 ],
@@ -488,19 +606,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             Text(
                               'Available: ${currentProduct.quantity}',
                               style: TextStyle(
-                                color: currentProduct.quantity > 0 
-                                    ? Colors.grey.shade600 
+                                color: currentProduct.quantity > 0
+                                    ? Colors.grey.shade600
                                     : Colors.red,
-                                fontWeight: currentProduct.quantity > 0 
-                                    ? FontWeight.normal 
+                                fontWeight: currentProduct.quantity > 0
+                                    ? FontWeight.normal
                                     : FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Coupon Code
                         const Text(
                           'Apply Coupon',
@@ -539,7 +657,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ],
                         ),
-                        
+
                         if (couponCode != null) ...[
                           const SizedBox(height: 8),
                           Row(
@@ -567,9 +685,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ],
                           ),
                         ],
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Order Summary
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -672,7 +790,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         disabledBackgroundColor: Colors.grey.shade400,
                       ),
                       child: Text(
-                        currentProduct.quantity > 0 
+                        currentProduct.quantity > 0
                             ? (isInCart ? 'ADDED TO CART' : 'ADD TO CART')
                             : 'OUT OF STOCK',
                         style: const TextStyle(
@@ -687,7 +805,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           );
         }
-        
+
         // If the state is not loaded, show a loading indicator
         return const Scaffold(
           body: Center(
@@ -698,6 +816,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

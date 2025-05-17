@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
-import 'package:Herfa/features/prduct/models/product_model.dart';
-import 'package:Herfa/features/prduct/repository/product_api_repository.dart';
-import 'package:Herfa/features/prduct/views/product_class.dart';
+import 'package:Herfa/features/get_product/data/models/product_model.dart';
+import 'package:Herfa/features/get_product/data/repository/product_api_repository.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:bloc/bloc.dart';
 
 class ProductCubit extends Cubit<ProductState> {
