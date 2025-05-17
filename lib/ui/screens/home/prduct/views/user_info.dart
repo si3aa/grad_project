@@ -77,12 +77,12 @@ class _UserInfoState extends State<UserInfo> {
           icon: Icon(
             isFollowing ? Icons.check : Icons.add,
             size: 16,
-            color: isFollowing ? Colors.green : Colors.blue,
+            color: isFollowing ? Colors.purpleAccent : Colors.blueGrey,
           ),
           label: Text(
             isFollowing ? 'Following' : 'Follow',
             style: TextStyle(
-              color: isFollowing ? Colors.green : Colors.blue,
+              color: isFollowing ? Colors.purpleAccent : Colors.blueGrey,
               fontWeight: FontWeight.bold,
             ),
           ),
