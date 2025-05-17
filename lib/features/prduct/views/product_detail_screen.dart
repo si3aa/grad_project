@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/screens/home/prduct/models/product_model.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/product_class.dart';
-import 'package:Herfa/ui/screens/home/prduct/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/prduct/models/product_model.dart';
+import 'package:Herfa/features/prduct/views/product_class.dart';
+import 'package:Herfa/features/prduct/viewmodels/product_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;

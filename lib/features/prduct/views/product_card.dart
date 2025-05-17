@@ -1,10 +1,10 @@
 
 import 'package:Herfa/core/route_manger/routes.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/product_action.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/product_class.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/product_detail.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/product_image.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/user_info.dart';
+import 'package:Herfa/features/prduct/views/product_action.dart';
+import 'package:Herfa/features/prduct/views/product_class.dart';
+import 'package:Herfa/features/prduct/views/product_detail.dart';
+import 'package:Herfa/features/prduct/views/product_image.dart';
+import 'package:Herfa/features/prduct/views/user_info.dart';
 import 'package:flutter/material.dart';
 class ProductCard extends StatelessWidget {
   final Product product;

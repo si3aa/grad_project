@@ -4,7 +4,7 @@ import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/new_post_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
-import 'package:Herfa/ui/screens/home/prduct/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/prduct/viewmodels/product_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/saved_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
 import 'package:Herfa/core/route_manger/route_generator.dart';

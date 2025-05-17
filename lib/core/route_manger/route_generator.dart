@@ -1,21 +1,23 @@
+
+
 import 'package:Herfa/core/route_manger/routes.dart';
+import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
 import 'package:Herfa/features/auth/forget_pass.dart';
 import 'package:Herfa/features/auth/guest.dart';
-import 'package:Herfa/features/auth/views/screens/login_screen.dart';
 import 'package:Herfa/features/auth/reset_pass.dart';
-import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/splash.dart';
 import 'package:Herfa/features/auth/success_screen.dart';
+import 'package:Herfa/features/auth/views/screens/login_screen.dart';
+import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
-import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
+import 'package:Herfa/features/prduct/views/product_class.dart';
+import 'package:Herfa/features/prduct/views/product_detail_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/events_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';
 import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/ui/screens/home/views/saved_screen.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/product/product_detail_screen.dart';
-import 'package:Herfa/ui/screens/home/prduct/views/product_class.dart';
 import 'package:flutter/material.dart';
 
 class RouteGenerator {

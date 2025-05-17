@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
+import 'package:Herfa/features/prduct/models/all_product_data_model.dart';
 import 'package:dio/dio.dart';
-import 'package:Herfa/ui/screens/home/prduct/models/all_product_data_model.dart';
 import 'package:Herfa/app_interceptors.dart';
 
 class ProductApiRepository {
