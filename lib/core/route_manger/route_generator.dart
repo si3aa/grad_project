@@ -14,6 +14,8 @@ import 'package:Herfa/ui/screens/home/views/events_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';
 import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/ui/screens/home/views/saved_screen.dart';
+import 'package:Herfa/ui/screens/home/prduct/views/product/product_detail_screen.dart';
+import 'package:Herfa/ui/screens/home/prduct/views/product_class.dart';
 import 'package:flutter/material.dart';
 
 class RouteGenerator {
@@ -57,6 +59,14 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const EventsScreen());
       case Routes.cartRoute:
         return MaterialPageRoute(builder: (_) => const CartScreen());
+      case Routes.productDetailRoute:
+        final product = arguments?['product'] as Product?;
+        if (product != null) {
+          return MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
+          );
+        }
+        return _undefinedRoute();
       default:
         return _undefinedRoute();
     }

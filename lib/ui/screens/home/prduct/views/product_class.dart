@@ -9,8 +9,10 @@ class Product {
   int likes; 
   int comments; 
   final String description;
+  final int quantity;
+  final String title;
 
-  Product({
+  Product( {
     required this.userName,
     required this.userHandle,
     required this.userImage,
@@ -21,5 +23,7 @@ class Product {
     required this.likes,
     required this.comments,
     required this.description,
+    required this.quantity,
+    required this.title,
   });
 }

@@ -6,7 +6,7 @@ import 'package:bloc/bloc.dart';
 
 class ProductCubit extends Cubit<ProductState> {
   ProductCubit() : super(const ProductInitial()) {
-    _loadProducts(); 
+    _loadProducts();
   }
 
   Future<void> _loadProducts() async {
@@ -15,12 +15,15 @@ class ProductCubit extends Cubit<ProductState> {
       developer.log('Loading products from repository', name: 'ProductCubit');
       final repository = ProductApiRepository();
       final apiProducts = await repository.getProducts();
-      
-      developer.log('Received ${apiProducts.length} products from API', name: 'ProductCubit');
-      
+
+      developer.log('Received ${apiProducts.length} products from API',
+          name: 'ProductCubit');
+
       // Convert API products to UI Product model
       final products = apiProducts.map((apiProduct) {
-        developer.log('Processing product: ${apiProduct.id} - ${apiProduct.name}', name: 'ProductCubit');
+        developer.log(
+            'Processing product: ${apiProduct.id} - ${apiProduct.name}',
+            name: 'ProductCubit');
         return Product(
           userName: 'Merchant', // Default or fetch from user API
           userHandle: '@merchant',
@@ -28,15 +31,20 @@ class ProductCubit extends Cubit<ProductState> {
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
           originalPrice: apiProduct.price ?? 0.0,
-          discountedPrice: apiProduct.discountedPrice ?? 0.0, // Now correctly handled as double
+          discountedPrice: apiProduct.discountedPrice ??
+              0.0, // Now correctly handled as double
           likes: 0, // Default value since it's not from API
           comments: 0, // Default value since it's not from API
-          description: apiProduct.shortDescription ?? '',
+          title: apiProduct.shortDescription ?? '',
+          description: apiProduct.longDescription ?? '',
+          
+          quantity: apiProduct.quantity ?? 0, 
         );
       }).toList();
-      
-      developer.log('Converted ${products.length} products to UI model', name: 'ProductCubit');
-      
+
+      developer.log('Converted ${products.length} products to UI model',
+          name: 'ProductCubit');
+
       emit(ProductLoaded(
         products: products,
         filteredProducts: products,
@@ -94,7 +102,33 @@ class ProductCubit extends Cubit<ProductState> {
   void moreOptions(Product product) {
     // Placeholder: In a real app, this might show a menu
   }
+
+  /// Update a product's quantity in the state
+  void updateProductQuantity(Product updatedProduct) {
+    final state = this.state;
+    if (state is ProductLoaded) {
+      final updatedProducts = state.products.map((product) {
+        if (product.productName == updatedProduct.productName) {
+          return updatedProduct;
+        }
+        return product;
+      }).toList();
+      
+      developer.log('Updated quantity for product: ${updatedProduct.productName}', 
+          name: 'ProductCubit');
+      
+      emit(ProductLoaded(
+        products: updatedProducts,
+        filteredProducts: updatedProducts.where((product) => 
+          state.filteredProducts.any((p) => p.productName == product.productName)
+        ).toList(),
+      ));
+    }
+  }
 }
+
+
+
 
 
 

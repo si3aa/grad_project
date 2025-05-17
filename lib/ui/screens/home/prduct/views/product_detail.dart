@@ -53,20 +53,12 @@ class _ProductDetailsState extends State<ProductDetails> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: widget.discountedPrice != null ? Colors.grey : Colors.black,
+                      color: widget.discountedPrice != null ? Colors.grey : Colors.red,
                       decoration: widget.discountedPrice != null ? TextDecoration.lineThrough : null,
                     ),
                   ),
                   if (widget.discountedPrice != null) ...[
                     const SizedBox(width: 10),
-                    Text(
-                      '\$${widget.discountedPrice!.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
                   ],
                 ],
               ),
@@ -124,7 +116,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                         onPressed: () {
                           if (isSaved) {
                             // Navigate to saved items screen
-                            Navigator.pushNamed(context, '/saved');
+                            Navigator.pushReplacementNamed(context, '/saved');
                           }
                         },
                       ),
