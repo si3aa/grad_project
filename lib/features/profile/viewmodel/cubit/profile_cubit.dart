@@ -1,9 +1,7 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:Herfa/features/profile/data/models/profile_model.dart';
 import 'dart:io';
-import 'dart:developer' as developer;
-
-import 'package:Herfa/features/profile/data/repositories/profile_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/models/profile_model.dart';
+import '../../data/repositories/profile_repository.dart';
 
 part 'profile_state.dart';
 
@@ -12,37 +10,14 @@ class ProfileCubit extends Cubit<ProfileState> {
   final String token;
 
   ProfileCubit({required this.repository, required this.token})
-      : super(ProfileInitial()) {
-    fetchProfile();
-  }
+      : super(ProfileInitial());
 
-  Future<void> fetchProfile() async {
+  Future<void> updateOrCreateProfile(ProfileModel profile) async {
     emit(ProfileLoading());
     try {
-      developer.log('Fetching profile with token: $token',
-          name: 'ProfileCubit');
-      final response = await repository.fetchProfile(token);
+      final response = await repository.updateOrCreateProfile(profile, token);
       if (response.success && response.data != null) {
-        developer.log('Profile fetch successful: ${response.data}',
-            name: 'ProfileCubit');
-        emit(ProfileLoaded(response.data!));
-      } else {
-        developer.log('Profile fetch failed: ${response.message}',
-            name: 'ProfileCubit');
-        emit(ProfileError(response.message));
-      }
-    } catch (e) {
-      developer.log('Profile fetch error: $e', name: 'ProfileCubit');
-      emit(ProfileError(e.toString()));
-    }
-  }
-
-  Future<void> updateProfile(ProfileModel profile) async {
-    emit(ProfileLoading());
-    try {
-      final response = await repository.updateProfile(profile, token);
-      if (response.success && response.data != null) {
-        emit(ProfileLoaded(response.data!));
+        emit(ProfileSuccess(response.data!));
       } else {
         emit(ProfileError(response.message));
       }
@@ -51,19 +26,20 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  Future<void> uploadProfilePicture(File imageFile) async {
-    emit(ProfileLoading());
+  Future<String?> uploadProfilePicture(File imageFile) async {
     try {
-      final success = await repository.uploadProfilePicture(token, imageFile);
-      if (success) {
-        emit(ProfilePictureUploadSuccess());
-        
-        await fetchProfile();
-      } else {
-        emit(ProfileError('Failed to upload profile picture.'));
-      }
+      return await repository.uploadProfilePicture(imageFile, token);
     } catch (e) {
-      emit(ProfileError(e.toString()));
+      emit(ProfileError('Failed to upload image: $e'));
+      return null;
     }
+  }
+
+  Future<ProfileModel> getMerchantProfile(int merchantId) async {
+    return await repository.fetchMerchantProfile(merchantId, token);
+  }
+
+  Future<ProfileModel> getUserProfile(int userId) async {
+    return await repository.fetchUserProfile(userId, token);
   }
 }

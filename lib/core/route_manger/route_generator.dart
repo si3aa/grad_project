@@ -14,13 +14,9 @@ import 'package:Herfa/ui/screens/home/home_screen.dart';
 import 'package:Herfa/ui/screens/home/new_post_screen.dart';
 import 'package:Herfa/ui/screens/home/notification_sc.dart';
 import 'package:Herfa/ui/screens/home/saved_screen.dart';
-import 'package:Herfa/features/profile/views/screens/profile_screen.dart';
-import 'package:Herfa/features/profile/viewmodel/cubit/profile_cubit.dart';
-import 'package:Herfa/features/profile/data/repositories/profile_repository.dart';
-import 'package:Herfa/features/profile/data/data_source/remote/profile_remote_data_source.dart';
+import 'package:Herfa/features/profile/views/screens/edit_profile_screen.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dio/dio.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -68,13 +64,7 @@ class RouteGenerator {
         final token = arguments?['token'] as String?;
         if (token != null) {
           return MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (_) => ProfileCubit(
-                repository: ProfileRepository(ProfileRemoteDataSource(Dio())),
-                token: token,
-              ),
-              child: ProfileScreen(token: token),
-            ),
+            builder: (_) => EditProfileScreen(token: token),
           );
         } else {
           return _undefinedRoute();

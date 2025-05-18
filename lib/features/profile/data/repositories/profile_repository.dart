@@ -1,21 +1,26 @@
-import 'package:Herfa/features/profile/data/data_source/remote/profile_remote_data_source.dart';
-import 'package:Herfa/features/profile/data/models/profile_model.dart';
-import 'package:Herfa/features/profile/data/models/profile_response.dart';
 import 'dart:io';
+import '../models/profile_model.dart';
+import '../models/profile_response.dart';
+import '../data_source/remote/profile_remote_data_source.dart';
 
 class ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
   ProfileRepository(this.remoteDataSource);
 
-  Future<ProfileResponse> updateProfile(ProfileModel profile, String token) {
-    return remoteDataSource.updateProfile(profile, token);
+  Future<ProfileResponse> updateOrCreateProfile(
+      ProfileModel profile, String token) {
+    return remoteDataSource.updateOrCreateProfile(profile, token);
   }
 
-  Future<ProfileResponse> fetchProfile(String token) {
-    return remoteDataSource.fetchProfile(token);
+  Future<String?> uploadProfilePicture(File imageFile, String token) {
+    return remoteDataSource.uploadProfilePicture(imageFile, token);
   }
 
-  Future<bool> uploadProfilePicture(String token, File imageFile) {
-    return remoteDataSource.uploadProfilePicture(token, imageFile);
+  Future<ProfileModel> fetchMerchantProfile(int merchantId, String token) {
+    return remoteDataSource.fetchMerchantProfile(merchantId, token);
+  }
+
+  Future<ProfileModel> fetchUserProfile(int userId, String token) {
+    return remoteDataSource.fetchUserProfile(userId, token);
   }
 }

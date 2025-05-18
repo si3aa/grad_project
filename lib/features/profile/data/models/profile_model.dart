@@ -6,6 +6,8 @@ class ProfileModel {
   final String? address;
   final String? bio;
   final String? profilePictureUrl;
+  final String? userType; // 'merchant' or 'user'
+  final String? email;
 
   ProfileModel({
     this.id,
@@ -15,24 +17,30 @@ class ProfileModel {
     this.address,
     this.bio,
     this.profilePictureUrl,
+    this.userType,
+    this.email,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
-        id: json['id'] as int?,
-        firstName: json['firstName'] as String?,
-        lastName: json['lastName'] as String?,
-        phone: json['phone'] as String?,
-        address: json['address'] as String?,
-        bio: json['bio'] as String?,
-        profilePictureUrl: json['profilePictureUrl'] as String?,
+        id: json['id'] ?? json['userId'],
+        firstName: json['firstName'],
+        lastName: json['lastName'],
+        phone: json['phone'],
+        address: json['address'],
+        bio: json['bio'],
+        profilePictureUrl: json['profilePictureUrl'],
+        userType: json['userType'],
+        email: json['email'],
       );
 
   Map<String, dynamic> toJson() => {
-        if (firstName != null) 'firstName': firstName,
-        if (lastName != null) 'lastName': lastName,
-        if (phone != null) 'phone': phone,
-        if (address != null) 'address': address,
-        if (bio != null) 'bio': bio,
-        if (profilePictureUrl != null) 'profilePictureUrl': profilePictureUrl,
+        'firstName': firstName,
+        'lastName': lastName,
+        'phone': phone,
+        'address': address,
+        'bio': bio,
+        'profilePictureUrl': profilePictureUrl,
+        'userType': userType,
+        'email': email,
       };
 }

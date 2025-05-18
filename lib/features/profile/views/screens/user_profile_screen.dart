@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../data/models/profile_model.dart';
 
-class MerchantProfileScreen extends StatelessWidget {
+class UserProfileScreen extends StatelessWidget {
   final ProfileModel profile;
-  final String token;
-  const MerchantProfileScreen(
-      {required this.profile, required this.token, super.key});
+  const UserProfileScreen({required this.profile, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +29,8 @@ class MerchantProfileScreen extends StatelessWidget {
             if (profile.address != null)
               Text('Address: ${profile.address!}',
                   style: const TextStyle(color: Colors.grey)),
-         
-            
+          
+            // Add more fields as needed from the user API response
           ],
         ),
       ),

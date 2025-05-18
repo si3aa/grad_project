@@ -6,14 +6,12 @@ class ProfileInitial extends ProfileState {}
 
 class ProfileLoading extends ProfileState {}
 
-class ProfileLoaded extends ProfileState {
+class ProfileSuccess extends ProfileState {
   final ProfileModel profile;
-  ProfileLoaded(this.profile);
+  ProfileSuccess(this.profile);
 }
 
 class ProfileError extends ProfileState {
   final String message;
   ProfileError(this.message);
 }
-
-class ProfilePictureUploadSuccess extends ProfileState {}

@@ -7,6 +7,7 @@ import 'dart:developer' as developer;
 class HomeAppBar extends StatelessWidget {
   final String? token;
   final String? userName;
+
   const HomeAppBar({super.key, this.token, this.userName});
 
   @override
@@ -32,21 +33,11 @@ class HomeAppBar extends StatelessWidget {
                 } else {
                   developer.log('No token available for profile navigation',
                       name: 'HomeAppBar');
-                  // Try to get token from SharedPreferences as fallback
-                  final prefs = await SharedPreferences.getInstance();
-                  final savedToken = prefs.getString('token');
-                  if (savedToken != null && savedToken.isNotEmpty) {
-                    developer.log('Using saved token from SharedPreferences',
-                        name: 'HomeAppBar');
-                    Navigator.pushNamed(
-                      context,
-                      Routes.profileRoute,
-                      arguments: {'token': savedToken},
-                    );
-                  } else {
-                    developer.log('No token found in SharedPreferences either',
-                        name: 'HomeAppBar');
-                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'You must be logged in to view your profile.')),
+                  );
                 }
               },
               child: Image.asset("assets/images/arrow-small-left.png"),
@@ -68,9 +59,18 @@ class HomeAppBar extends StatelessWidget {
             ),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.notifications_none),
-              onPressed: () {
-                Navigator.pushNamed(context, Routes.notificationRoute);
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('token');
+                if (context.mounted) {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    Routes.loginRoute,
+                    (route) => false,
+                  );
+                }
               },
             ),
           ],
