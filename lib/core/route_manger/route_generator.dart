@@ -1,14 +1,18 @@
+
+
 import 'package:Herfa/core/route_manger/routes.dart';
+import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
 import 'package:Herfa/features/auth/forget_pass.dart';
 import 'package:Herfa/features/auth/guest.dart';
-import 'package:Herfa/features/auth/views/screens/login_screen.dart';
 import 'package:Herfa/features/auth/reset_pass.dart';
-import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/splash.dart';
 import 'package:Herfa/features/auth/success_screen.dart';
+import 'package:Herfa/features/auth/views/screens/login_screen.dart';
+import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
-import 'package:Herfa/ui/screens/home/add_new_post/views/screens/new_post_screen.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
+import 'package:Herfa/features/get_product/views/product_detail_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/events_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';
@@ -57,6 +61,14 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const EventsScreen());
       case Routes.cartRoute:
         return MaterialPageRoute(builder: (_) => const CartScreen());
+      case Routes.productDetailRoute:
+        final product = arguments?['product'] as Product?;
+        if (product != null) {
+          return MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
+          );
+        }
+        return _undefinedRoute();
       default:
         return _undefinedRoute();
     }

@@ -25,7 +25,8 @@ class AppIntercepters extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  // ignore: deprecated_member_use
+  void onError(DioError err, ErrorInterceptorHandler handler) {
     debugPrint(
         'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
     super.onError(err, handler);

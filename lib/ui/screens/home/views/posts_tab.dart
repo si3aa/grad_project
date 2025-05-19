@@ -1,6 +1,6 @@
-import 'package:Herfa/ui/screens/home/prduct/product_card.dart';
-import 'package:Herfa/ui/screens/home/prduct/viewmodels/product_cubit.dart';
-import 'package:Herfa/ui/screens/home/prduct/models/product_model.dart';
+import 'package:Herfa/features/get_product/views/product_card.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/get_product/data/models/product_model.dart';
 import 'package:Herfa/ui/widgets/home/header.dart';
 import 'package:Herfa/ui/widgets/home/nav_and_categ.dart';
 import 'package:flutter/material.dart';
