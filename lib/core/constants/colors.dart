@@ -11,10 +11,7 @@ const kBackgroundColor = Color(0xFFF5F5F5);
 
 // Error color
 const kErrorColor = Color(0xFFB00020);
-
-// Text colors
 const kTextColor = Color(0xFF000000);
 const kTextLightColor = Color(0xFF757575);
 
-// Border color
 const kBorderColor = Color(0xFFDDDDDD);
