@@ -76,6 +76,37 @@ class ProductApiRepository {
       throw Exception('Error fetching products: $e');
     }
   }
+
+  /// Delete a product by ID
+  Future<bool> deleteProduct(String productId) async {
+    try {
+      developer.log('Deleting product with ID: $productId', name: 'ProductAPI');
+      
+      final response = await _dio.delete(
+        '/products/$productId',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+      
+      developer.log('Delete product response: ${response.statusCode}', name: 'ProductAPI');
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        developer.log('Product deleted successfully', name: 'ProductAPI');
+        return true;
+      } else {
+        developer.log('Failed to delete product: ${response.statusCode} - ${response.data}', 
+            name: 'ProductAPI');
+        return false;
+      }
+    } catch (e) {
+      developer.log('Error deleting product', name: 'ProductAPI', error: e);
+      return false;
+    }
+  }
 }
 
 

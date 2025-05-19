@@ -11,7 +11,7 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onLike;
   final VoidCallback onComment;
   final VoidCallback onCart;
-  final VoidCallback onMore;
+  final Function(BuildContext) onMore;
 
   const ProductCard({
     super.key,
@@ -47,7 +47,7 @@ class ProductCard extends StatelessWidget {
                 userName: product.userName,
                 userHandle: product.userHandle,
                 userImage: product.userImage,
-                onMore: onMore,
+                onMore: () => onMore(context),
               ),
               const SizedBox(height: 10),
               ProductImage(
@@ -74,6 +74,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
+
 
 
 

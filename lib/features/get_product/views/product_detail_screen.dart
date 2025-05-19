@@ -145,32 +145,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _showDeleteConfirmation(Product product) {
+    // Store a reference to the ScaffoldMessengerState
+    // ignore: unused_local_variable
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Product'),
-        content: const Text(
-          'Are you sure you want to delete this product? This action cannot be undone.'
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Are you sure you want to delete "${product.productName}"?'),
+            const SizedBox(height: 8),
+            const Text(
+              'This action cannot be undone and the product will be permanently removed from your store.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('CANCEL'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // Implement delete product functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Product deleted successfully'),
-                  backgroundColor: Colors.red,
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              Navigator.pop(context); // Return to previous screen
+              
+              // Get the ProductCubit before any navigation happens
+              final productCubit = context.read<ProductCubit>();
+              
+              // Delete the product using the stored reference
+              productCubit.deleteProduct(context, product);
+              
+              // Navigate back to the previous screen after deletion
+              Navigator.pop(context);
             },
-            child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('DELETE'),
           ),
         ],
       ),

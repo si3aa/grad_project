@@ -1,4 +1,5 @@
 class Product {
+  final int id;
   final String userName;
   final String userHandle;
   final String userImage;
@@ -6,13 +7,13 @@ class Product {
   final String productName;
   final double originalPrice;
   final double discountedPrice;
-  int likes; 
-  int comments; 
+  int likes;
+  int comments;
+  final String title;
   final String description;
   final int quantity;
-  final String title;
 
-  Product( {
+  Product({
     required this.userName,
     required this.userHandle,
     required this.userImage,
@@ -22,8 +23,9 @@ class Product {
     required this.discountedPrice,
     required this.likes,
     required this.comments,
+    required this.title,
     required this.description,
     required this.quantity,
-    required this.title,
+    this.id = 0, // Default value for backward compatibility
   });
 }

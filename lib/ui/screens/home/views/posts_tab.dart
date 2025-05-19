@@ -91,8 +91,8 @@ class _ProductList extends StatelessWidget {
                 onCart: () {
                   context.read<ProductCubit>().addToCart(product);
                 },
-                onMore: () {
-                  context.read<ProductCubit>().moreOptions(product);
+                onMore: (context) {
+                  context.read<ProductCubit>().moreOptions(product, context);
                 },
               );
             },
