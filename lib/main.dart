@@ -2,13 +2,14 @@ import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
-import 'package:Herfa/ui/provider/cubit/new_post_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/saved_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
-import 'package:Herfa/core/route_manger/route_generator.dart';
+import 'package:Herfa/features/add_new_product/views/screens/new_post_view.dart';
+import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
+import 'package:Herfa/core/route_manger/route_generator.dart';
 import 'package:Herfa/core/app_bloc_observer.dart';
 import 'package:Herfa/features/auth/viewmodel/cubit/auth_cubit.dart';
 import 'package:dio/dio.dart';
@@ -59,7 +60,36 @@ class Herfa extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        onGenerateRoute: RouteGenerator.getRoute,
+        onGenerateRoute: (settings) {
+          if (settings.name == '/add_product') {
+            // Check if we have arguments for edit mode
+            final args = settings.arguments as Map<String, dynamic>?;
+            final isEditMode = args?['isEditMode'] ?? false;
+            final product = args?['product'];
+            final productId = args?['productId'];
+
+            return MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                create: (context) {
+                  final cubit = NewPostCubit();
+                  // Initialize with product data if in edit mode
+                  if (isEditMode && product != null) {
+                    // Initialize the cubit with product data
+                    cubit.initWithProductData(product);
+                  }
+                  return cubit;
+                },
+                child: NewPostView(
+                  isEditMode: isEditMode,
+                  product: product,
+                  productId: productId,
+                ),
+              ),
+            );
+          }
+          // Use the RouteGenerator for all other routes
+          return RouteGenerator.getRoute(settings);
+        },
         initialRoute: Routes.splashScreen,
       ),
     );

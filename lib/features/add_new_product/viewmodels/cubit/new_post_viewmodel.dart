@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Herfa/app_interceptors.dart';
 import 'package:Herfa/app_strings.dart';
 import 'package:Herfa/exceptions.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/status_codes.dart';
 import 'package:Herfa/features/add_new_product/data/data_source/api_respose.dart';
 import 'package:Herfa/features/add_new_product/data/models/post_model.dart';
@@ -215,14 +216,17 @@ class NewPostCubit extends Cubit<NewPostState> {
 
     try {
       emit(state.copyWith(isLoading: true, error: null));
-
-      // Use the stored productId if available, otherwise generate a temporary one
-      final productId = state.productId != null
-          ? state.productId.toString()
-          : DateTime.now().millisecondsSinceEpoch.toString();
-
+      
+      // First, delete the old product
+      final deleteResponse = await deleteProductById(state.productId.toString());
+      
+      if (!deleteResponse.success) {
+        throw Exception('Failed to delete old product: ${deleteResponse.message}');
+      }
+      
+      // Create a new product with updated data
       final product = ProductModel(
-        id: productId,
+        id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate new ID
         name: state.productName.trim(),
         title: state.productTitle.trim(),
         description: state.description.trim(),
@@ -235,8 +239,8 @@ class NewPostCubit extends Cubit<NewPostState> {
       );
 
       // Print product data for debugging
-      print('======= UPDATING PRODUCT DATA =======');
-      print('Product ID: ${product.id}');
+      print('======= CREATING NEW PRODUCT WITH UPDATED DATA =======');
+      print('New Product ID: ${product.id}');
       print('Product Name: ${product.name}');
       print('Product Title: ${product.title}');
       print('Description: ${product.description}');
@@ -247,8 +251,8 @@ class NewPostCubit extends Cubit<NewPostState> {
       print('Images: ${product.images}');
       print('======================================');
 
-      // Send data to API
-      final response = await updateProductApi(product);
+      // Send data to API (using the same method as for creating a new product)
+      final response = await sendProductToApi(product);
 
       // Print API response for debugging
       print('API response success: ${response.success}');
@@ -274,10 +278,11 @@ class NewPostCubit extends Cubit<NewPostState> {
   Future<ApiResponse> updateProductApi(ProductModel product) async {
     try {
       // API URL: https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products
+      print('Updating product with ID: ${product.id}');
 
       // Convert all product fields to strings
       final productData = {
-        'id': product.id,
+        'id': product.id, // Include product ID in the request body
         'name': product.name,
         'shortDescription': product.title,
         'longDescription': product.description,
@@ -288,18 +293,12 @@ class NewPostCubit extends Cubit<NewPostState> {
         'colors': "[${product.colors.join(',').toString()}]",
       };
 
-      // Create FormData for multipart request
-      final formData = FormData.fromMap(productData);
-      if (product.images.isNotEmpty) {
-        formData.files.add(MapEntry(
-            "file", await MultipartFile.fromFileSync(product.images[0])));
-      }
-
-      // Make the API call using Dio
+      // Make the API call using Dio - use the main products endpoint
       final response = await postFormData(
-        '/products',
+        '/products', // Use the main endpoint without ID in the path
         body: productData,
         files: product.images.isNotEmpty ? {'file': File(product.images[0])} : null,
+        isUpdate: true, // Indicate this is an update operation
       );
 
       // Print response to console
@@ -428,13 +427,54 @@ class NewPostCubit extends Cubit<NewPostState> {
     print("Images Count: ${state.images.length}");
     print("====================");
   }
+
+  /// Initialize with existing product data for editing
+  void initWithProductData(Product product) {
+    // Reset state first to clear any existing data
+    resetState();
+
+    // Set the product ID first to ensure it's available
+    setProductId(product.id);
+    
+    // Set all the other product data fields
+    updateProductName(product.productName);
+    updateProductTitle(product.title);
+    updateDescription(product.description);
+    updatePrice(product.originalPrice);
+    updateQuantity(product.quantity);
+
+    // Add the product image if available
+    if (product.productImage.isNotEmpty && !product.productImage.startsWith('assets/')) {
+      addImage(product.productImage);
+    }
+
+    // Set category ID (you might need to map the category name to ID)
+    // This is a placeholder - adjust based on your actual category structure
+    updateCategoryId(1); // Default to first category if unknown
+
+    // Set colors if available - for now we'll add a default color
+    // This is a placeholder - adjust based on your actual color structure
+    if (state.selectedColors.isEmpty) {
+      toggleColor(Colors.red, 'Red');
+    }
+
+    print('Product data initialized for editing: ${product.productName}');
+    _printCurrentState("After initialization for editing");
+  }
+
+  /// Check if we're in edit mode
+  bool get isEditMode => state.productId != null;
+
+  /// Get appropriate button text based on mode
+  String get submitButtonText => isEditMode ? 'UPDATE PRODUCT' : 'CREATE PRODUCT';
 }
 
 Future postFormData(String path,
     {Map<String, dynamic>? body,
     Map<String, File>? files,
     Map<String, dynamic>? queryParameters,
-    Map<String, String>? headers}) async {
+    Map<String, String>? headers,
+    bool isUpdate = false}) async {
   try {
     final dio = Dio(BaseOptions(
         baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
@@ -449,7 +489,12 @@ Future postFormData(String path,
 
     dio.interceptors.add(AppIntercepters());
     FormData formData = FormData.fromMap(body ?? {});
-    // formData.fields.add(MapEntry("_method", "patch"));
+
+    // For update operations, add a _method field to indicate PUT
+    if (isUpdate) {
+      formData.fields.add(MapEntry("_method", "put"));
+    }
+
     if (files != null && files.isNotEmpty) {
       for (var file in files.entries) {
         formData.files.add(
@@ -458,9 +503,15 @@ Future postFormData(String path,
     }
     log("formData: ${formData.fields}");
 
+    // Determine if we should use PUT or POST based on whether this is an update
+    final method = isUpdate ? 'PUT' : 'POST';
+    log("Using HTTP method: $method for path: $path");
+
+    // Use the appropriate HTTP method
     final response = await dio.post(path,
         data: formData,
         options: Options(
+          method: method,
           headers: {
             AppStrings.contentType: AppStrings.multipartFile,
             ...headers ?? {}
@@ -504,8 +555,39 @@ dynamic _handleDioError(DioException error) {
   }
 }
 
-
-
-
+  // Method to delete a product by ID
+  Future<ApiResponse> deleteProductById(String productId) async {
+    try {
+      print('Deleting product with ID: $productId');
+      
+      final response = await Dio(BaseOptions(
+        baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
+        headers: {
+          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M",
+        }
+      )).delete('/products/$productId');
+      
+      print('Delete response status: ${response.statusCode}');
+      print('Delete response data: ${response.data}');
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return ApiResponse(
+          success: true,
+          message: 'Product deleted successfully',
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Failed to delete product: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Error deleting product: $e');
+      return ApiResponse(
+        success: false,
+        message: 'Error deleting product: $e',
+      );
+    }
+  }
 
 

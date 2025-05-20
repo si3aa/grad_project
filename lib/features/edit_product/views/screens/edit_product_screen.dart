@@ -1,4 +1,3 @@
-import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/states/new_post_state.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
 import 'package:Herfa/features/add_new_product/views/widgets/active_status.dart';
@@ -109,23 +108,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Edit Product'),
-            actions: [
-              TextButton(
-                onPressed: state.isLoading
-                    ? null
-                    : () async {
-                        if (_formKey.currentState!.validate()) {
-                          final success = await cubit.updateProduct();
-                          if (success && context.mounted) {
-                            Navigator.pop(context, true); // Return true to indicate successful edit
-                          }
-                        }
-                      },
-                child: state.isLoading
-                    ? const CircularProgressIndicator()
-                    : Text('UPDATE PRODUCT', style: TextStyle(color: kPrimaryColor)),
-              ),
-            ],
+            // Remove the actions with the update button
           ),
           body: SafeArea(
             child: SingleChildScrollView(

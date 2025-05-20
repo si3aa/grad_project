@@ -444,6 +444,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     );
                   },
                 ),
+                // Add edit button for product owner
+                IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () {
+                    _showEditOptions(currentProduct);
+                  },
+                ),
               ],
             ),
             body: SingleChildScrollView(

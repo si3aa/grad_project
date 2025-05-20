@@ -5,7 +5,7 @@ import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
+
 class ProductCubit extends Cubit<ProductState> {
   ProductCubit() : super(const ProductInitial()) {
     _loadProducts();
@@ -27,7 +27,7 @@ class ProductCubit extends Cubit<ProductState> {
             'Processing product: ${apiProduct.id} - ${apiProduct.name}',
             name: 'ProductCubit');
         return Product(
-         id: apiProduct.id!,
+          id: apiProduct.id!,
           userName: 'Merchant', // Default or fetch from user API
           userHandle: '@merchant',
           userImage: 'assets/images/arrow-small-left.png', // Default image
@@ -39,7 +39,7 @@ class ProductCubit extends Cubit<ProductState> {
           comments: 0, // Default value since it's not from API
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
-          quantity: apiProduct.quantity ?? 0, 
+          quantity: apiProduct.quantity ?? 0,
         );
       }).toList();
 
@@ -174,20 +174,21 @@ class ProductCubit extends Cubit<ProductState> {
   void _navigateToEditProduct(BuildContext context, Product product) {
     // Store a reference to the ScaffoldMessengerState
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    
-    Navigator.push(
+
+    // Navigate to the add new product screen but in edit mode
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (context) => EditProductScreen(
-          product: product,
-          productId: product.id,
-        ),
-      ),
+      '/add_product', // Use the same route as add product
+      arguments: {
+        'isEditMode': true,
+        'product': product,
+        'productId': product.id,
+      },
     ).then((edited) {
       if (edited == true) {
         // Refresh product data if edited
         _loadProducts();
-        
+
         // Show success message using the stored reference
         scaffoldMessenger.showSnackBar(
           const SnackBar(
@@ -243,7 +244,7 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void> deleteProduct(BuildContext context, Product product) async {
     // Store a reference to the ScaffoldMessengerState to avoid using context after widget disposal
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    
+
     try {
       // Show loading indicator
       final loadingSnackBar = SnackBar(
@@ -261,36 +262,38 @@ class ProductCubit extends Cubit<ProductState> {
             Text('Deleting ${product.productName}...'),
           ],
         ),
-        duration: const Duration(seconds: 60), // Long duration as we'll dismiss it manually
+        duration: const Duration(
+            seconds: 60), // Long duration as we'll dismiss it manually
       );
-      
+
       scaffoldMessenger.showSnackBar(loadingSnackBar);
-      
+
       // Call API to delete the product
       final repository = ProductApiRepository();
       final success = await repository.deleteProduct(product.id.toString());
-      
+
       // Hide the loading indicator
       scaffoldMessenger.hideCurrentSnackBar();
-      
+
       if (success) {
         // Update local state if deletion was successful
         final currentState = this.state;
         if (currentState is ProductLoaded) {
           // Remove the product from the lists
-          final updatedProducts = currentState.products.where((p) => 
-            p.id != product.id).toList();
-          
-          final updatedFilteredProducts = currentState.filteredProducts.where((p) => 
-            p.id != product.id).toList();
-          
+          final updatedProducts =
+              currentState.products.where((p) => p.id != product.id).toList();
+
+          final updatedFilteredProducts = currentState.filteredProducts
+              .where((p) => p.id != product.id)
+              .toList();
+
           // Update the state
           emit(ProductLoaded(
             products: updatedProducts,
             filteredProducts: updatedFilteredProducts,
           ));
         }
-        
+
         // Show success message
         scaffoldMessenger.showSnackBar(
           const SnackBar(
@@ -312,7 +315,7 @@ class ProductCubit extends Cubit<ProductState> {
     } catch (e) {
       // Hide the loading indicator
       scaffoldMessenger.hideCurrentSnackBar();
-      
+
       // Show error message
       scaffoldMessenger.showSnackBar(
         SnackBar(
@@ -321,7 +324,7 @@ class ProductCubit extends Cubit<ProductState> {
           duration: const Duration(seconds: 3),
         ),
       );
-      
+
       developer.log('Error deleting product', name: 'ProductCubit', error: e);
     }
   }
@@ -336,22 +339,37 @@ class ProductCubit extends Cubit<ProductState> {
         }
         return product;
       }).toList();
-      
-      developer.log('Updated quantity for product: ${updatedProduct.productName}', 
+
+      developer.log(
+          'Updated quantity for product: ${updatedProduct.productName}',
           name: 'ProductCubit');
-      
+
       emit(ProductLoaded(
         products: updatedProducts,
-        filteredProducts: updatedProducts.where((product) => 
-          state.filteredProducts.any((p) => p.productName == product.productName)
-        ).toList(),
+        filteredProducts: updatedProducts
+            .where((product) => state.filteredProducts
+                .any((p) => p.productName == product.productName))
+            .toList(),
       ));
     }
   }
+
+  /// Update a product
+  Future<bool> updateProduct(
+      String productId, Map<String, dynamic> productData) async {
+    try {
+      final repository = ProductApiRepository();
+      final success = await repository.updateProduct(productId, productData);
+
+      if (success) {
+        // Refresh the products list after successful update
+        await _loadProducts();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      developer.log('Error updating product', name: 'ProductCubit', error: e);
+      return false;
+    }
+  }
 }
-
-
-
-
-
-

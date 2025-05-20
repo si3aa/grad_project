@@ -390,14 +390,9 @@ class ImagePickerWidget extends StatelessWidget {
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: image.startsWith('assets/')
-                                  ? AssetImage(image) as ImageProvider
-                                  : FileImage(File(image)),
-                              fit: BoxFit.cover,
-                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
+                          child: _buildImageWidget(image),
                         ),
                         // Always show delete button
                         Positioned(
@@ -425,4 +420,62 @@ class ImagePickerWidget extends StatelessWidget {
             ],
     );
   }
+
+  Widget _buildImageWidget(String image) {
+    if (image.startsWith('http')) {
+      // Network image
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          image,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey.shade200,
+              child: const Icon(Icons.broken_image, size: 30, color: Colors.grey),
+            );
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              color: Colors.grey.shade200,
+              child: Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    } else if (image.startsWith('assets/')) {
+      // Asset image
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.asset(
+          image,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else {
+      // Local file
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.file(
+          File(image),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey.shade200,
+              child: const Icon(Icons.broken_image, size: 30, color: Colors.grey),
+            );
+          },
+        ),
+      );
+    }
+  }
 }
+

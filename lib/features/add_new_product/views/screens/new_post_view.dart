@@ -10,13 +10,23 @@ import 'package:Herfa/features/add_new_product/views/widgets/product_name_field.
 import 'package:Herfa/features/add_new_product/views/widgets/product_title_field.dart';
 import 'package:Herfa/features/add_new_product/views/widgets/quantity_field.dart';
 import 'package:Herfa/features/add_new_product/views/widgets/submit_button.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:dio/dio.dart';
 
 /// The view for creating a new product post, displaying the form UI.
 class NewPostView extends StatefulWidget {
-  const NewPostView({super.key});
+  final bool isEditMode;
+  final Product? product;
+  final int? productId;
+
+  const NewPostView({
+    Key? key,
+    this.isEditMode = false,
+    this.product,
+    this.productId,
+  }) : super(key: key);
 
   @override
   State<NewPostView> createState() => _NewPostViewState();
@@ -24,11 +34,11 @@ class NewPostView extends StatefulWidget {
 
 class _NewPostViewState extends State<NewPostView> {
   final _formKey = GlobalKey<FormState>();
-  final _productNameController = TextEditingController();
-  final _productTitleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _quantityController = TextEditingController();
+  late final TextEditingController _productNameController;
+  late final TextEditingController _productTitleController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _priceController;
+  late final TextEditingController _quantityController;
 
   // Category list with IDs (1-based indexing for simplicity)
   static const _categories = [
@@ -48,13 +58,38 @@ class _NewPostViewState extends State<NewPostView> {
     Colors.purple,
   ];
 
-static final _colorNames = {
+  static final _colorNames = {
     Colors.red: 'Red',
     Colors.blue: 'Blue',
     Colors.green: 'Green',
     Colors.yellow: 'Yellow',
     Colors.purple: 'Purple',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _productNameController = TextEditingController();
+    _productTitleController = TextEditingController();
+    _descriptionController = TextEditingController();
+    _priceController = TextEditingController();
+    _quantityController = TextEditingController();
+
+    // Initialize with product data if in edit mode
+    if (widget.isEditMode && widget.product != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final cubit = context.read<NewPostCubit>();
+        cubit.initWithProductData(widget.product!);
+
+        // Set controller values
+        _productNameController.text = widget.product!.productName;
+        _productTitleController.text = widget.product!.title;
+        _descriptionController.text = widget.product!.description;
+        _priceController.text = widget.product!.originalPrice.toString();
+        _quantityController.text = widget.product!.quantity.toString();
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -77,11 +112,7 @@ static final _colorNames = {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Create New Product'),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-            ),
+            title: Text(widget.isEditMode ? 'Edit Product' : 'Add New Product'),
           ),
           body: SafeArea(
             child: SingleChildScrollView(
@@ -94,7 +125,8 @@ static final _colorNames = {
                     // Product Images Section
                     const Text(
                       'Product Images',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     ImagePickerWidget(
@@ -116,7 +148,8 @@ static final _colorNames = {
                     // Product Details Section
                     const Text(
                       'Product Details',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
 
@@ -129,8 +162,9 @@ static final _colorNames = {
                     ProductTitleField(
                       controller: _productTitleController,
                       onChanged: cubit.updateProductTitle,
-                      errorText: state.error != null && state.error!.toLowerCase().contains('title') 
-                          ? state.error 
+                      errorText: state.error != null &&
+                              state.error!.toLowerCase().contains('title')
+                          ? state.error
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -138,8 +172,9 @@ static final _colorNames = {
                     DescriptionField(
                       controller: _descriptionController,
                       onChanged: cubit.updateDescription,
-                      errorText: state.error != null && state.error!.toLowerCase().contains('description') 
-                          ? state.error 
+                      errorText: state.error != null &&
+                              state.error!.toLowerCase().contains('description')
+                          ? state.error
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -202,8 +237,11 @@ static final _colorNames = {
                     // Submit Button
                     SubmitButton(
                       state: state,
-                      onSubmit: cubit.submitProduct,
+                      onSubmit: widget.isEditMode
+                          ? cubit.updateProduct
+                          : cubit.submitProduct,
                       formKey: _formKey,
+                      isEditMode: widget.isEditMode,
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -215,4 +253,63 @@ static final _colorNames = {
       },
     );
   }
+}
+
+Future<void> updateProduct({
+  required String productId,
+  required String name,
+  required String shortDescription,
+  required String longDescription,
+  required double price,
+  required int quantity,
+  required int categoryId,
+  required String filePath, // Local path to the image file
+  required bool active,
+  required List<String> colors, // e.g. ['red', 'blue']
+}) async {
+  final dio = Dio();
+
+  // Convert colors to JSON string
+  final colorsJson =
+      colors.toString(); // or jsonEncode(colors) if you import dart:convert
+
+  // Print all data before sending
+  print('--- Data to be sent for product update ---');
+  print('product_id: $productId');
+  print('name: $name');
+  print('shortDescription: $shortDescription');
+  print('longDescription: $longDescription');
+  print('price: $price');
+  print('quantity: $quantity');
+  print('categoryId: $categoryId');
+  print('filePath: $filePath');
+  print('active: $active');
+  print('colors: $colorsJson');
+  print('------------------------------------------');
+
+  final formData = FormData.fromMap({
+    'name': name,
+    'shortDescription': shortDescription,
+    'longDescription': longDescription,
+    'price': price.toString(),
+    'quantity': quantity.toString(),
+    'categoryId': categoryId.toString(),
+    'file': await MultipartFile.fromFile(filePath),
+    'product_id': productId,
+    'active': active.toString(),
+    'colors': colorsJson,
+  });
+
+  final response = await dio.put(
+    'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products',
+    data: formData,
+    options: Options(
+      headers: {
+        'Authorization': 'Bearer YOUR_TOKEN',
+        'Content-Type': 'multipart/form-data',
+      },
+    ),
+  );
+
+  print(response.data);
 }
