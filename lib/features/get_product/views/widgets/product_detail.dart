@@ -1,8 +1,13 @@
-import 'package:Herfa/constants.dart';
+import 'dart:developer';
+import 'package:Herfa/core/constants/colors.dart';
+import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
 
 /// Widget to display product details (name, price, description).
 class ProductDetails extends StatefulWidget {
+  final String productId;
   final String productName;
   final double originalPrice;
   final double? discountedPrice;
@@ -10,13 +15,14 @@ class ProductDetails extends StatefulWidget {
   final VoidCallback onCart;
 
   const ProductDetails({
-    super.key,
+    Key? key,
+    required this.productId,
     required this.productName,
     required this.originalPrice,
     this.discountedPrice,
     required this.description,
     required this.onCart,
-  });
+  }) : super(key: key);
 
   @override
   State<ProductDetails> createState() => _ProductDetailsState();
@@ -29,9 +35,9 @@ class _ProductDetailsState extends State<ProductDetails> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Product details section
+        // Product info column
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +45,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Text(
                 widget.productName,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
@@ -51,14 +57,26 @@ class _ProductDetailsState extends State<ProductDetails> {
                   Text(
                     '\$${widget.originalPrice.toStringAsFixed(2)}',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: widget.discountedPrice != null ? Colors.grey : Colors.red,
-                      decoration: widget.discountedPrice != null ? TextDecoration.lineThrough : null,
+                      color: widget.discountedPrice != null
+                          ? Colors.grey.shade500
+                          : Colors.black,
+                      decoration: widget.discountedPrice != null
+                          ? TextDecoration.lineThrough
+                          : null,
                     ),
                   ),
                   if (widget.discountedPrice != null) ...[
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
+                    Text(
+                      '\$${widget.discountedPrice!.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -75,36 +93,19 @@ class _ProductDetailsState extends State<ProductDetails> {
             ],
           ),
         ),
-        
+
         // Action buttons column
         Column(
           children: [
             // Save button
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isSaved ? kPrimaryColor : Colors.grey.shade200,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                icon: Icon(
-                  Icons.bookmark,
-                  color: isSaved ? Colors.white : Colors.grey.shade600,
-                  size: 22,
-                  semanticLabel: isSaved ? 'Saved' : 'Save',
-                ),
-                onPressed: () {
-                  setState(() {
-                    isSaved = !isSaved;
-                  });
-                  
+            BlocConsumer<SavedProductCubit, SavedProductState>(
+              listener: (context, state) {
+                log('SavedProductState: $state');
+                if (state is SavedProductSuccess) {
+                  log('Product save status changed: ${state.message}');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        isSaved ? 'Product saved successfully' : 'Product removed from saved items',
-                      ),
+                      content: Text(state.message),
                       duration: const Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
@@ -114,7 +115,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                         label: 'View',
                         textColor: Colors.white,
                         onPressed: () {
-                          if (isSaved) {
+                          if (state.message.contains('saved')) {
                             // Navigate to saved items screen
                             Navigator.pushReplacementNamed(context, '/saved');
                           }
@@ -122,13 +123,94 @@ class _ProductDetailsState extends State<ProductDetails> {
                       ),
                     ),
                   );
-                },
-              ),
+                } else if (state is SavedProductError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: ${state.message}'),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                bool isLoading = state is SavedProductLoading;
+
+                // Check if this product is in the saved list
+                bool isSaved = false;
+                if (state is SavedProductDetailsLoaded) {
+                  isSaved =
+                      state.productDetails.any((p) => p.id == widget.productId);
+                }
+
+                return Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: isSaved ? kPrimaryColor : Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        // ignore: deprecated_member_use
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: isLoading
+                      ? Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: isSaved ? Colors.white : kPrimaryColor,
+                            ),
+                          ),
+                        )
+                      : IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            isSaved ? Icons.bookmark : Icons.bookmark_outline,
+                            color:
+                                isSaved ? Colors.white : Colors.grey.shade600,
+                            size: 22,
+                            semanticLabel: isSaved ? 'Saved' : 'Save',
+                          ),
+                          onPressed: () {
+                            if (isSaved) {
+                              // Remove from saved list
+                              context
+                                  .read<SavedProductCubit>()
+                                  .removeSavedProduct(widget.productId)
+                                  .then((_) {
+                                // Fetch saved products with details to update the UI
+                                context
+                                    .read<SavedProductCubit>()
+                                    .fetchSavedProductsWithDetails();
+                              });
+                            } else {
+                              // Add to saved list
+                              context
+                                  .read<SavedProductCubit>()
+                                  .saveProduct(widget.productId)
+                                  .then((_) {
+                                // Fetch saved products with details to update the UI
+                                context
+                                    .read<SavedProductCubit>()
+                                    .fetchSavedProductsWithDetails();
+                              });
+                            }
+                          },
+                        ),
+                );
+              },
             ),
-            
+
             // Space between buttons
             const SizedBox(height: 12),
-            
+
             // Cart button
             Container(
               width: 40,
@@ -149,14 +231,16 @@ class _ProductDetailsState extends State<ProductDetails> {
                   setState(() {
                     isInCart = !isInCart;
                   });
-                  
+
                   // Call the parent's onCart callback
                   widget.onCart();
-                  
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        isInCart ? 'Product added to cart' : 'Product removed from cart',
+                        isInCart
+                            ? 'Product added to cart'
+                            : 'Product removed from cart',
                       ),
                       duration: const Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
@@ -184,5 +268,3 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 }
-
-

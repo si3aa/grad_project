@@ -372,4 +372,9 @@ class ProductCubit extends Cubit<ProductState> {
       return false;
     }
   }
+
+  // Make this method public so it can be called from UI
+  Future<void> loadProducts() async {
+    return _loadProducts();
+  }
 }
