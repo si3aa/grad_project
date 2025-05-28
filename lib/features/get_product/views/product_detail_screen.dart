@@ -2,9 +2,10 @@
 
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
-import 'package:Herfa/features/get_product/data/models/product_model.dart';
-import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
+    as viewmodels;
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -407,10 +408,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final price = widget.product.discountedPrice;
     final totalPrice = (price - discountAmount) * selectedQuantity;
 
-    return BlocBuilder<ProductCubit, ProductState>(
+    return BlocBuilder<ProductCubit, viewmodels.ProductState>(
       builder: (context, state) {
         // If the state is loaded, we can access the updated product
-        if (state is ProductLoaded) {
+        if (state is viewmodels.ProductLoaded) {
           // Find the current product in the updated list
           final currentProduct = state.products.firstWhere(
             (p) => p.productName == widget.product.productName,

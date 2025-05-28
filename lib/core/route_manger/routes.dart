@@ -12,8 +12,9 @@ class Routes {
   static const String notificationRoute = '/notification';
   static const String savedRoute = '/saved';
   static const String newPostRoute = '/newPost';
+  static const String addProductRoute = '/add_product';
+  static const String editProductRoute = '/edit_product';
   static const String eventsRoute = '/events';
   static const String cartRoute = '/cart';
   static const String productDetailRoute = '/product-detail';
 }
-
