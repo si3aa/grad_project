@@ -25,111 +25,131 @@ class SavedProductItemWidget extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: product.images.isNotEmpty &&
-                      product.images[0].startsWith('http')
-                  ? Image.network(
-                      product.images[0],
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/images/product_1.png',
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    )
-                  : Image.asset(
-                      product.images.isNotEmpty
-                          ? product.images[0]
-                          : 'assets/images/product_1.png',
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
+            // Product Image with tap to view details
+            GestureDetector(
+              onTap: () {
+                // Navigate to product details
+                Navigator.pushNamed(
+                  context,
+                  '/product_details',
+                  arguments: {'productId': product.id},
+                );
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: product.images.isNotEmpty &&
+                        product.images[0].startsWith('http')
+                    ? Image.network(
+                        product.images[0],
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/images/product_1.png',
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        product.images.isNotEmpty
+                            ? product.images[0]
+                            : 'assets/images/product_1.png',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+              ),
             ),
             const SizedBox(width: 12),
 
             // Product Details
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    product.title,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(
-                        '\$${product.discountedPrice > 0 ? product.discountedPrice.toStringAsFixed(2) : product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: kPrimaryColor,
-                        ),
+              child: GestureDetector(
+                onTap: () {
+                  // Navigate to product details
+                  Navigator.pushNamed(
+                    context,
+                    '/product_details',
+                    arguments: {'productId': product.id},
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                      const SizedBox(width: 8),
-                      if (product.discountedPrice > 0 &&
-                          product.discountedPrice < product.price)
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      product.title,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
                         Text(
-                          '\$${product.price.toStringAsFixed(2)}',
+                          '\$${product.discountedPrice > 0 ? product.discountedPrice.toStringAsFixed(2) : product.price.toStringAsFixed(2)}',
                           style: TextStyle(
-                            decoration: TextDecoration.lineThrough,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: kPrimaryColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (product.discountedPrice > 0 &&
+                            product.discountedPrice < product.price)
+                          Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${product.rating}',
+                          style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 14,
                           ),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        color: Colors.amber,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${product.rating}',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
+                        const SizedBox(width: 8),
+                        Text(
+                          '(${product.reviewCount} reviews)',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '(${product.reviewCount} reviews)',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 

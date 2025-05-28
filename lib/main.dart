@@ -4,10 +4,10 @@ import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
-import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_view.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
+import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/core/route_manger/route_generator.dart';
 import 'package:Herfa/core/app_bloc_observer.dart';
@@ -42,7 +42,9 @@ Future<void> main() async {
         BlocProvider(create: (_) => CartCubit()),
         BlocProvider(create: (_) => ProductCubit()),
         BlocProvider(create: (_) => AuthCubit()),
-        BlocProvider(create: (_) => SavedProductCubit()),
+        BlocProvider(
+            create: (_) =>
+                SavedProductCubit()..fetchSavedProductsWithDetails()),
       ],
       child: const Herfa(),
     ),

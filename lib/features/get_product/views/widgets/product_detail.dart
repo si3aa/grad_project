@@ -38,6 +38,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Product info column
+        // Product info column
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,6 +69,15 @@ class _ProductDetailsState extends State<ProductDetails> {
                     ),
                   ),
                   if (widget.discountedPrice != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '\$${widget.discountedPrice!.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       '\$${widget.discountedPrice!.toStringAsFixed(2)}',
@@ -117,7 +127,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                         onPressed: () {
                           if (state.message.contains('saved')) {
                             // Navigate to saved items screen
-                            Navigator.pushReplacementNamed(context, '/saved');
+                            Navigator.pushNamed(context, '/saved');
                           }
                         },
                       ),
@@ -179,18 +189,12 @@ class _ProductDetailsState extends State<ProductDetails> {
                             semanticLabel: isSaved ? 'Saved' : 'Save',
                           ),
                           onPressed: isSaved
-                              ? null
+                              ? null // Disable click when already saved
                               : () {
                                   // Only allow saving if not already saved
                                   context
                                       .read<SavedProductCubit>()
-                                      .saveProduct(widget.productId)
-                                      .then((_) {
-                                    // Fetch saved products with details to update the UI
-                                    context
-                                        .read<SavedProductCubit>()
-                                        .fetchSavedProductsWithDetails();
-                                  });
+                                      .saveProduct(widget.productId);
                                 },
                         ),
                 );

@@ -5,12 +5,12 @@ import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.da
 import 'package:Herfa/features/get_product/data/models/product_model.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 
 import '../../saved_products/viewmodels/cubit/saved_product_cubit.dart';
-import '../../saved_products/viewmodels/states/saved_product_state.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -423,31 +423,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               actions: [
                 BlocBuilder<SavedProductCubit, SavedProductState>(
                   builder: (context, savedState) {
-                    // Check if this product is in the saved list
-                    bool isSaved = false;
+                    bool isProductSaved = false;
+
                     if (savedState is SavedProductDetailsLoaded) {
-                      isSaved = savedState.productDetails
+                      isProductSaved = savedState.productDetails
                           .any((p) => p.id == widget.product.id.toString());
                     }
 
                     return IconButton(
                       icon: Icon(
-                        isSaved ? Icons.bookmark : Icons.bookmark_outline,
-                        color: isSaved ? kPrimaryColor : null,
+                        isProductSaved
+                            ? Icons.bookmark
+                            : Icons.bookmark_outline,
+                        color: isProductSaved ? kPrimaryColor : null,
                       ),
-                      onPressed: isSaved
-                          ? null
+                      onPressed: isProductSaved
+                          ? null // Disable click when already saved
                           : () {
                               // Only allow saving if not already saved
-                              context
-                                  .read<SavedProductCubit>()
-                                  .saveProduct(widget.product.id.toString())
-                                  .then((_) {
-                                // Fetch saved products with details to update the UI
-                                context
-                                    .read<SavedProductCubit>()
-                                    .fetchSavedProductsWithDetails();
-                              });
+                              final savedProductCubit =
+                                  context.read<SavedProductCubit>();
+                              savedProductCubit
+                                  .saveProduct(widget.product.id.toString());
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -458,8 +455,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     textColor: Colors.white,
                                     onPressed: () {
                                       // Navigate to saved items screen
-                                      Navigator.pushReplacementNamed(
-                                          context, '/saved');
+                                      Navigator.pushNamed(context, '/saved');
                                     },
                                   ),
                                 ),
