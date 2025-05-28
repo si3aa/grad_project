@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 
+import '../../saved_products/viewmodels/cubit/saved_product_cubit.dart';
+import '../../saved_products/viewmodels/states/saved_product_state.dart';
+
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
 
@@ -23,7 +26,6 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int selectedQuantity = 1;
-  bool isSaved = false;
   bool isInCart = false;
   String? couponCode;
   double discountAmount = 0.0;
@@ -71,7 +73,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       MaterialPageRoute(
         builder: (context) => EditProductScreen(
           product: product,
-          productId: 1, 
+          productId: 1,
         ),
       ),
     ).then((edited) {
@@ -148,7 +150,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     // Store a reference to the ScaffoldMessengerState
     // ignore: unused_local_variable
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -173,13 +175,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              
+
               // Get the ProductCubit before any navigation happens
               final productCubit = context.read<ProductCubit>();
-              
+
               // Delete the product using the stored reference
               productCubit.deleteProduct(context, product);
-              
+
               // Navigate back to the previous screen after deletion
               Navigator.pop(context);
             },
@@ -232,7 +234,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       comments: widget.product.comments,
       title: widget.product.title,
       description: widget.product.description,
-      quantity: widget.product.quantity - selectedQuantity, // Decrease the available quantity
+      quantity: widget.product.quantity -
+          selectedQuantity, // Decrease the available quantity
     );
 
     // Update the product in the state
@@ -262,75 +265,81 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Hero(
       tag: 'product-${widget.product.productName}',
       child: widget.product.productImage.startsWith('http')
-        ? Image.network(
-            widget.product.productImage,
-            width: double.infinity,
-            height: 300,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              developer.log('Error loading image: ${widget.product.productImage}',
-                name: 'ProductDetailScreen', error: error);
-              return Container(
-                width: double.infinity,
-                height: 300,
-                color: Colors.grey.shade200,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.broken_image, size: 60, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Image could not be loaded',
-                      style: TextStyle(color: Colors.grey.shade700),
-                    ),
-                  ],
-                ),
-              );
-            },
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(
-                width: double.infinity,
-                height: 300,
-                color: Colors.grey.shade200,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
-                    color: kPrimaryColor,
+          ? Image.network(
+              widget.product.productImage,
+              width: double.infinity,
+              height: 300,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                developer.log(
+                    'Error loading image: ${widget.product.productImage}',
+                    name: 'ProductDetailScreen',
+                    error: error);
+                return Container(
+                  width: double.infinity,
+                  height: 300,
+                  color: Colors.grey.shade200,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.broken_image,
+                          size: 60, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Image could not be loaded',
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                    ],
                   ),
-                ),
-              );
-            },
-          )
-        : Image.asset(
-            widget.product.productImage,
-            width: double.infinity,
-            height: 300,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              developer.log('Error loading asset image: ${widget.product.productImage}',
-                name: 'ProductDetailScreen', error: error);
-              return Container(
-                width: double.infinity,
-                height: 300,
-                color: Colors.grey.shade200,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.broken_image, size: 60, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Image could not be loaded',
-                      style: TextStyle(color: Colors.grey.shade700),
+                );
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  width: double.infinity,
+                  height: 300,
+                  color: Colors.grey.shade200,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                      color: kPrimaryColor,
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                );
+              },
+            )
+          : Image.asset(
+              widget.product.productImage,
+              width: double.infinity,
+              height: 300,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                developer.log(
+                    'Error loading asset image: ${widget.product.productImage}',
+                    name: 'ProductDetailScreen',
+                    error: error);
+                return Container(
+                  width: double.infinity,
+                  height: 300,
+                  color: Colors.grey.shade200,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.broken_image,
+                          size: 60, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Image could not be loaded',
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 
@@ -412,23 +421,50 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             appBar: AppBar(
               title: const Text('Product Details'),
               actions: [
-                IconButton(
-                  icon: Icon(
-                    isSaved ? Icons.bookmark : Icons.bookmark_outline,
-                    color: isSaved ? kPrimaryColor : null,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isSaved = !isSaved;
-                    });
+                BlocBuilder<SavedProductCubit, SavedProductState>(
+                  builder: (context, savedState) {
+                    // Check if this product is in the saved list
+                    bool isSaved = false;
+                    if (savedState is SavedProductDetailsLoaded) {
+                      isSaved = savedState.productDetails
+                          .any((p) => p.id == widget.product.id.toString());
+                    }
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isSaved ? 'Product saved' : 'Product removed from saved items',
-                        ),
-                        duration: const Duration(seconds: 2),
+                    return IconButton(
+                      icon: Icon(
+                        isSaved ? Icons.bookmark : Icons.bookmark_outline,
+                        color: isSaved ? kPrimaryColor : null,
                       ),
+                      onPressed: isSaved
+                          ? null
+                          : () {
+                              // Only allow saving if not already saved
+                              context
+                                  .read<SavedProductCubit>()
+                                  .saveProduct(widget.product.id.toString())
+                                  .then((_) {
+                                // Fetch saved products with details to update the UI
+                                context
+                                    .read<SavedProductCubit>()
+                                    .fetchSavedProductsWithDetails();
+                              });
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Product saved'),
+                                  duration: const Duration(seconds: 2),
+                                  action: SnackBarAction(
+                                    label: 'View',
+                                    textColor: Colors.white,
+                                    onPressed: () {
+                                      // Navigate to saved items screen
+                                      Navigator.pushReplacementNamed(
+                                          context, '/saved');
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
                     );
                   },
                 ),
@@ -470,7 +506,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Row(
                           children: [
                             CircleAvatar(
-                              backgroundImage: AssetImage(currentProduct.userImage),
+                              backgroundImage:
+                                  AssetImage(currentProduct.userImage),
                               radius: 20,
                             ),
                             const SizedBox(width: 12),
@@ -551,13 +588,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: currentProduct.discountedPrice != null ? Colors.red : Colors.black,
+                                color: currentProduct.discountedPrice != null
+                                    ? Colors.red
+                                    : Colors.black,
                               ),
                             ),
                             if (currentProduct.discountedPrice != null) ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: Colors.red.shade100,
                                   borderRadius: BorderRadius.circular(12),
@@ -602,10 +642,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.remove),
                                     onPressed: _decreaseQuantity,
-                                    color: selectedQuantity > 1 ? kPrimaryColor : Colors.grey,
+                                    color: selectedQuantity > 1
+                                        ? kPrimaryColor
+                                        : Colors.grey,
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12),
                                     child: Text(
                                       '$selectedQuantity',
                                       style: const TextStyle(
@@ -616,10 +659,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.add),
-                                    onPressed: selectedQuantity < currentProduct.quantity
+                                    onPressed: selectedQuantity <
+                                            currentProduct.quantity
                                         ? _increaseQuantity
                                         : null,
-                                    color: selectedQuantity < currentProduct.quantity
+                                    color: selectedQuantity <
+                                            currentProduct.quantity
                                         ? kPrimaryColor
                                         : Colors.grey,
                                   ),
@@ -662,7 +707,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
                                 ),
                               ),
                             ),
@@ -675,7 +721,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 16),
                               ),
                               child: const Text('Apply'),
                             ),
@@ -686,7 +733,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(Icons.check_circle, color: Colors.green, size: 16),
+                              const Icon(Icons.check_circle,
+                                  color: Colors.green, size: 16),
                               const SizedBox(width: 8),
                               Text(
                                 'Coupon "$couponCode" applied: -\$${discountAmount.toStringAsFixed(2)}',
@@ -731,19 +779,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                               const SizedBox(height: 12),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text('Subtotal'),
-                                  Text('\$${(price * selectedQuantity).toStringAsFixed(2)}'),
+                                  Text(
+                                      '\$${(price * selectedQuantity).toStringAsFixed(2)}'),
                                 ],
                               ),
                               if (discountAmount > 0) ...[
                                 const SizedBox(height: 8),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     const Text('Discount'),
-                                    Text('-\$${(discountAmount * selectedQuantity).toStringAsFixed(2)}'),
+                                    Text(
+                                        '-\$${(discountAmount * selectedQuantity).toStringAsFixed(2)}'),
                                   ],
                                 ),
                               ],
@@ -751,7 +803,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               const Divider(),
                               const SizedBox(height: 8),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     'Total',
@@ -803,7 +856,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Expanded(
                     flex: 2,
                     child: ElevatedButton(
-                      onPressed: currentProduct.quantity > 0 ? _addToCart : null,
+                      onPressed:
+                          currentProduct.quantity > 0 ? _addToCart : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryColor,
                         foregroundColor: Colors.white,
@@ -840,17 +894,3 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,5 +1,3 @@
-
-
 import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
 import 'package:Herfa/features/auth/forget_pass.dart';
@@ -17,7 +15,7 @@ import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/events_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';
 import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
-import 'package:Herfa/ui/screens/home/views/saved_screen.dart';
+import 'package:Herfa/features/saved_products/views/screens/saved_screen.dart';
 import 'package:flutter/material.dart';
 
 class RouteGenerator {
@@ -56,7 +54,9 @@ class RouteGenerator {
       case Routes.newPostRoute:
         return MaterialPageRoute(builder: (_) => const NewPostScreen());
       case Routes.savedRoute:
-        return MaterialPageRoute(builder: (_) => const SavedScreen());
+        return MaterialPageRoute(
+          builder: (_) => const SavedScreen(),
+        );
       case Routes.eventsRoute:
         return MaterialPageRoute(builder: (_) => const EventsScreen());
       case Routes.cartRoute:

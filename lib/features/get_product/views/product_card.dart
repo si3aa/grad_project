@@ -1,11 +1,11 @@
-
 import 'package:Herfa/core/route_manger/routes.dart';
-import 'package:Herfa/features/get_product/views/widgets/product_action.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_action.dart';
 import 'package:Herfa/features/get_product/views/widgets/user_info.dart';
 import 'package:flutter/material.dart';
+
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onLike;
@@ -55,6 +55,7 @@ class ProductCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               ProductDetails(
+                productId: product.id.toString(),
                 productName: product.productName,
                 originalPrice: product.originalPrice,
                 description: product.title,
@@ -74,13 +75,3 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-

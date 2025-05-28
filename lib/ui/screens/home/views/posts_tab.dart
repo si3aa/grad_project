@@ -1,3 +1,4 @@
+import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/get_product/views/product_card.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/features/get_product/data/models/product_model.dart';
@@ -15,9 +16,13 @@ class PostsTab extends StatelessWidget {
       create: (context) => ProductCubit(),
       child: Scaffold(
         body: SafeArea(
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              // Reload products when user swipes down
+              await context.read<ProductCubit>().loadProducts();
+            },
+            color: kPrimaryColor,
+            child: ListView(
               children: [
                 const HomeAppBar(),
                 const SizedBox(height: 20),
@@ -27,11 +32,65 @@ class PostsTab extends StatelessWidget {
                 const SizedBox(height: 20),
                 _ProductList(),
                 const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    'Swipe down to refresh products',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                _buildProductList(),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProductList() {
+    return BlocBuilder<ProductCubit, ProductState>(
+      builder: (context, state) {
+        if (state is ProductLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is ProductLoaded) {
+          final products = state.filteredProducts;
+          if (products.isEmpty) {
+            return const Center(child: Text('No products found'));
+          }
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final product = products[index];
+              return ProductCard(
+                product: product,
+                onLike: () {
+                  context.read<ProductCubit>().likeProduct(product);
+                },
+                onComment: () {
+                  context.read<ProductCubit>().commentProduct(product);
+                },
+                onCart: () {
+                  context.read<ProductCubit>().addToCart(product);
+                },
+                onMore: (context) {
+                  context.read<ProductCubit>().moreOptions(product, context);
+                },
+              );
+            },
+          );
+        } else if (state is ProductError) {
+          return Center(child: Text(state.message));
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 }
