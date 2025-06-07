@@ -22,7 +22,7 @@ class ProductInteractions extends StatelessWidget {
         IconButton(
           onPressed: onLike,
           icon: const Icon(
-            Icons.favorite,
+            Icons.bookmark_border,
             color: Colors.red,
             size: 20,
             semanticLabel: 'Like',

@@ -22,13 +22,16 @@ Future<void> main() async {
 
   // Set bloc observer
   Bloc.observer = AppBlocObserver();
-  LogInterceptor(
+
+  // Configure Dio interceptor for logging
+  final dio = Dio();
+  dio.interceptors.add(LogInterceptor(
       responseBody: true,
       error: true,
       requestHeader: true,
       responseHeader: true,
       request: true,
-      requestBody: true);
+      requestBody: true));
 
   runApp(
     MultiBlocProvider(
