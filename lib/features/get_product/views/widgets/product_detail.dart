@@ -23,6 +23,7 @@ class ProductDetails extends StatefulWidget {
     this.discountedPrice,
     required this.description,
     required this.onCart,
+    required this.isSaved,
   }) : super(key: key);
 
   @override
@@ -30,6 +31,8 @@ class ProductDetails extends StatefulWidget {
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
+  bool isInCart = false;
+
   @override
   Widget build(BuildContext context) {
     return Row(

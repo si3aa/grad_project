@@ -60,6 +60,7 @@ class ProductCard extends StatelessWidget {
                 originalPrice: product.originalPrice,
                 description: product.title,
                 onCart: onCart,
+                isSaved: false,
               ),
               const SizedBox(height: 10),
               ProductInteractions(
