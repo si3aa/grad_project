@@ -1,18 +1,20 @@
 import 'dart:developer' as developer;
-import 'package:Herfa/features/get_product/data/models/product_model.dart';
+import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/get_product/data/repository/product_api_repository.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
-import 'package:bloc/bloc.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
+    as viewmodels;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
 
-class ProductCubit extends Cubit<ProductState> {
-  ProductCubit() : super(const ProductInitial()) {
+class ProductCubit extends Cubit<viewmodels.ProductState> {
+  ProductCubit() : super(const viewmodels.ProductInitial()) {
     _loadProducts();
   }
 
   Future<void> _loadProducts() async {
-    emit(const ProductLoading());
+    emit(const viewmodels.ProductLoading());
     try {
       developer.log('Loading products from repository', name: 'ProductCubit');
       final repository = ProductApiRepository();
@@ -46,25 +48,25 @@ class ProductCubit extends Cubit<ProductState> {
       developer.log('Converted ${products.length} products to UI model',
           name: 'ProductCubit');
 
-      emit(ProductLoaded(
+      emit(viewmodels.ProductLoaded(
         products: products,
         filteredProducts: products,
       ));
     } catch (e) {
       developer.log('Error loading products', name: 'ProductCubit', error: e);
-      emit(ProductError('Failed to load products: $e'));
+      emit(viewmodels.ProductError('Failed to load products: $e'));
     }
   }
 
   /// Filter products based on the search query.
   void filterProducts(String query) {
     final state = this.state;
-    if (state is ProductLoaded) {
+    if (state is viewmodels.ProductLoaded) {
       final filtered = state.products
           .where((product) =>
               product.productName.toLowerCase().contains(query.toLowerCase()))
           .toList();
-      emit(ProductLoaded(
+      emit(viewmodels.ProductLoaded(
         products: state.products,
         filteredProducts: filtered,
       ));
@@ -73,9 +75,9 @@ class ProductCubit extends Cubit<ProductState> {
 
   void likeProduct(Product product) {
     final state = this.state;
-    if (state is ProductLoaded) {
+    if (state is viewmodels.ProductLoaded) {
       product.likes++;
-      emit(ProductLoaded(
+      emit(viewmodels.ProductLoaded(
         products: state.products,
         filteredProducts: List.from(state.filteredProducts),
       ));
@@ -85,9 +87,9 @@ class ProductCubit extends Cubit<ProductState> {
   /// Handle comment action (placeholder for now).
   void commentProduct(Product product) {
     final state = this.state;
-    if (state is ProductLoaded) {
+    if (state is viewmodels.ProductLoaded) {
       product.comments++;
-      emit(ProductLoaded(
+      emit(viewmodels.ProductLoaded(
         products: state.products,
         filteredProducts: List.from(state.filteredProducts),
       ));
@@ -175,12 +177,11 @@ class ProductCubit extends Cubit<ProductState> {
     // Store a reference to the ScaffoldMessengerState
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    // Navigate to the add new product screen but in edit mode
+    // Navigate to the edit product screen
     Navigator.pushNamed(
       context,
-      '/add_product', // Use the same route as add product
+      Routes.editProductRoute,
       arguments: {
-        'isEditMode': true,
         'product': product,
         'productId': product.id,
       },
@@ -278,7 +279,7 @@ class ProductCubit extends Cubit<ProductState> {
       if (success) {
         // Update local state if deletion was successful
         final currentState = this.state;
-        if (currentState is ProductLoaded) {
+        if (currentState is viewmodels.ProductLoaded) {
           // Remove the product from the lists
           final updatedProducts =
               currentState.products.where((p) => p.id != product.id).toList();
@@ -288,7 +289,7 @@ class ProductCubit extends Cubit<ProductState> {
               .toList();
 
           // Update the state
-          emit(ProductLoaded(
+          emit(viewmodels.ProductLoaded(
             products: updatedProducts,
             filteredProducts: updatedFilteredProducts,
           ));
@@ -332,7 +333,7 @@ class ProductCubit extends Cubit<ProductState> {
   /// Update a product's quantity in the state
   void updateProductQuantity(Product updatedProduct) {
     final state = this.state;
-    if (state is ProductLoaded) {
+    if (state is viewmodels.ProductLoaded) {
       final updatedProducts = state.products.map((product) {
         if (product.productName == updatedProduct.productName) {
           return updatedProduct;
@@ -344,7 +345,7 @@ class ProductCubit extends Cubit<ProductState> {
           'Updated quantity for product: ${updatedProduct.productName}',
           name: 'ProductCubit');
 
-      emit(ProductLoaded(
+      emit(viewmodels.ProductLoaded(
         products: updatedProducts,
         filteredProducts: updatedProducts
             .where((product) => state.filteredProducts
@@ -358,17 +359,83 @@ class ProductCubit extends Cubit<ProductState> {
   Future<bool> updateProduct(
       String productId, Map<String, dynamic> productData) async {
     try {
+      emit(const viewmodels.ProductLoading());
       final repository = ProductApiRepository();
-      final success = await repository.updateProduct(productId, productData);
 
-      if (success) {
-        // Refresh the products list after successful update
-        await _loadProducts();
-        return true;
+      // Convert product data to match API requirements
+      final apiData = {
+        'name': productData['name'],
+        'shortDescription': productData['title'],
+        'longDescription': productData['description'],
+        'price': productData['price'].toString(),
+        'quantity': productData['quantity'].toString(),
+        'categoryId': productData['categoryId'].toString(),
+        'active': 'true',
+        'colors': productData['colors']?.toString() ?? '[]',
+      };
+
+      // Step 1: Update the existing product
+      final updateSuccess = await repository.updateProduct(productId, apiData);
+      if (!updateSuccess) {
+        emit(viewmodels.ProductError('Failed to update product'));
+        return false;
       }
-      return false;
+
+      // Step 2: Delete the old product
+      final deleteSuccess = await repository.deleteProduct(productId);
+      if (!deleteSuccess) {
+        emit(viewmodels.ProductError('Failed to delete old product'));
+        return false;
+      }
+
+      // Step 3: Create new product with updated data
+      final newProductData = {
+        ...apiData,
+        'id':
+            DateTime.now().millisecondsSinceEpoch.toString(), // Generate new ID
+      };
+
+      // Add the new product (using the same API endpoint)
+      final addSuccess =
+          await repository.updateProduct(newProductData['id'], newProductData);
+      if (!addSuccess) {
+        emit(viewmodels.ProductError('Failed to add updated product'));
+        return false;
+      }
+
+      // Update local state
+      final currentState = this.state;
+      if (currentState is viewmodels.ProductLoaded) {
+        final updatedProducts = currentState.products.map((product) {
+          if (product.id.toString() == productId) {
+            return Product(
+              id: int.parse(newProductData['id']),
+              userName: product.userName,
+              userHandle: product.userHandle,
+              userImage: product.userImage,
+              productImage: product.productImage,
+              productName: productData['name'] as String,
+              originalPrice: productData['price'] as double,
+              discountedPrice: productData['price'] as double,
+              likes: product.likes,
+              comments: product.comments,
+              title: productData['title'] as String,
+              description: productData['description'] as String,
+              quantity: productData['quantity'] as int,
+            );
+          }
+          return product;
+        }).toList();
+
+        emit(viewmodels.ProductLoaded(
+          products: updatedProducts,
+          filteredProducts: updatedProducts,
+        ));
+      }
+      return true;
     } catch (e) {
       developer.log('Error updating product', name: 'ProductCubit', error: e);
+      emit(viewmodels.ProductError('Failed to update product: $e'));
       return false;
     }
   }

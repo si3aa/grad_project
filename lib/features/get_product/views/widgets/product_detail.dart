@@ -23,7 +23,6 @@ class ProductDetails extends StatefulWidget {
     this.discountedPrice,
     required this.description,
     required this.onCart,
-    this.isSaved = false,
   }) : super(key: key);
 
   @override
@@ -34,9 +33,10 @@ class _ProductDetailsState extends State<ProductDetails> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Product details column
+        // Product info column
+        // Product info column
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,19 +56,33 @@ class _ProductDetailsState extends State<ProductDetails> {
                   Text(
                     '\$${widget.originalPrice.toStringAsFixed(2)}',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: kPrimaryColor,
+                      color: widget.discountedPrice != null
+                          ? Colors.grey.shade500
+                          : Colors.black,
+                      decoration: widget.discountedPrice != null
+                          ? TextDecoration.lineThrough
+                          : null,
                     ),
                   ),
                   if (widget.discountedPrice != null) ...[
                     const SizedBox(width: 8),
                     Text(
                       '\$${widget.discountedPrice!.toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
-                        decoration: TextDecoration.lineThrough,
-                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '\$${widget.discountedPrice!.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
                       ),
                     ),
                   ],
@@ -111,7 +125,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                         onPressed: () {
                           if (state.message.contains('saved')) {
                             // Navigate to saved items screen
-                            Navigator.pushReplacementNamed(context, '/saved');
+                            Navigator.pushNamed(context, '/saved');
                           }
                         },
                       ),
@@ -129,7 +143,13 @@ class _ProductDetailsState extends State<ProductDetails> {
               },
               builder: (context, state) {
                 bool isLoading = state is SavedProductLoading;
-                bool isSaved = widget.isSaved;
+
+                // Check if this product is in the saved list
+                bool isSaved = false;
+                if (state is SavedProductDetailsLoaded) {
+                  isSaved =
+                      state.productDetails.any((p) => p.id == widget.productId);
+                }
 
                 return Container(
                   width: 36,
@@ -166,32 +186,13 @@ class _ProductDetailsState extends State<ProductDetails> {
                             size: 22,
                             semanticLabel: isSaved ? 'Saved' : 'Save',
                           ),
-                          onPressed: isLoading
-                              ? null
+                          onPressed: isSaved
+                              ? null // Disable click when already saved
                               : () {
-                                  if (isSaved) {
-                                    // Remove from saved list
-                                    context
-                                        .read<SavedProductCubit>()
-                                        .removeSavedProduct(widget.productId)
-                                        .then((_) {
-                                      // Fetch saved products with details to update the UI
-                                      context
-                                          .read<SavedProductCubit>()
-                                          .fetchSavedProductsWithDetails();
-                                    });
-                                  } else {
-                                    // Add to saved list
-                                    context
-                                        .read<SavedProductCubit>()
-                                        .saveProduct(widget.productId)
-                                        .then((_) {
-                                      // Fetch saved products with details to update the UI
-                                      context
-                                          .read<SavedProductCubit>()
-                                          .fetchSavedProductsWithDetails();
-                                    });
-                                  }
+                                  // Only allow saving if not already saved
+                                  context
+                                      .read<SavedProductCubit>()
+                                      .saveProduct(widget.productId);
                                 },
                         ),
                 );
@@ -225,7 +226,39 @@ class _ProductDetailsState extends State<ProductDetails> {
                   size: 22,
                   semanticLabel: 'Add to cart',
                 ),
-                onPressed: widget.onCart,
+                onPressed: () {
+                  setState(() {
+                    isInCart = !isInCart;
+                  });
+
+                  // Call the parent's onCart callback
+                  widget.onCart();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isInCart
+                            ? 'Product added to cart'
+                            : 'Product removed from cart',
+                      ),
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      action: SnackBarAction(
+                        label: 'View Cart',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          if (isInCart) {
+                            // Navigate to cart screen
+                            Navigator.pushNamed(context, '/cart');
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

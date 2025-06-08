@@ -1,5 +1,7 @@
 import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
+import 'package:Herfa/features/add_new_product/views/screens/new_post_view.dart';
+import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
 import 'package:Herfa/features/auth/forget_pass.dart';
 import 'package:Herfa/features/auth/guest.dart';
 import 'package:Herfa/features/auth/reset_pass.dart';
@@ -17,6 +19,7 @@ import 'package:Herfa/ui/screens/home/views/home_screen.dart';
 import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/features/saved_products/views/screens/saved_screen_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -53,6 +56,49 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const NotificationScreen());
       case Routes.newPostRoute:
         return MaterialPageRoute(builder: (_) => const NewPostScreen());
+      case Routes.addProductRoute:
+        // Check if we have arguments for edit mode
+        final isEditMode = arguments?['isEditMode'] ?? false;
+        final product = arguments?['product'];
+        final productId = arguments?['productId'];
+
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider(
+            create: (context) {
+              final cubit = NewPostCubit();
+              // Initialize with product data if in edit mode
+              if (isEditMode && product != null) {
+                cubit.initWithProductData(product);
+              }
+              return cubit;
+            },
+            child: NewPostView(
+              isEditMode: isEditMode,
+              product: product,
+              productId: productId,
+            ),
+          ),
+        );
+      case Routes.editProductRoute:
+        final product = arguments?['product'] as Product?;
+        final productId = arguments?['productId'];
+        if (product != null) {
+          return MaterialPageRoute(
+            builder: (context) => BlocProvider(
+              create: (context) {
+                final cubit = NewPostCubit();
+                cubit.initWithProductData(product);
+                return cubit;
+              },
+              child: NewPostView(
+                isEditMode: true,
+                product: product,
+                productId: productId,
+              ),
+            ),
+          );
+        }
+        return _undefinedRoute();
       case Routes.savedRoute:
         return MaterialPageRoute(
           builder: (_) => const SavedScreenWrapper(),

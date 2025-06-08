@@ -106,12 +106,13 @@ class NewPostCubit extends Cubit<NewPostState> {
         state.quantity <= 0 ||
         state.categoryId <= 0 ||
         state.selectedColors.isEmpty) {
-
-      String errorMessage = 'Please fill all required fields and select at least one color';
+      String errorMessage =
+          'Please fill all required fields and select at least one color';
 
       if (state.productTitle.isNotEmpty && state.productTitle.length < 10) {
         errorMessage = 'Product title must be at least 10 characters';
-      } else if (state.description.isNotEmpty && state.description.length < 20) {
+      } else if (state.description.isNotEmpty &&
+          state.description.length < 20) {
         errorMessage = 'Product description must be at least 20 characters';
       }
 
@@ -119,8 +120,10 @@ class NewPostCubit extends Cubit<NewPostState> {
 
       print("Validation Error: Missing required fields or length requirements");
       print("Product Name: ${state.productName.isEmpty ? 'MISSING' : 'OK'}");
-      print("Product Title: ${state.productTitle.isEmpty ? 'MISSING' : (state.productTitle.length < 10 ? 'TOO SHORT' : 'OK')}");
-      print("Description: ${state.description.isEmpty ? 'MISSING' : (state.description.length < 20 ? 'TOO SHORT' : 'OK')}");
+      print(
+          "Product Title: ${state.productTitle.isEmpty ? 'MISSING' : (state.productTitle.length < 10 ? 'TOO SHORT' : 'OK')}");
+      print(
+          "Description: ${state.description.isEmpty ? 'MISSING' : (state.description.length < 20 ? 'TOO SHORT' : 'OK')}");
       print("Price: ${state.price <= 0 ? 'MISSING' : 'OK'}");
       print("Quantity: ${state.quantity <= 0 ? 'MISSING' : 'OK'}");
       print("Category ID: ${state.categoryId <= 0 ? 'MISSING' : 'OK'}");
@@ -201,12 +204,13 @@ class NewPostCubit extends Cubit<NewPostState> {
         state.quantity <= 0 ||
         state.categoryId <= 0 ||
         state.selectedColors.isEmpty) {
-
-      String errorMessage = 'Please fill all required fields and select at least one color';
+      String errorMessage =
+          'Please fill all required fields and select at least one color';
 
       if (state.productTitle.isNotEmpty && state.productTitle.length < 10) {
         errorMessage = 'Product title must be at least 10 characters';
-      } else if (state.description.isNotEmpty && state.description.length < 20) {
+      } else if (state.description.isNotEmpty &&
+          state.description.length < 20) {
         errorMessage = 'Product description must be at least 20 characters';
       }
 
@@ -216,14 +220,16 @@ class NewPostCubit extends Cubit<NewPostState> {
 
     try {
       emit(state.copyWith(isLoading: true, error: null));
-      
+
       // First, delete the old product
-      final deleteResponse = await deleteProductById(state.productId.toString());
-      
+      final deleteResponse =
+          await deleteProductById(state.productId.toString());
+
       if (!deleteResponse.success) {
-        throw Exception('Failed to delete old product: ${deleteResponse.message}');
+        throw Exception(
+            'Failed to delete old product: ${deleteResponse.message}');
       }
-      
+
       // Create a new product with updated data
       final product = ProductModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate new ID
@@ -265,11 +271,15 @@ class NewPostCubit extends Cubit<NewPostState> {
         throw Exception(response.message);
       }
 
-      emit(state.copyWith(isLoading: false, error: null));
+      emit(state.copyWith(
+        isLoading: false,
+        error: null,
+      ));
       return true;
     } catch (e) {
       print('Error updating product: $e');
-      emit(state.copyWith(isLoading: false, error: 'Failed to update product: $e'));
+      emit(state.copyWith(
+          isLoading: false, error: 'Failed to update product: $e'));
       return false;
     }
   }
@@ -297,7 +307,9 @@ class NewPostCubit extends Cubit<NewPostState> {
       final response = await postFormData(
         '/products', // Use the main endpoint without ID in the path
         body: productData,
-        files: product.images.isNotEmpty ? {'file': File(product.images[0])} : null,
+        files: product.images.isNotEmpty
+            ? {'file': File(product.images[0])}
+            : null,
         isUpdate: true, // Indicate this is an update operation
       );
 
@@ -435,7 +447,7 @@ class NewPostCubit extends Cubit<NewPostState> {
 
     // Set the product ID first to ensure it's available
     setProductId(product.id);
-    
+
     // Set all the other product data fields
     updateProductName(product.productName);
     updateProductTitle(product.title);
@@ -444,7 +456,8 @@ class NewPostCubit extends Cubit<NewPostState> {
     updateQuantity(product.quantity);
 
     // Add the product image if available
-    if (product.productImage.isNotEmpty && !product.productImage.startsWith('assets/')) {
+    if (product.productImage.isNotEmpty &&
+        !product.productImage.startsWith('assets/')) {
       addImage(product.productImage);
     }
 
@@ -466,7 +479,8 @@ class NewPostCubit extends Cubit<NewPostState> {
   bool get isEditMode => state.productId != null;
 
   /// Get appropriate button text based on mode
-  String get submitButtonText => isEditMode ? 'UPDATE PRODUCT' : 'CREATE PRODUCT';
+  String get submitButtonText =>
+      isEditMode ? 'UPDATE PRODUCT' : 'CREATE PRODUCT';
 }
 
 Future postFormData(String path,
@@ -555,39 +569,37 @@ dynamic _handleDioError(DioException error) {
   }
 }
 
-  // Method to delete a product by ID
-  Future<ApiResponse> deleteProductById(String productId) async {
-    try {
-      print('Deleting product with ID: $productId');
-      
-      final response = await Dio(BaseOptions(
+// Method to delete a product by ID
+Future<ApiResponse> deleteProductById(String productId) async {
+  try {
+    print('Deleting product with ID: $productId');
+
+    final response = await Dio(BaseOptions(
         baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
         headers: {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M",
-        }
-      )).delete('/products/$productId');
-      
-      print('Delete response status: ${response.statusCode}');
-      print('Delete response data: ${response.data}');
-      
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        return ApiResponse(
-          success: true,
-          message: 'Product deleted successfully',
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message: 'Failed to delete product: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error deleting product: $e');
+          "Authorization":
+              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M",
+        })).delete('/products/$productId');
+
+    print('Delete response status: ${response.statusCode}');
+    print('Delete response data: ${response.data}');
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return ApiResponse(
+        success: true,
+        message: 'Product deleted successfully',
+      );
+    } else {
       return ApiResponse(
         success: false,
-        message: 'Error deleting product: $e',
+        message: 'Failed to delete product: ${response.statusCode}',
       );
     }
+  } catch (e) {
+    print('Error deleting product: $e');
+    return ApiResponse(
+      success: false,
+      message: 'Error deleting product: $e',
+    );
   }
-
-
+}

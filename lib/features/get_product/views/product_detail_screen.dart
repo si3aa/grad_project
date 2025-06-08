@@ -2,15 +2,16 @@
 
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
-import 'package:Herfa/features/get_product/data/models/product_model.dart';
-import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
+    as viewmodels;
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
+import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 
-import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
-import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
+import '../../saved_products/viewmodels/cubit/saved_product_cubit.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -26,7 +27,6 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int selectedQuantity = 1;
-  bool isSaved = false;
   bool isInCart = false;
   String? couponCode;
   double discountAmount = 0.0;
@@ -408,169 +408,141 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final price = widget.product.discountedPrice;
     final totalPrice = (price - discountAmount) * selectedQuantity;
 
-    return BlocProvider(
-      create: (context) => SavedProductCubit()..fetchSavedProductsWithDetails(),
-      child: BlocBuilder<ProductCubit, ProductState>(
-        builder: (context, state) {
-          // If the state is loaded, we can access the updated product
-          if (state is ProductLoaded) {
-            // Find the current product in the updated list
-            final currentProduct = state.products.firstWhere(
-              (p) => p.productName == widget.product.productName,
-              orElse: () => widget.product,
-            );
+    return BlocBuilder<ProductCubit, viewmodels.ProductState>(
+      builder: (context, state) {
+        // If the state is loaded, we can access the updated product
+        if (state is viewmodels.ProductLoaded) {
+          // Find the current product in the updated list
+          final currentProduct = state.products.firstWhere(
+            (p) => p.productName == widget.product.productName,
+            orElse: () => widget.product,
+          );
 
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Product Details'),
-                actions: [
-                  BlocBuilder<SavedProductCubit, SavedProductState>(
-                    builder: (context, state) {
-                      bool isSaved = false;
-                      if (state is SavedProductDetailsLoaded) {
-                        isSaved = state.productDetails
-                            .any((p) => p.id == widget.product.id.toString());
-                      }
-                      bool isLoading = state is SavedProductLoading;
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Product Details'),
+              actions: [
+                BlocBuilder<SavedProductCubit, SavedProductState>(
+                  builder: (context, savedState) {
+                    bool isProductSaved = false;
 
-                      return IconButton(
-                        icon: Icon(
-                          isSaved ? Icons.bookmark : Icons.bookmark_outline,
-                          color: isSaved ? kPrimaryColor : null,
-                        ),
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                if (isSaved) {
-                                  // Remove from saved list
-                                  context
-                                      .read<SavedProductCubit>()
-                                      .removeSavedProduct(
-                                          widget.product.id.toString())
-                                      .then((_) {
-                                    // Fetch saved products with details to update the UI
-                                    context
-                                        .read<SavedProductCubit>()
-                                        .fetchSavedProductsWithDetails();
-                                  });
+                    if (savedState is SavedProductDetailsLoaded) {
+                      isProductSaved = savedState.productDetails
+                          .any((p) => p.id == widget.product.id.toString());
+                    }
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Product removed from saved items'),
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
-                                } else {
-                                  // Save the product
-                                  context
-                                      .read<SavedProductCubit>()
-                                      .saveProduct(widget.product.id.toString())
-                                      .then((_) {
-                                    // Fetch saved products with details to update the UI
-                                    context
-                                        .read<SavedProductCubit>()
-                                        .fetchSavedProductsWithDetails();
-                                  });
+                    return IconButton(
+                      icon: Icon(
+                        isProductSaved
+                            ? Icons.bookmark
+                            : Icons.bookmark_outline,
+                        color: isProductSaved ? kPrimaryColor : null,
+                      ),
+                      onPressed: isProductSaved
+                          ? null // Disable click when already saved
+                          : () {
+                              // Only allow saving if not already saved
+                              final savedProductCubit =
+                                  context.read<SavedProductCubit>();
+                              savedProductCubit
+                                  .saveProduct(widget.product.id.toString());
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text('Product saved'),
-                                      duration: const Duration(seconds: 2),
-                                      action: SnackBarAction(
-                                        label: 'View',
-                                        textColor: Colors.white,
-                                        onPressed: () {
-                                          // Navigate to saved items screen
-                                          Navigator.pushReplacementNamed(
-                                              context, '/saved');
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.share),
-                    onPressed: () {
-                      // Implement share functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sharing product...'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                  ),
-                  // Add edit button for product owner
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                      _showEditOptions(currentProduct);
-                    },
-                  ),
-                ],
-              ),
-              body: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Product Image with error handling
-                    _buildProductImage(),
-
-                    // Product Info
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Seller Info
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundImage:
-                                    AssetImage(currentProduct.userImage),
-                                radius: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    currentProduct.userName,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  Text(
-                                    currentProduct.userHandle,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Implement contact seller functionality
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimaryColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Product saved'),
+                                  duration: const Duration(seconds: 2),
+                                  action: SnackBarAction(
+                                    label: 'View',
+                                    textColor: Colors.white,
+                                    onPressed: () {
+                                      // Navigate to saved items screen
+                                      Navigator.pushNamed(context, '/saved');
+                                    },
                                   ),
                                 ),
-                                child: const Text('Contact Seller'),
+                              );
+                            },
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: () {
+                    // Implement share functionality
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Sharing product...'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+                // Add edit button for product owner
+                IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () {
+                    _showEditOptions(currentProduct);
+                  },
+                ),
+              ],
+            ),
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product Image with error handling
+                  _buildProductImage(),
+
+                  // Product Info
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Seller Info
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundImage:
+                                  AssetImage(currentProduct.userImage),
+                              radius: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  currentProduct.userName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(
+                                  currentProduct.userHandle,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Implement contact seller functionality
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kPrimaryColor,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                               ),
-                            ],
-                          ),
+                              child: const Text('Contact Seller'),
+                            ),
+                          ],
+                        ),
 
                           const SizedBox(height: 24),
 
@@ -594,50 +566,50 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             const SizedBox(height: 8),
                           ],
 
-                          // Price information
-                          Row(
-                            children: [
-                              if (currentProduct.discountedPrice != null) ...[
-                                Text(
-                                  '\$${currentProduct.originalPrice.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    decoration: TextDecoration.lineThrough,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
+                        // Price information
+                        Row(
+                          children: [
+                            if (currentProduct.discountedPrice != null) ...[
                               Text(
-                                '\$${(currentProduct.discountedPrice).toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: currentProduct.discountedPrice != null
-                                      ? Colors.red
-                                      : Colors.black,
+                                '\$${currentProduct.originalPrice.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors.grey,
                                 ),
                               ),
-                              if (currentProduct.discountedPrice != null) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade100,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '${(100 - (currentProduct.discountedPrice / currentProduct.originalPrice * 100)).toStringAsFixed(0)}% OFF',
-                                    style: TextStyle(
-                                      color: Colors.red.shade700,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              const SizedBox(width: 8),
+                            ],
+                            Text(
+                              '\$${(currentProduct.discountedPrice).toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: currentProduct.discountedPrice != null
+                                    ? Colors.red
+                                    : Colors.black,
+                              ),
+                            ),
+                            if (currentProduct.discountedPrice != null) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${(100 - (currentProduct.discountedPrice / currentProduct.originalPrice * 100)).toStringAsFixed(0)}% OFF',
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ],
+                              ),
                             ],
-                          ),
+                          ],
+                        ),
 
                           const SizedBox(height: 24),
 
@@ -646,269 +618,268 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                           const SizedBox(height: 24),
 
-                          // Quantity Selector
-                          const Text(
-                            'Quantity',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        // Quantity Selector
+                        const Text(
+                          'Quantity',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.remove),
-                                      onPressed: _decreaseQuantity,
-                                      color: selectedQuantity > 1
-                                          ? kPrimaryColor
-                                          : Colors.grey,
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12),
-                                      child: Text(
-                                        '$selectedQuantity',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: _decreaseQuantity,
+                                    color: selectedQuantity > 1
+                                        ? kPrimaryColor
+                                        : Colors.grey,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12),
+                                    child: Text(
+                                      '$selectedQuantity',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.add),
-                                      onPressed: selectedQuantity <
-                                              currentProduct.quantity
-                                          ? _increaseQuantity
-                                          : null,
-                                      color: selectedQuantity <
-                                              currentProduct.quantity
-                                          ? kPrimaryColor
-                                          : Colors.grey,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Text(
-                                'Available: ${currentProduct.quantity}',
-                                style: TextStyle(
-                                  color: currentProduct.quantity > 0
-                                      ? Colors.grey.shade600
-                                      : Colors.red,
-                                  fontWeight: currentProduct.quantity > 0
-                                      ? FontWeight.normal
-                                      : FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Coupon Code
-                          const Text(
-                            'Apply Coupon',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _couponController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter coupon code',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton(
-                                onPressed: _applyCoupon,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimaryColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 16),
-                                ),
-                                child: const Text('Apply'),
-                              ),
-                            ],
-                          ),
-
-                          if (couponCode != null) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.check_circle,
-                                    color: Colors.green, size: 16),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Coupon "$couponCode" applied: -\$${discountAmount.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Spacer(),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      couponCode = null;
-                                      discountAmount = 0.0;
-                                      _couponController.clear();
-                                    });
-                                  },
-                                  child: const Text('Remove'),
-                                ),
-                              ],
-                            ),
-                          ],
-
-                          const SizedBox(height: 24),
-
-                          // Order Summary
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Order Summary',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text('Subtotal'),
-                                    Text(
-                                        '\$${(price * selectedQuantity).toStringAsFixed(2)}'),
-                                  ],
-                                ),
-                                if (discountAmount > 0) ...[
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text('Discount'),
-                                      Text(
-                                          '-\$${(discountAmount * selectedQuantity).toStringAsFixed(2)}'),
-                                    ],
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: selectedQuantity <
+                                            currentProduct.quantity
+                                        ? _increaseQuantity
+                                        : null,
+                                    color: selectedQuantity <
+                                            currentProduct.quantity
+                                        ? kPrimaryColor
+                                        : Colors.grey,
                                   ),
                                 ],
-                                const SizedBox(height: 8),
-                                const Divider(),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              'Available: ${currentProduct.quantity}',
+                              style: TextStyle(
+                                color: currentProduct.quantity > 0
+                                    ? Colors.grey.shade600
+                                    : Colors.red,
+                                fontWeight: currentProduct.quantity > 0
+                                    ? FontWeight.normal
+                                    : FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                          const SizedBox(height: 24),
+
+                        // Coupon Code
+                        const Text(
+                          'Apply Coupon',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _couponController,
+                                decoration: InputDecoration(
+                                  hintText: 'Enter coupon code',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            ElevatedButton(
+                              onPressed: _applyCoupon,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kPrimaryColor,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 16),
+                              ),
+                              child: const Text('Apply'),
+                            ),
+                          ],
+                        ),
+
+                        if (couponCode != null) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  color: Colors.green, size: 16),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Coupon "$couponCode" applied: -\$${discountAmount.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    couponCode = null;
+                                    discountAmount = 0.0;
+                                    _couponController.clear();
+                                  });
+                                },
+                                child: const Text('Remove'),
+                              ),
+                            ],
+                          ),
+                        ],
+
+                          const SizedBox(height: 24),
+
+                        // Order Summary
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Order Summary',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Subtotal'),
+                                  Text(
+                                      '\$${(price * selectedQuantity).toStringAsFixed(2)}'),
+                                ],
+                              ),
+                              if (discountAmount > 0) ...[
                                 const SizedBox(height: 8),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
-                                      'Total',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                    const Text('Discount'),
                                     Text(
-                                      '\$${totalPrice.toStringAsFixed(2)}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
+                                        '-\$${(discountAmount * selectedQuantity).toStringAsFixed(2)}'),
                                   ],
                                 ),
                               ],
-                            ),
+                              const SizedBox(height: 8),
+                              const Divider(),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Total',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '\$${totalPrice.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            bottomNavigationBar: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade300,
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '\$${totalPrice.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              bottomNavigationBar: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade300,
-                      blurRadius: 10,
-                      offset: const Offset(0, -5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed:
+                          currentProduct.quantity > 0 ? _addToCart : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kPrimaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        disabledBackgroundColor: Colors.grey.shade400,
+                      ),
                       child: Text(
-                        '\$${totalPrice.toStringAsFixed(2)}',
+                        currentProduct.quantity > 0
+                            ? (isInCart ? 'ADDED TO CART' : 'ADD TO CART')
+                            : 'OUT OF STOCK',
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed:
-                            currentProduct.quantity > 0 ? _addToCart : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          disabledBackgroundColor: Colors.grey.shade400,
-                        ),
-                        child: Text(
-                          currentProduct.quantity > 0
-                              ? (isInCart ? 'ADDED TO CART' : 'ADD TO CART')
-                              : 'OUT OF STOCK',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          }
+            ),
+          );
+        }
 
           // If the state is not loaded, show a loading indicator
           return const Scaffold(

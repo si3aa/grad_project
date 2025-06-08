@@ -1,7 +1,7 @@
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/get_product/views/product_card.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
-import 'package:Herfa/features/get_product/data/models/product_model.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_state.dart';
 import 'package:Herfa/ui/widgets/home/header.dart';
 import 'package:Herfa/ui/widgets/home/nav_and_categ.dart';
 import 'package:flutter/material.dart';
@@ -12,40 +12,37 @@ class PostsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ProductCubit(),
-      child: Scaffold(
-        body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              // Reload products when user swipes down
-              await context.read<ProductCubit>().loadProducts();
-            },
-            color: kPrimaryColor,
-            child: ListView(
-              children: [
-                const HomeAppBar(),
-                const SizedBox(height: 20),
-                _SearchBar(),
-                const SizedBox(height: 20),
-                const CategoriesList(),
-                const SizedBox(height: 20),
-                _buildProductList(),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Text(
-                    'Swipe down to refresh products',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
+    return Scaffold(
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // Reload products when user swipes down
+            await context.read<ProductCubit>().loadProducts();
+          },
+          color: kPrimaryColor,
+          child: ListView(
+            children: [
+              const HomeAppBar(),
+              const SizedBox(height: 20),
+              _SearchBar(),
+              const SizedBox(height: 20),
+              const CategoriesList(),
+              const SizedBox(height: 20),
+              _buildProductList(),
+              const SizedBox(height: 20),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Text(
+                  'Swipe down to refresh products',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

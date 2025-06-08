@@ -133,6 +133,7 @@ class ProductApiRepository {
       String productId, Map<String, dynamic> productData) async {
     try {
       developer.log('Updating product with ID: $productId', name: 'ProductAPI');
+      developer.log('Update data: $productData', name: 'ProductAPI');
 
       final response = await _dio.put(
         '/products/$productId',
@@ -146,6 +147,8 @@ class ProductApiRepository {
       );
 
       developer.log('Update product response: ${response.statusCode}',
+          name: 'ProductAPI');
+      developer.log('Update product response data: ${response.data}',
           name: 'ProductAPI');
 
       if (response.statusCode == 200 || response.statusCode == 204) {
