@@ -1,5 +1,5 @@
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/ui/provider/cubit/saved_cubit.dart';
+import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_cubit.dart';
 import 'package:flutter/material.dart';
 
 class SavedItemWidget extends StatelessWidget {
@@ -19,7 +19,7 @@ class SavedItemWidget extends StatelessWidget {
           children: [
             Container(
               width: 80,
-              height:100,
+              height: 100,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(item.imageUrl),

@@ -4,7 +4,6 @@ import 'package:Herfa/ui/provider/cubit/event_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
-import 'package:Herfa/ui/provider/cubit/saved_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_view.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
@@ -36,13 +35,13 @@ Future<void> main() async {
         BlocProvider(create: (_) => HomeCubit()),
         BlocProvider(create: (_) => ContentCubit()),
         BlocProvider(create: (_) => NotificationCubit()),
-        BlocProvider(create: (_) => SavedCubit()),
         BlocProvider(create: (_) => SearchCubit()),
         BlocProvider(create: (_) => NewPostCubit()),
         BlocProvider(create: (_) => EventsCubit()),
         BlocProvider(create: (_) => CartCubit()),
         BlocProvider(create: (_) => ProductCubit()),
         BlocProvider(create: (_) => AuthCubit()),
+        // SavedProductCubit is provided in the route generator for the SavedScreen
       ],
       child: const Herfa(),
     ),
