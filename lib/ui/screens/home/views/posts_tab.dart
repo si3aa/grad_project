@@ -1,3 +1,4 @@
+import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/get_product/views/product_card.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/features/get_product/data/models/product_model.dart';
@@ -15,9 +16,13 @@ class PostsTab extends StatelessWidget {
       create: (context) => ProductCubit(),
       child: Scaffold(
         body: SafeArea(
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              // Reload products when user swipes down
+              await context.read<ProductCubit>().loadProducts();
+            },
+            color: kPrimaryColor,
+            child: ListView(
               children: [
                 const HomeAppBar(),
                 const SizedBox(height: 20),
@@ -27,6 +32,18 @@ class PostsTab extends StatelessWidget {
                 const SizedBox(height: 20),
                 _ProductList(),
                 const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    'Swipe down to refresh products',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ],
             ),
           ),
