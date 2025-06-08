@@ -9,6 +9,7 @@ import 'package:Herfa/features/add_new_product/views/widgets/price_field.dart';
 import 'package:Herfa/features/add_new_product/views/widgets/product_name_field.dart';
 import 'package:Herfa/features/add_new_product/views/widgets/product_title_field.dart';
 import 'package:Herfa/features/add_new_product/views/widgets/quantity_field.dart';
+import 'package:Herfa/features/add_new_product/views/widgets/submit_button.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -64,11 +65,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
   @override
   void initState() {
     super.initState();
-    _productNameController = TextEditingController(text: widget.product.productName);
+    _productNameController =
+        TextEditingController(text: widget.product.productName);
     _productTitleController = TextEditingController(text: widget.product.title);
-    _descriptionController = TextEditingController(text: widget.product.description);
-    _priceController = TextEditingController(text: widget.product.originalPrice.toString());
-    _quantityController = TextEditingController(text: widget.product.quantity.toString());
+    _descriptionController =
+        TextEditingController(text: widget.product.description);
+    _priceController =
+        TextEditingController(text: widget.product.originalPrice.toString());
+    _quantityController =
+        TextEditingController(text: widget.product.quantity.toString());
 
     // Initialize the NewPostCubit with the product data
     final cubit = context.read<NewPostCubit>();
@@ -121,7 +126,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     // Product Images Section
                     const Text(
                       'Product Images',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     ImagePickerWidget(
@@ -143,7 +149,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     // Product Details Section
                     const Text(
                       'Product Details',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
 
@@ -156,7 +163,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     ProductTitleField(
                       controller: _productTitleController,
                       onChanged: cubit.updateProductTitle,
-                      errorText: state.error != null && state.error!.toLowerCase().contains('title')
+                      errorText: state.error != null &&
+                              state.error!.toLowerCase().contains('title')
                           ? state.error
                           : null,
                     ),
@@ -165,7 +173,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     DescriptionField(
                       controller: _descriptionController,
                       onChanged: cubit.updateDescription,
-                      errorText: state.error != null && state.error!.toLowerCase().contains('description')
+                      errorText: state.error != null &&
+                              state.error!.toLowerCase().contains('description')
                           ? state.error
                           : null,
                     ),
@@ -225,6 +234,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     // Active Status
                     const ActiveStatus(),
                     const SizedBox(height: 32),
+
+                    // Submit Button
+                    SubmitButton(
+                      state: state,
+                      onSubmit: cubit.updateProduct,
+                      formKey: _formKey,
+                      isEditMode: true,
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),

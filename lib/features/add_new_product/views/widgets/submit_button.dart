@@ -1,6 +1,7 @@
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/states/new_post_state.dart';
 import 'package:flutter/material.dart';
+
 /// A button for submitting the product creation form.
 class SubmitButton extends StatelessWidget {
   final NewPostState state;
@@ -32,10 +33,11 @@ class SubmitButton extends StatelessWidget {
         onPressed: state.isLoading
             ? null
             : () async {
-                print("${isEditMode ? 'Update' : 'Create'} Product button pressed");
+                print(
+                    "${isEditMode ? 'Update' : 'Create'} Product button pressed");
                 if (formKey.currentState!.validate()) {
                   print("Form is valid, submitting product");
-                  
+
                   // Show loading overlay
                   showDialog(
                     context: context,
@@ -46,31 +48,40 @@ class SubmitButton extends StatelessWidget {
                       );
                     },
                   );
-                  
+
                   final success = await onSubmit();
-                  
+
                   // Close loading overlay
                   if (context.mounted) {
                     Navigator.of(context).pop();
                   }
-                  
+
                   print("Product submission result: $success");
                   if (success && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(
-                          isEditMode 
-                              ? 'Product updated successfully' 
-                              : 'Product created successfully'
-                        ),
+                        content: Text(isEditMode
+                            ? 'Product updated successfully'
+                            : 'Product created successfully'),
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 2),
                       ),
                     );
-                    Navigator.pushReplacementNamed(context, '/home');
+
+                    if (isEditMode) {
+                      // Return to previous screen with success result
+                      Navigator.of(context).pop(true);
+                    } else {
+                      // Navigate to home for new products
+                      Navigator.pushReplacementNamed(context, '/home');
+                    }
                   } else if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Failed to ${isEditMode ? 'update' : 'create'} product: ${state.error ?? "Unknown error"}'),
+                        content: Text(
+                            'Failed to ${isEditMode ? 'update' : 'create'} product: ${state.error ?? "Unknown error"}'),
                         backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
                       ),
                     );
                   }

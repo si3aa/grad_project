@@ -1,12 +1,10 @@
 import 'package:Herfa/core/route_manger/routes.dart';
-import 'package:Herfa/features/get_product/views/widgets/product_action.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_action.dart';
 import 'package:Herfa/features/get_product/views/widgets/user_info.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -56,15 +54,12 @@ class ProductCard extends StatelessWidget {
                 productImage: product.productImage,
               ),
               const SizedBox(height: 10),
-              BlocProvider(
-                create: (context) => SavedProductCubit(),
-                child: ProductDetails(
-                  productId: product.id.toString(),
-                  productName: product.productName,
-                  originalPrice: product.originalPrice,
-                  description: product.title,
-                  onCart: onCart,
-                ),
+              ProductDetails(
+                productId: product.id.toString(),
+                productName: product.productName,
+                originalPrice: product.originalPrice,
+                description: product.title,
+                onCart: onCart,
               ),
               const SizedBox(height: 10),
               ProductInteractions(

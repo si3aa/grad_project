@@ -1,4 +1,4 @@
-import 'package:Herfa/features/get_product/data/models/product.dart';
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 
 abstract class ProductState {
   const ProductState();

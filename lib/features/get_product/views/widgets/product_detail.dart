@@ -13,6 +13,7 @@ class ProductDetails extends StatefulWidget {
   final double? discountedPrice;
   final String description;
   final VoidCallback onCart;
+  final bool isSaved;
 
   const ProductDetails({
     Key? key,
@@ -29,14 +30,12 @@ class ProductDetails extends StatefulWidget {
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
-  bool isSaved = false;
-  bool isInCart = false;
-
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Product info column
         // Product info column
         Expanded(
           child: Column(
@@ -48,10 +47,10 @@ class _ProductDetailsState extends State<ProductDetails> {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 4),
               Row(
                 children: [
                   Text(
@@ -77,10 +76,19 @@ class _ProductDetailsState extends State<ProductDetails> {
                         color: Colors.red,
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '\$${widget.discountedPrice!.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
                   ],
                 ],
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 4),
               Text(
                 widget.description,
                 style: TextStyle(
@@ -117,7 +125,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                         onPressed: () {
                           if (state.message.contains('saved')) {
                             // Navigate to saved items screen
-                            Navigator.pushReplacementNamed(context, '/saved');
+                            Navigator.pushNamed(context, '/saved');
                           }
                         },
                       ),
@@ -178,31 +186,14 @@ class _ProductDetailsState extends State<ProductDetails> {
                             size: 22,
                             semanticLabel: isSaved ? 'Saved' : 'Save',
                           ),
-                          onPressed: () {
-                            if (isSaved) {
-                              // Remove from saved list
-                              context
-                                  .read<SavedProductCubit>()
-                                  .removeSavedProduct(widget.productId)
-                                  .then((_) {
-                                // Fetch saved products with details to update the UI
-                                context
-                                    .read<SavedProductCubit>()
-                                    .fetchSavedProductsWithDetails();
-                              });
-                            } else {
-                              // Add to saved list
-                              context
-                                  .read<SavedProductCubit>()
-                                  .saveProduct(widget.productId)
-                                  .then((_) {
-                                // Fetch saved products with details to update the UI
-                                context
-                                    .read<SavedProductCubit>()
-                                    .fetchSavedProductsWithDetails();
-                              });
-                            }
-                          },
+                          onPressed: isSaved
+                              ? null // Disable click when already saved
+                              : () {
+                                  // Only allow saving if not already saved
+                                  context
+                                      .read<SavedProductCubit>()
+                                      .saveProduct(widget.productId);
+                                },
                         ),
                 );
               },
@@ -213,19 +204,27 @@ class _ProductDetailsState extends State<ProductDetails> {
 
             // Cart button
             Container(
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: isInCart ? kPrimaryColor : Colors.grey.shade200,
+                color: Colors.white,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    // ignore: deprecated_member_use
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: IconButton(
                 padding: EdgeInsets.zero,
                 icon: Icon(
-                  Icons.shopping_cart,
-                  color: isInCart ? Colors.white : Colors.grey.shade600,
+                  Icons.shopping_cart_outlined,
+                  color: Colors.grey.shade600,
                   size: 22,
-                  semanticLabel: isInCart ? 'Added to cart' : 'Add to cart',
+                  semanticLabel: 'Add to cart',
                 ),
                 onPressed: () {
                   setState(() {

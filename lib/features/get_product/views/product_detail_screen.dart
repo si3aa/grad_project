@@ -2,9 +2,11 @@
 
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
-import 'package:Herfa/features/get_product/data/models/product_model.dart';
-import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
+    as viewmodels;
+import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
+import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
@@ -25,7 +27,6 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int selectedQuantity = 1;
-  bool isSaved = false;
   bool isInCart = false;
   String? couponCode;
   double discountAmount = 0.0;
@@ -407,10 +408,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final price = widget.product.discountedPrice;
     final totalPrice = (price - discountAmount) * selectedQuantity;
 
-    return BlocBuilder<ProductCubit, ProductState>(
+    return BlocBuilder<ProductCubit, viewmodels.ProductState>(
       builder: (context, state) {
         // If the state is loaded, we can access the updated product
-        if (state is ProductLoaded) {
+        if (state is viewmodels.ProductLoaded) {
           // Find the current product in the updated list
           final currentProduct = state.products.firstWhere(
             (p) => p.productName == widget.product.productName,
@@ -421,53 +422,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             appBar: AppBar(
               title: const Text('Product Details'),
               actions: [
-                IconButton(
-                  icon: Icon(
-                    isSaved ? Icons.bookmark : Icons.bookmark_outline,
-                    color: isSaved ? kPrimaryColor : null,
-                  ),
-                  onPressed: () {
-                    if (isSaved) {
-                      // Remove from saved list
-                      context
-                          .read<SavedProductCubit>()
-                          .removeSavedProduct(widget.product.id.toString());
+                BlocBuilder<SavedProductCubit, SavedProductState>(
+                  builder: (context, savedState) {
+                    bool isProductSaved = false;
 
-                      setState(() {
-                        isSaved = false;
-                      });
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Product removed from saved items'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    } else {
-                      setState(() {
-                        isSaved = true;
-                      });
-
-                      // Save the product
-                      context
-                          .read<SavedProductCubit>()
-                          .saveProduct(widget.product.id.toString());
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Product saved'),
-                          duration: const Duration(seconds: 2),
-                          action: SnackBarAction(
-                            label: 'View',
-                            textColor: Colors.white,
-                            onPressed: () {
-                              // Navigate to saved items screen
-                              Navigator.pushReplacementNamed(context, '/saved');
-                            },
-                          ),
-                        ),
-                      );
+                    if (savedState is SavedProductDetailsLoaded) {
+                      isProductSaved = savedState.productDetails
+                          .any((p) => p.id == widget.product.id.toString());
                     }
+
+                    return IconButton(
+                      icon: Icon(
+                        isProductSaved
+                            ? Icons.bookmark
+                            : Icons.bookmark_outline,
+                        color: isProductSaved ? kPrimaryColor : null,
+                      ),
+                      onPressed: isProductSaved
+                          ? null // Disable click when already saved
+                          : () {
+                              // Only allow saving if not already saved
+                              final savedProductCubit =
+                                  context.read<SavedProductCubit>();
+                              savedProductCubit
+                                  .saveProduct(widget.product.id.toString());
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Product saved'),
+                                  duration: const Duration(seconds: 2),
+                                  action: SnackBarAction(
+                                    label: 'View',
+                                    textColor: Colors.white,
+                                    onPressed: () {
+                                      // Navigate to saved items screen
+                                      Navigator.pushNamed(context, '/saved');
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                    );
                   },
                 ),
                 IconButton(
