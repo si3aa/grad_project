@@ -4,7 +4,6 @@ import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
 import 'package:Herfa/features/get_product/views/widgets/user_info.dart';
 import 'package:Herfa/features/get_product/views/widgets/favorite_button.dart';
-import 'package:Herfa/features/get_product/views/widgets/comment_button.dart';
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatefulWidget {
@@ -22,6 +21,12 @@ class ProductCard extends StatefulWidget {
   @override
   State<ProductCard> createState() => _ProductCardState();
 }
+
+// Remove this duplicate declaration
+// class _ProductCardState extends State<ProductCard> {
+//   @override
+//   State<ProductCard> createState() => _ProductCardState();
+// }
 
 class _ProductCardState extends State<ProductCard> {
   @override
@@ -76,16 +81,37 @@ class _ProductCardState extends State<ProductCard> {
                       // FavoriteButton manages its own state, no need to track here
                     },
                   ),
-                  const SizedBox(width: 8),
-                  CommentButton(
-                    productId: widget.product.id.toString(),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () {
                       Navigator.pushNamed(
                         context,
-                        '/comments',
+                        Routes.commentsRoute,
                         arguments: {'productId': widget.product.id.toString()},
                       );
                     },
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            // ignore: deprecated_member_use
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.grey,
+                        size: 22,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -96,3 +122,5 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 }
+
+

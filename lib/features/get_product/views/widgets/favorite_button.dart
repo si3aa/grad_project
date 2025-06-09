@@ -29,14 +29,17 @@ class _FavoriteButtonState extends State<FavoriteButton> {
   @override
   void initState() {
     super.initState();
+    // Always start as unfavorited - NO API check
     _isFavorite = false;
     widget.onFavoriteChanged(false);
+
     // Validate product ID
     if (widget.productId == '0' || widget.productId.isEmpty) {
       developer.log(
           '⚠️ Invalid product ID: "${widget.productId}" - favorites will not work');
     } else {
-      _checkFavoriteStatus();
+      developer.log(
+          '🤍 Product ${widget.productId} initialized as UNFAVORITED - Icon is UNCOLORED');
     }
   }
 

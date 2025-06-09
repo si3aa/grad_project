@@ -17,4 +17,6 @@ class Routes {
   static const String eventsRoute = '/events';
   static const String cartRoute = '/cart';
   static const String productDetailRoute = '/product-detail';
+  static const String commentsRoute = '/comments';
 }
+

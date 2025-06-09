@@ -11,6 +11,7 @@ import 'package:Herfa/features/auth/views/screens/login_screen.dart';
 import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
+import 'package:Herfa/features/comments/views/comments_screen.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/product_detail_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
@@ -20,7 +21,6 @@ import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/features/saved_products/views/screens/saved_screen_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:Herfa/features/get_product/views/comments_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -116,7 +116,7 @@ class RouteGenerator {
           );
         }
         return _undefinedRoute();
-      case '/comments':
+      case Routes.commentsRoute: // Update this line to use the constant
         final productId = arguments?['productId'] as String?;
         if (productId != null) {
           return MaterialPageRoute(

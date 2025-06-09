@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 
-import '../../saved_products/viewmodels/cubit/saved_product_cubit.dart';
+import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
+import 'package:Herfa/features/comments/views/comments_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -484,6 +485,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     _showEditOptions(currentProduct);
                   },
                 ),
+                // Comment Icon
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommentsScreen(
+                          productId: widget.product.id.toString(),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.comment,
+                      color: kPrimaryColor,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
               ],
             ),
             body: SingleChildScrollView(
