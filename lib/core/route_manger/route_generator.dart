@@ -20,6 +20,7 @@ import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/features/saved_products/views/screens/saved_screen_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:Herfa/features/get_product/views/comments_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -112,6 +113,14 @@ class RouteGenerator {
         if (product != null) {
           return MaterialPageRoute(
             builder: (_) => ProductDetailScreen(product: product),
+          );
+        }
+        return _undefinedRoute();
+      case '/comments':
+        final productId = arguments?['productId'] as String?;
+        if (productId != null) {
+          return MaterialPageRoute(
+            builder: (_) => CommentsScreen(productId: productId),
           );
         }
         return _undefinedRoute();
