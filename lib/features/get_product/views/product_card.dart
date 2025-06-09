@@ -4,7 +4,6 @@ import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
 import 'package:Herfa/features/get_product/views/widgets/user_info.dart';
 import 'package:Herfa/features/get_product/views/widgets/favorite_button.dart';
-import 'package:Herfa/features/get_product/views/widgets/comment_button.dart';
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatefulWidget {
@@ -19,6 +18,11 @@ class ProductCard extends StatefulWidget {
     required this.onMore,
   });
 
+  @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
   @override
   State<ProductCard> createState() => _ProductCardState();
 }
@@ -74,17 +78,6 @@ class _ProductCardState extends State<ProductCard> {
                         false, // All products start as unfavorited
                     onFavoriteChanged: (isFavorite) {
                       // FavoriteButton manages its own state, no need to track here
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  CommentButton(
-                    productId: widget.product.id.toString(),
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/comments',
-                        arguments: {'productId': widget.product.id.toString()},
-                      );
                     },
                   ),
                 ],
