@@ -13,6 +13,7 @@ import 'dart:developer' as developer;
 
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 import 'package:Herfa/features/comments/views/comments_screen.dart';
+import 'package:Herfa/core/route_manger/routes.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -488,13 +489,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 // Comment Icon
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => CommentsScreen(
-                          productId: widget.product.id.toString(),
-                        ),
-                      ),
+                      Routes.commentsRoute,
+                      arguments: {'productId': widget.product.id.toString()},
                     );
                   },
                   child: Container(
