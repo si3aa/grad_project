@@ -67,12 +67,6 @@ class PostsTab extends StatelessWidget {
               final product = products[index];
               return ProductCard(
                 product: product,
-                onLike: () {
-                  context.read<ProductCubit>().likeProduct(product);
-                },
-                onComment: () {
-                  context.read<ProductCubit>().commentProduct(product);
-                },
                 onCart: () {
                   context.read<ProductCubit>().addToCart(product);
                 },
