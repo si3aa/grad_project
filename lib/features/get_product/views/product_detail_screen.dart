@@ -12,7 +12,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
-import 'package:Herfa/features/comments/views/comments_screen.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
 
 class ProductDetailScreen extends StatefulWidget {
