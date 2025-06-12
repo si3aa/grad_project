@@ -7,6 +7,7 @@ import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/status_codes.dart';
 import 'package:Herfa/features/add_new_product/data/data_source/api_respose.dart';
 import 'package:Herfa/features/add_new_product/data/models/post_model.dart';
+import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
@@ -171,14 +172,43 @@ class NewPostCubit extends Cubit<NewPostState> {
       }
 
       if (!response.success) {
-        throw Exception(response.message);
+        String errorMessage = response.message;
+        if (errorMessage.contains('401') ||
+            errorMessage.contains('Unauthorized')) {
+          errorMessage =
+              'Authentication failed. Please check your login status.';
+        } else if (errorMessage.contains('404')) {
+          errorMessage =
+              'API endpoint not found. Please check the server configuration.';
+        } else if (errorMessage.contains('500')) {
+          errorMessage = 'Server error occurred. Please try again later.';
+        }
+        throw Exception(errorMessage);
       }
 
       emit(state.copyWith(isLoading: false, error: null));
       return true;
     } catch (e) {
       print('Error in submitProduct: ${e.toString()}');
-      emit(state.copyWith(isLoading: false, error: e.toString()));
+      String errorMessage = e.toString();
+      if (e is DioException) {
+        print('DioError details:');
+        print('Error type: ${e.type}');
+        print('Error message: ${e.message}');
+        print('Error response: ${e.response?.data}');
+        print('Error status code: ${e.response?.statusCode}');
+
+        if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.sendTimeout) {
+          errorMessage =
+              'Connection timeout. Please check your internet connection.';
+        } else if (e.type == DioExceptionType.unknown) {
+          errorMessage =
+              'Network error. Please check your internet connection.';
+        }
+      }
+      emit(state.copyWith(isLoading: false, error: errorMessage));
       return false;
     }
   }
@@ -490,14 +520,20 @@ Future postFormData(String path,
     Map<String, String>? headers,
     bool isUpdate = false}) async {
   try {
+    final authDataSource = AuthSharedPrefLocalDataSource();
+    final token = await authDataSource.getToken();
+
+    if (token == null) {
+      throw UnauthorizedException();
+    }
+
     final dio = Dio(BaseOptions(
         baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         validateStatus: (status) => true,
         headers: {
-          "Authorization":
-              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M",
+          "Authorization": "Bearer $token",
           "Content-Type": "multipart/form-data",
         }));
 
