@@ -13,6 +13,7 @@ import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
 import 'package:Herfa/features/comments/views/comments_screen.dart';
 import 'package:Herfa/features/event/views/screens/events_screen.dart';
+import 'package:Herfa/features/event/views/event_comments_screen.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/product_detail_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
@@ -121,6 +122,14 @@ class RouteGenerator {
         if (productId != null) {
           return MaterialPageRoute(
             builder: (_) => CommentsScreen(productId: productId),
+          );
+        }
+        return _undefinedRoute();
+      case Routes.eventCommentsRoute:
+        final eventId = arguments?['eventId'] as String?;
+        if (eventId != null) {
+          return MaterialPageRoute(
+            builder: (_) => EventCommentsScreen(eventId: eventId),
           );
         }
         return _undefinedRoute();

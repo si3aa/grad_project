@@ -7,16 +7,16 @@ import '../../data/models/return_event.dart';
 import 'dart:io';
 import 'package:Herfa/features/add_new_product/views/widgets/image_picker.dart';
 
-class AddEventScreen extends StatefulWidget {
-  final Data? eventToEdit; // Optional event for editing
+class EditEventScreen extends StatefulWidget {
+  final Data event;
 
-  const AddEventScreen({Key? key, this.eventToEdit}) : super(key: key);
+  const EditEventScreen({Key? key, required this.event}) : super(key: key);
 
   @override
-  State<AddEventScreen> createState() => _AddEventScreenState();
+  State<EditEventScreen> createState() => _EditEventScreenState();
 }
 
-class _AddEventScreenState extends State<AddEventScreen> {
+class _EditEventScreenState extends State<EditEventScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -26,37 +26,30 @@ class _AddEventScreenState extends State<AddEventScreen> {
   File? _image;
   bool _isLoading = false;
 
-  // Helper getter to check if we're in edit mode
-  bool get isEditMode => widget.eventToEdit != null;
-
   @override
   void initState() {
     super.initState();
-    if (isEditMode) {
-      _initializeFieldsForEdit();
-    }
+    _initializeFields();
   }
 
-  void _initializeFieldsForEdit() {
-    final event = widget.eventToEdit!;
-
+  void _initializeFields() {
     // Initialize form fields with existing event data
-    _titleController.text = event.name ?? '';
-    _descriptionController.text = event.description ?? '';
-    _priceController.text = event.price?.toString() ?? '';
-
+    _titleController.text = widget.event.name ?? '';
+    _descriptionController.text = widget.event.description ?? '';
+    _priceController.text = widget.event.price?.toString() ?? '';
+    
     // Parse dates
-    if (event.startTime != null) {
+    if (widget.event.startTime != null) {
       try {
-        _startDate = DateTime.parse(event.startTime!);
+        _startDate = DateTime.parse(widget.event.startTime!);
       } catch (e) {
         print('Error parsing start date: $e');
       }
     }
-
-    if (event.endTime != null) {
+    
+    if (widget.event.endTime != null) {
       try {
-        _endDate = DateTime.parse(event.endTime!);
+        _endDate = DateTime.parse(widget.event.endTime!);
       } catch (e) {
         print('Error parsing end date: $e');
       }
@@ -74,11 +67,12 @@ class _AddEventScreenState extends State<AddEventScreen> {
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: isStartDate 
+          ? (_startDate ?? DateTime.now()) 
+          : (_endDate ?? DateTime.now().add(const Duration(days: 1))),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-
     if (picked != null) {
       setState(() {
         if (isStartDate) {
@@ -102,21 +96,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
       return;
     }
 
-    // For new events, image is required. For editing, image is optional
-    if (!isEditMode && _image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an image for the event'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (_image != null) {
-      print('Image before sending to cubit: $_image'); // Debug print
-    }
-
     setState(() => _isLoading = true);
 
     try {
@@ -131,78 +110,48 @@ class _AddEventScreenState extends State<AddEventScreen> {
         return;
       }
 
-      if (isEditMode) {
-        // Update existing event
-        final event = EventModel(
-          id: widget.eventToEdit!.id.toString(),
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          startDate: _startDate!,
-          endDate: _endDate!,
-          price: double.parse(_priceController.text),
-          imageUrl: widget.eventToEdit!.media ?? '', // Keep existing image if no new image
-          organizerId: 'merchant',
-        );
+      final updatedEvent = EventModel(
+        id: widget.event.id.toString(),
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        startDate: _startDate!,
+        endDate: _endDate!,
+        price: double.parse(_priceController.text),
+        imageUrl: widget.event.media ?? '', // Keep existing image if no new image
+        organizerId: 'merchant',
+      );
 
-        print('Updating event: ${event.title}');
-
-        if (_image != null) {
-          // If there's a new image, create a new event (which will replace the old one)
-          await context.read<EventCubit>().createEvent(event, _image!);
-        } else {
-          // Update without changing the image
-          await context.read<EventCubit>().updateEvent(event);
-        }
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Event updated successfully! 🎉'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
-          );
-          Navigator.pop(context);
-        }
+      print('Updating event: ${updatedEvent.title}');
+      
+      // If there's a new image, we need to handle it differently
+      if (_image != null) {
+        // For now, we'll use the create method with the new image
+        // In a real implementation, you might want a separate update with image method
+        await context.read<EventCubit>().createEvent(updatedEvent, _image!);
       } else {
-        // Create new event
-        final event = EventModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          startDate: _startDate!,
-          endDate: _endDate!,
-          price: double.parse(_priceController.text),
-          imageUrl: '', // Will be set by the repository
-          organizerId: 'merchant', // This will be handled by the backend based on the token
+        // Update without changing the image
+        await context.read<EventCubit>().updateEvent(updatedEvent);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Event updated successfully! 🎉'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
         );
-
-        print('Creating event: ${event.title}');
-        await context.read<EventCubit>().createEvent(event, _image!);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Event created successfully! 🎉'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
-          );
-          Navigator.pop(context);
-        }
+        Navigator.pop(context);
       }
     } catch (e) {
-      print('Error ${isEditMode ? 'updating' : 'creating'} event: $e');
+      print('Error updating event: $e');
       if (mounted) {
-        String errorMessage = isEditMode ? 'Failed to update event' : 'Failed to create event';
-
-        // Provide more user-friendly error messages
+        String errorMessage = 'Failed to update event';
+        
         if (e.toString().contains('UnauthorizedException')) {
-          errorMessage = 'Please log in again to ${isEditMode ? 'update' : 'create'} events';
+          errorMessage = 'Please log in again to update events';
         } else if (e.toString().contains('Access forbidden')) {
-          errorMessage = 'You don\'t have permission to ${isEditMode ? 'update' : 'create'} events';
-        } else if (e.toString().contains('File too large')) {
-          errorMessage = 'Image file is too large. Please choose a smaller image';
+          errorMessage = 'You don\'t have permission to update events';
         } else if (e.toString().contains('Validation error')) {
           errorMessage = 'Please check your input data and try again';
         } else if (e.toString().contains('Network')) {
@@ -210,16 +159,14 @@ class _AddEventScreenState extends State<AddEventScreen> {
         } else if (e.toString().contains('Server error')) {
           errorMessage = 'Server error. Please try again later';
         } else {
-          // Extract the actual error message if possible
           String fullError = e.toString();
-          String searchPattern = isEditMode ? 'Failed to update event: ' : 'Failed to create event: ';
-          if (fullError.contains(searchPattern)) {
-            errorMessage = fullError.split(searchPattern).last;
+          if (fullError.contains('Failed to update event: ')) {
+            errorMessage = fullError.split('Failed to update event: ').last;
           } else {
             errorMessage = 'Something went wrong. Please try again';
           }
         }
-
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -244,7 +191,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? 'Edit Event' : 'Create Event'),
+        title: const Text('Edit Event'),
         centerTitle: true,
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
@@ -259,7 +206,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
               // Title Field
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Event Title',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12))),
@@ -280,8 +227,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
               // Description Field
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Event Description',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12))),
                   filled: true,
@@ -289,7 +237,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                 ),
-                maxLines: 3,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an event description';
@@ -303,7 +250,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
               TextFormField(
                 controller: _priceController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Price',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12))),
@@ -324,37 +271,61 @@ class _AddEventScreenState extends State<AddEventScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Product Images Section (using ImagePickerWidget)
+              // Current Image Display
+              if (widget.event.media != null && widget.event.media!.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Current Event Image',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          widget.event.media!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.image_not_supported, size: 50),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+
+              // New Image Selection (Optional)
               const Text(
-                'Event Image',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                'Update Event Image (Optional)',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               ImagePickerWidget(
                 images: _image != null ? [_image!.path] : [],
                 onAddImage: (path) {
                   setState(() {
                     _image = File(path);
-                    print(
-                        'Image selected path: ${_image!.path}'); // Debug print
                   });
                 },
                 onDeleteImage: (path) {
                   setState(() {
                     _image = null;
-                    print('Image cleared: $_image'); // Debug print
                   });
                 },
                 maxImages: 1,
               ),
-              if (_image == null)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'Please add at least one event image',
-                    style: TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                ),
               const SizedBox(height: 24),
 
               // Date Selection
@@ -418,9 +389,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : Text(
-                        isEditMode ? 'Update Event' : 'Create Event',
-                        style: const TextStyle(
+                    : const Text(
+                        'Update Event',
+                        style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
+import 'package:Herfa/core/route_manger/routes.dart';
 import '../../viewmodels/cubit/event_cubit.dart';
 import '../../data/models/return_event.dart';
 import 'add_event_screen.dart';
@@ -14,6 +15,7 @@ class EventsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Events'),
+        centerTitle: true,
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
       ),
@@ -113,7 +115,8 @@ class EventsScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EventDetailsScreen(event: event),
+                          builder: (context) =>
+                              EventDetailsScreen(event: event),
                         ),
                       );
                     },
@@ -162,21 +165,26 @@ class EventCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Event Image
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              event.media ?? '',
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.network(
+                  event.media ?? '',
                   height: 200,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image_not_supported, size: 50),
-                );
-              },
-            ),
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported, size: 50),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -224,20 +232,40 @@ class EventCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 // Action Buttons
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    IconButton(
+                      icon: Icon(Icons.comment_outlined, color: kPrimaryColor),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.eventCommentsRoute,
+                          arguments: {'eventId': event.id.toString()},
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 16),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EventDetailsScreen(event: event),
+                          ),
+                        );
+                      },
                       child: const Text('View Details'),
                     ),
                     const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {},
+                    ElevatedButton.icon(
+                      onPressed: () => _showEventOptions(context, event),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryColor,
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text('RSVP'),
+                      icon: const Icon(Icons.more_horiz, size: 18),
+                      label: const Text('More'),
                     ),
                   ],
                 ),
@@ -257,5 +285,158 @@ class EventCard extends StatelessWidget {
     } catch (e) {
       return 'Invalid Date';
     }
+  }
+
+  void _showEventOptions(BuildContext context, Data event) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Title
+              Text(
+                'Event Options',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Edit Option
+              ListTile(
+                leading: const Icon(
+                  Icons.edit,
+                  color: Colors.blue,
+                ),
+                title: const Text('Edit Event'),
+                subtitle: const Text('Modify event details'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editEvent(context, event);
+                },
+              ),
+
+              // Delete Option
+              ListTile(
+                leading: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+                title: const Text('Delete Event'),
+                subtitle: const Text('Remove this event permanently'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDeleteEvent(context, event);
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              // Cancel Button
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _editEvent(BuildContext context, Data event) {
+    // For now, show a placeholder message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content:
+            Text('Edit functionality for "${event.name}" will be implemented'),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _confirmDeleteEvent(BuildContext context, Data event) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Event'),
+          content: Text(
+            'Are you sure you want to delete "${event.name}"?\n\nThis action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteEvent(context, event);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteEvent(BuildContext context, Data event) {
+    // Show loading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(width: 16),
+            Text('Deleting event...'),
+          ],
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    // Call the delete method from EventCubit
+    context.read<EventCubit>().deleteEvent(event.id.toString());
   }
 }

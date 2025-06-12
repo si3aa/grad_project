@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/event/data/models/return_event.dart';
+import 'package:Herfa/core/route_manger/routes.dart';
 
 class EventDetailsScreen extends StatelessWidget {
   final Data event;
@@ -24,6 +25,18 @@ class EventDetailsScreen extends StatelessWidget {
         title: Text(event.name ?? 'Event Details'),
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.comment),
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                Routes.eventCommentsRoute,
+                arguments: {'eventId': event.id.toString()},
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
