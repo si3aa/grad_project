@@ -11,16 +11,20 @@ import 'package:Herfa/features/auth/views/screens/login_screen.dart';
 import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
-import 'package:Herfa/features/comments/views/comments_screen.dart';
+import 'package:Herfa/features/comments/views/product_comments_screen.dart';
+import 'package:Herfa/features/event/views/screens/events_screen.dart';
+import 'package:Herfa/features/event/views/event_comments_screen.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/product_detail_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
-import 'package:Herfa/ui/screens/home/views/events_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';
 import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/features/saved_products/views/screens/saved_screen_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:Herfa/constants.dart';
+import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
+import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -112,7 +116,10 @@ class RouteGenerator {
         final product = arguments?['product'] as Product?;
         if (product != null) {
           return MaterialPageRoute(
-            builder: (_) => ProductDetailScreen(product: product),
+            builder: (_) => BlocProvider(
+              create: (context) => CommentCubit(CommentRepository()),
+              child: ProductDetailScreen(product: product),
+            ),
           );
         }
         return _undefinedRoute();
@@ -120,7 +127,29 @@ class RouteGenerator {
         final productId = arguments?['productId'] as String?;
         if (productId != null) {
           return MaterialPageRoute(
-            builder: (_) => CommentsScreen(productId: productId),
+            builder: (_) => BlocProvider(
+              create: (context) {
+                final cubit = CommentCubit(CommentRepository());
+                cubit.fetchComments(productId);
+                return cubit;
+              },
+              child: ProductCommentsScreen(productId: productId),
+            ),
+          );
+        }
+        return _undefinedRoute();
+      case Routes.eventCommentsRoute:
+        final eventId = arguments?['eventId'] as String?;
+        if (eventId != null) {
+          return MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (context) {
+                final cubit = CommentCubit(CommentRepository());
+                cubit.fetchComments(eventId);
+                return cubit;
+              },
+              child: EventCommentsScreen(eventId: eventId),
+            ),
           );
         }
         return _undefinedRoute();
@@ -133,9 +162,12 @@ class RouteGenerator {
     return MaterialPageRoute(
       builder: (_) => Scaffold(
         appBar: AppBar(
-          title: const Text('No Route Found'),
+          title: const Text('Error'),
+          backgroundColor: kPrimaryColor,
         ),
-        body: const Center(child: Text('No Route Found')),
+        body: const Center(
+          child: Text('Route not found'),
+        ),
       ),
     );
   }
