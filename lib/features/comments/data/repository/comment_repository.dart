@@ -92,4 +92,6 @@ class CommentRepository {
       return false;
     }
   }
+
+  updateComment(String commentId, String newContent) {}
 }
