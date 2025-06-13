@@ -138,190 +138,224 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comments'),
+        centerTitle: true,
+        elevation: 0,
+        title: const Text(
+          'Event Comments',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: kPrimaryColor,
       ),
-      body: BlocBuilder<EventCommentCubit, EventCommentState>(
-        builder: (context, state) {
-          if (state is EventCommentLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              kPrimaryColor.withOpacity(0.1),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: BlocBuilder<EventCommentCubit, EventCommentState>(
+                builder: (context, state) {
+                  if (state is EventCommentLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(kPrimaryColor),
+                      ),
+                    );
+                  }
 
-          if (state is EventCommentError) {
-            return Center(
-              child: Text(
-                state.message,
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          }
-
-          if (state is EventCommentLoaded) {
-            if (state.comments.isEmpty) {
-              return const Center(
-                child: Text(
-                  'No comments yet',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-              );
-            }
-
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: state.comments.length,
-                    itemBuilder: (context, index) {
-                      final comment = state.comments[index];
-                      return GestureDetector(
-                        onLongPress: () => _showCommentOptions(comment),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 4.0,
+                  if (state is EventCommentError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.red[300],
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.0),
-                            boxShadow: [
-                              BoxShadow(
-                                // ignore: deprecated_member_use
-                                color: Colors.grey.withOpacity(0.1),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(0, 1),
+                          const SizedBox(height: 16),
+                          Text(
+                            state.message,
+                            style: TextStyle(
+                              color: Colors.red[700],
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (state is EventCommentLoaded) {
+                    if (state.comments.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No comments yet. Be the first to comment!',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
                               ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundColor: kPrimaryColor,
-                                      radius: 20,
-                                      child: Text(
-                                        comment.userName != null &&
-                                                comment.userName!.isNotEmpty
-                                            ? comment.userName![0].toUpperCase()
-                                            : 'A',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12.0),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      itemCount: state.comments.length,
+                      itemBuilder: (context, index) {
+                        final comment = state.comments[index];
+                        return GestureDetector(
+                          onLongPress: () => _showCommentOptions(comment),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  spreadRadius: 2,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
                                         children: [
-                                          Text(
-                                            comment.userName ?? 'Anonymous',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16.0,
-                                              color: Colors.black87,
+                                          CircleAvatar(
+                                            backgroundColor:
+                                                kPrimaryColor.withOpacity(0.1),
+                                            child: Icon(
+                                              Icons.person,
+                                              color: kPrimaryColor,
+                                              size: 20,
                                             ),
                                           ),
+                                          const SizedBox(width: 12),
                                           Text(
-                                            _formatDate(comment.createdAt),
-                                            style: const TextStyle(
-                                              fontSize: 12.0,
-                                              color: Colors.grey,
+                                            'User',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12.0),
-                                Text(
-                                  comment.content,
-                                  style: const TextStyle(
-                                    fontSize: 16.0,
-                                    color: Colors.black87,
-                                    height: 1.4,
+                                      Text(
+                                        _formatDate(comment.createdAt),
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    comment.content,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, -1),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _commentController,
-                          decoration: InputDecoration(
-                            hintText: 'Add a comment...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20.0,
-                              vertical: 10.0,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade300),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                              borderSide: BorderSide(color: kPrimaryColor),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      FloatingActionButton(
-                        onPressed: _addComment,
-                        backgroundColor: kPrimaryColor,
-                        foregroundColor: Colors.white,
-                        mini: true,
-                        child: const Icon(Icons.send),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          }
+                        );
+                      },
+                    );
+                  }
 
-          return const Center(child: Text('No comments yet'));
-        },
+                  return const Center(child: Text('No comments yet'));
+                },
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: TextField(
+                        controller: _commentController,
+                        decoration: InputDecoration(
+                          hintText: _editingCommentId != null
+                              ? 'Edit your comment...'
+                              : 'Add a comment...',
+                          hintStyle: TextStyle(color: Colors.grey[500]),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        maxLines: null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  FloatingActionButton(
+                    onPressed: _addComment,
+                    backgroundColor: kPrimaryColor,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    child: const Icon(Icons.send),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

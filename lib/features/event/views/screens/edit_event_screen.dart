@@ -311,7 +311,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
               // New Image Selection (Optional)
               const Text(
-                'Update Event Image (Optional)',
+                'Update Event Image (required)',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),

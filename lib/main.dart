@@ -31,7 +31,7 @@ Future<void> main() async {
       baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
     ),
   );
-
+  
   dio.interceptors.add(
     LogInterceptor(
       requestBody: true,
@@ -50,15 +50,6 @@ Future<void> main() async {
     authDataSource: authDataSource,
   );
   final eventCommentRepository = EventCommentRepository();
-
-  dio.interceptors.add(LogInterceptor(
-    requestBody: true,
-    responseBody: true,
-    requestHeader: true,
-    responseHeader: true,
-    error: true,
-    request: true,
-  ));
 
   runApp(
     MultiBlocProvider(
