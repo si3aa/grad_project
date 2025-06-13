@@ -11,7 +11,7 @@ import 'package:Herfa/features/auth/views/screens/login_screen.dart';
 import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
-import 'package:Herfa/features/comments/views/product_comments_screen.dart';
+import 'package:Herfa/features/comments/views/comments_screen.dart';
 import 'package:Herfa/features/event/views/screens/events_screen.dart';
 import 'package:Herfa/features/event/views/event_comments_screen.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
@@ -127,14 +127,7 @@ class RouteGenerator {
         final productId = arguments?['productId'] as String?;
         if (productId != null) {
           return MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (context) {
-                final cubit = CommentCubit(CommentRepository());
-                cubit.fetchComments(productId);
-                return cubit;
-              },
-              child: ProductCommentsScreen(productId: productId),
-            ),
+            builder: (_) => CommentsScreen(productId: productId),
           );
         }
         return _undefinedRoute();
@@ -142,14 +135,7 @@ class RouteGenerator {
         final eventId = arguments?['eventId'] as String?;
         if (eventId != null) {
           return MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (context) {
-                final cubit = CommentCubit(CommentRepository());
-                cubit.fetchComments(eventId);
-                return cubit;
-              },
-              child: EventCommentsScreen(eventId: eventId),
-            ),
+            builder: (_) => EventCommentsScreen(eventId: eventId),
           );
         }
         return _undefinedRoute();

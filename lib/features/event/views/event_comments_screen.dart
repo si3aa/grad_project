@@ -138,45 +138,41 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Event Comments',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Comments'),
         backgroundColor: kPrimaryColor,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<EventCommentCubit, EventCommentState>(
-              builder: (context, state) {
-                if (state is EventCommentLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: BlocBuilder<EventCommentCubit, EventCommentState>(
+        builder: (context, state) {
+          if (state is EventCommentLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                if (state is EventCommentError) {
-                  return Center(
-                    child: Text(
-                      state.message,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  );
-                }
+          if (state is EventCommentError) {
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
 
-                if (state is EventCommentLoaded) {
-                  if (state.comments.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No comments yet. Be the first to comment!',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    );
-                  }
+          if (state is EventCommentLoaded) {
+            if (state.comments.isEmpty) {
+              return const Center(
+                child: Text(
+                  'No comments yet',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              );
+            }
 
-                  return ListView.builder(
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
                     padding: const EdgeInsets.all(8.0),
                     itemCount: state.comments.length,
                     itemBuilder: (context, index) {
@@ -202,85 +198,130 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
                             ],
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(12.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      comment.userName ?? 'Anonymous',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                    CircleAvatar(
+                                      backgroundColor: kPrimaryColor,
+                                      radius: 20,
+                                      child: Text(
+                                        comment.userName != null &&
+                                                comment.userName!.isNotEmpty
+                                            ? comment.userName![0].toUpperCase()
+                                            : 'A',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
-                                    Text(
-                                      _formatDate(comment.createdAt),
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 12,
+                                    const SizedBox(width: 12.0),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            comment.userName ?? 'Anonymous',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16.0,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          Text(
+                                            _formatDate(comment.createdAt),
+                                            style: const TextStyle(
+                                              fontSize: 12.0,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
-                                Text(comment.content),
+                                const SizedBox(height: 12.0),
+                                Text(
+                                  comment.content,
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                    color: Colors.black87,
+                                    height: 1.4,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ),
                       );
                     },
-                  );
-                }
-
-                return const Center(child: Text('No comments yet'));
-              },
-            ),
-          ),
-          // Comment input field
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  // ignore: deprecated_member_use
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 1,
-                  blurRadius: 3,
-                  offset: const Offset(0, -1),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: InputDecoration(
-                      hintText: _editingCommentId != null
-                          ? 'Edit your comment...'
-                          : 'Add a comment...',
-                      border: InputBorder.none,
-                    ),
-                    maxLines: null,
                   ),
                 ),
-                const SizedBox(width: 8.0),
-                FloatingActionButton(
-                  onPressed: _addComment,
-                  backgroundColor: kPrimaryColor,
-                  foregroundColor: Colors.white,
-                  mini: true,
-                  child: const Icon(Icons.send),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        // ignore: deprecated_member_use
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, -1),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _commentController,
+                          decoration: InputDecoration(
+                            hintText: 'Add a comment...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                              vertical: 10.0,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: BorderSide(color: kPrimaryColor),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      FloatingActionButton(
+                        onPressed: _addComment,
+                        backgroundColor: kPrimaryColor,
+                        foregroundColor: Colors.white,
+                        mini: true,
+                        child: const Icon(Icons.send),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ),
-        ],
+            );
+          }
+
+          return const Center(child: Text('No comments yet'));
+        },
       ),
     );
   }

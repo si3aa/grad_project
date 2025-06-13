@@ -51,6 +51,23 @@ Future<void> main() async {
   );
   final eventCommentRepository = EventCommentRepository();
 
+  final dio = Dio(
+      BaseOptions(baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app'));
+  dio.interceptors.add(LogInterceptor(
+    requestBody: true,
+    responseBody: true,
+    requestHeader: true,
+    responseHeader: true,
+    error: true,
+    request: true,
+  ));
+  final authDataSource = AuthSharedPrefLocalDataSource();
+  final eventRepository = EventRepository(
+    dio: dio,
+    authDataSource: authDataSource,
+  );
+  final eventCommentRepository = EventCommentRepository();
+
   runApp(
     MultiBlocProvider(
       providers: [
