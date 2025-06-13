@@ -145,14 +145,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         );
 
         print('Updating event: ${event.title}');
-
-        if (_image != null) {
-          // If there's a new image, create a new event (which will replace the old one)
-          await context.read<EventCubit>().createEvent(event, _image!);
-        } else {
-          // Update without changing the image
-          await context.read<EventCubit>().updateEvent(event);
-        }
+        await context.read<EventCubit>().updateEvent(event, _image);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

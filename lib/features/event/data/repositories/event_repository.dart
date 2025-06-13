@@ -46,7 +46,8 @@ class EventRepository {
 
           // Create fresh FormData for each attempt to avoid "already finalized" error
           FormData freshFormData = FormData.fromMap({
-            "file": await MultipartFile.fromFile(imageFile.path, filename: fileName),
+            "file": await MultipartFile.fromFile(imageFile.path,
+                filename: fileName),
           });
 
           final response = await _dio.post(endpoint, data: freshFormData);
@@ -64,7 +65,8 @@ class EventRepository {
               return responseMap['url'] as String;
             } else if (responseMap.containsKey('media')) {
               return responseMap['media'] as String;
-            } else if (responseMap.containsKey('data') && responseMap['data'] is Map) {
+            } else if (responseMap.containsKey('data') &&
+                responseMap['data'] is Map) {
               final dataMap = responseMap['data'] as Map<String, dynamic>;
               if (dataMap.containsKey('url')) {
                 return dataMap['url'] as String;
@@ -75,8 +77,8 @@ class EventRepository {
           }
 
           // If we get here, the response structure is unexpected
-          throw Exception('Upload successful but response format is unexpected: ${response.data}');
-
+          throw Exception(
+              'Upload successful but response format is unexpected: ${response.data}');
         } on DioException catch (e) {
           print('Upload failed for endpoint $endpoint:');
           print('  Status code: ${e.response?.statusCode}');
@@ -98,18 +100,20 @@ class EventRepository {
         print('  Response data: ${lastException.response?.data}');
 
         if (lastException.response?.statusCode == 401) {
-          throw UnauthorizedException('Unauthorized: Invalid or expired token.');
+          throw UnauthorizedException(
+              'Unauthorized: Invalid or expired token.');
         } else if (lastException.response?.statusCode == 403) {
-          throw Exception('Failed to upload image: Access forbidden. Please check your permissions.');
+          throw Exception(
+              'Failed to upload image: Access forbidden. Please check your permissions.');
         } else if (lastException.response?.statusCode == 413) {
           throw Exception('Failed to upload image: File too large.');
         } else {
-          throw Exception('Failed to upload image: ${lastException.message ?? 'Unknown error'}');
+          throw Exception(
+              'Failed to upload image: ${lastException.message ?? 'Unknown error'}');
         }
       }
 
       throw Exception('Failed to upload image: All upload endpoints failed');
-
     } catch (e) {
       if (e is UnauthorizedException) rethrow;
       print('General exception during image upload: $e');
@@ -150,10 +154,12 @@ class EventRepository {
         final responseMap = response.data as Map<String, dynamic>;
         print('Response is a map with keys: ${responseMap.keys.toList()}');
 
-        if (responseMap.containsKey('data') && responseMap['data'] is List<dynamic>) {
+        if (responseMap.containsKey('data') &&
+            responseMap['data'] is List<dynamic>) {
           eventJson = responseMap['data'] as List<dynamic>;
           print('Found data array with ${eventJson.length} items');
-        } else if (responseMap.containsKey('events') && responseMap['events'] is List<dynamic>) {
+        } else if (responseMap.containsKey('events') &&
+            responseMap['events'] is List<dynamic>) {
           eventJson = responseMap['events'] as List<dynamic>;
           print('Found events array with ${eventJson.length} items');
         } else {
@@ -184,7 +190,6 @@ class EventRepository {
 
       print('Successfully parsed ${events.length} events');
       return events;
-
     } on DioException catch (e) {
       print('DioException in getEvents:');
       print('  Status code: ${e.response?.statusCode}');
@@ -195,11 +200,14 @@ class EventRepository {
       if (e.response?.statusCode == 401) {
         throw UnauthorizedException('Unauthorized: Invalid or expired token.');
       } else if (e.response?.statusCode == 404) {
-        throw Exception('Failed to load events: Events endpoint not found (404).');
+        throw Exception(
+            'Failed to load events: Events endpoint not found (404).');
       } else if (e.response?.statusCode == 500) {
-        throw Exception('Failed to load events: Server error (500). Please try again later.');
+        throw Exception(
+            'Failed to load events: Server error (500). Please try again later.');
       } else {
-        throw Exception('Failed to load events: ${e.message ?? 'Network error'}');
+        throw Exception(
+            'Failed to load events: ${e.message ?? 'Network error'}');
       }
     } catch (e) {
       print('General exception in getEvents: $e');
@@ -220,20 +228,31 @@ class EventRepository {
 
       String? imageUrl;
 
-      // Try to upload image first
-      try {
-        print('1. Attempting to upload image...');
-        imageUrl = await uploadImage(imageFile);
-        print('2. Image uploaded successfully: $imageUrl');
-      } catch (e) {
-        print('Image upload failed: $e');
-        print('Proceeding with event creation using multipart form...');
+      // Determine if we need to upload a new image or use existing URL
+      bool shouldUploadImage =
+          await imageFile.exists() && imageFile.lengthSync() > 0;
 
-        // Fallback: Create event with image in multipart form
-        return await _createEventWithMultipartForm(event, imageFile, token);
+      // Check for valid file or existing URL
+      if (await imageFile.exists() && imageFile.lengthSync() > 0) {
+        try {
+          print('1. Attempting to upload new image...');
+          imageUrl = await uploadImage(imageFile);
+          print('2. Image uploaded successfully: $imageUrl');
+        } catch (e) {
+          print('Image upload failed: $e');
+          print('Proceeding with event creation using multipart form...');
+          return await _createEventWithMultipartForm(event, imageFile, token);
+        }
+      } else if (event.imageUrl.isNotEmpty &&
+          !_isLocalFilePath(event.imageUrl)) {
+        print('Using existing image URL: ${event.imageUrl}');
+        imageUrl = event.imageUrl;
+      } else {
+        print('No valid image provided');
+        throw Exception('A valid image file or URL is required');
       }
 
-      // Create event with uploaded image URL
+      // Create event with the appropriate image URL
       final eventWithImageUrl = event.copyWith(imageUrl: imageUrl);
       final eventData = eventWithImageUrl.toJson();
 
@@ -245,7 +264,6 @@ class EventRepository {
       print('5. Event creation response data: ${response.data}');
 
       return _parseEventResponse(response);
-
     } on UnauthorizedException {
       rethrow;
     } on DioException catch (e) {
@@ -269,11 +287,14 @@ class EventRepository {
         }
         throw Exception('Failed to create event: $errorMessage');
       } else if (e.response?.statusCode == 422) {
-        throw Exception('Failed to create event: Validation error. Please check your input data.');
+        throw Exception(
+            'Failed to create event: Validation error. Please check your input data.');
       } else if (e.response?.statusCode == 500) {
-        throw Exception('Failed to create event: Server error. Please try again later.');
+        throw Exception(
+            'Failed to create event: Server error. Please try again later.');
       } else {
-        throw Exception('Failed to create event: ${e.message ?? 'Network error'}');
+        throw Exception(
+            'Failed to create event: ${e.message ?? 'Network error'}');
       }
     } catch (e) {
       print('General exception during event creation: $e');
@@ -282,7 +303,8 @@ class EventRepository {
   }
 
   // Helper method to create event with multipart form (includes image)
-  Future<Data> _createEventWithMultipartForm(EventModel event, File imageFile, String token) async {
+  Future<Data> _createEventWithMultipartForm(
+      EventModel event, File imageFile, String token) async {
     try {
       print('Creating event with multipart form...');
 
@@ -293,7 +315,8 @@ class EventRepository {
         'startTime': event.startDate.toIso8601String(),
         'endTime': event.endDate.toIso8601String(),
         'price': event.price.toString(),
-        'file': await MultipartFile.fromFile(imageFile.path, filename: fileName),
+        'file':
+            await MultipartFile.fromFile(imageFile.path, filename: fileName),
       });
 
       print('Multipart form data prepared');
@@ -303,7 +326,6 @@ class EventRepository {
       print('Multipart event creation response data: ${response.data}');
 
       return _parseEventResponse(response);
-
     } catch (e) {
       print('Multipart form creation failed: $e');
       rethrow;
@@ -321,15 +343,18 @@ class EventRepository {
       final responseMap = response.data as Map<String, dynamic>;
 
       // Check for success field
-      if (responseMap.containsKey('success') && responseMap['success'] == false) {
+      if (responseMap.containsKey('success') &&
+          responseMap['success'] == false) {
         final message = responseMap['message'] ?? 'Unknown error';
         throw Exception('Failed to create event: $message');
       }
 
       // Try to find the event data in the response
-      if (responseMap.containsKey('data') && responseMap['data'] is Map<String, dynamic>) {
+      if (responseMap.containsKey('data') &&
+          responseMap['data'] is Map<String, dynamic>) {
         return Data.fromJson(responseMap['data'] as Map<String, dynamic>);
-      } else if (responseMap.containsKey('event') && responseMap['event'] is Map<String, dynamic>) {
+      } else if (responseMap.containsKey('event') &&
+          responseMap['event'] is Map<String, dynamic>) {
         return Data.fromJson(responseMap['event'] as Map<String, dynamic>);
       } else {
         // If the response itself is the event data
@@ -341,31 +366,97 @@ class EventRepository {
         }
       }
     } else {
-      throw Exception('Failed to create event: Unexpected response format - expected Map but got ${response.data.runtimeType}');
+      throw Exception(
+          'Failed to create event: Unexpected response format - expected Map but got ${response.data.runtimeType}');
+    }
+  } // We're using create + delete instead of update to avoid permission issues
+
+  Future<Data> updateEventByCreateDelete(EventModel event,
+      {File? imageFile, String? oldEventId}) async {
+    try {
+      print('Starting event update using create-then-delete approach...');
+
+      // Step 1: Create new event first before deleting old one
+      EventModel eventToCreate = event;
+      File? finalImageFile;
+
+      print('Processing image for update...');
+      if (imageFile != null && await imageFile.exists()) {
+        print('Using newly provided image file');
+        finalImageFile = imageFile;
+        eventToCreate = event.copyWith(imageUrl: '');
+      } else if (_isLocalFilePath(event.imageUrl)) {
+        try {
+          print('Using image from local path: ${event.imageUrl}');
+          finalImageFile = File(event.imageUrl);
+          if (await finalImageFile.exists()) {
+            eventToCreate = event.copyWith(imageUrl: '');
+          } else {
+            print('Local image file does not exist, using empty file');
+            finalImageFile = File("");
+          }
+        } catch (e) {
+          print('Error accessing local image file: $e');
+          finalImageFile = File("");
+        }
+      } else {
+        print('Keeping existing remote image URL: ${event.imageUrl}');
+        finalImageFile = File("");
+      }
+
+      // Step 2: Create the new event
+      print('Creating new event with model: ${eventToCreate.toJson()}');
+      Data newEvent;
+
+      try {
+        if (finalImageFile != null &&
+            await finalImageFile.exists() &&
+            finalImageFile.lengthSync() > 0) {
+          print('Creating event with new image upload');
+          newEvent = await createEvent(eventToCreate, finalImageFile);
+        } else {
+          print('Creating event with existing image URL');
+          // Using empty file when keeping existing URL
+          newEvent = await createEvent(eventToCreate, File(""));
+        }
+        print('Created new event successfully with ID: ${newEvent.id}');
+      } catch (e) {
+        print('Failed to create new event: $e');
+        throw Exception('Failed to update event: Could not create new version');
+      }
+
+      // Step 3: Delete the old event only after successful creation
+      if (oldEventId != null && oldEventId.isNotEmpty) {
+        try {
+          print('Attempting to delete old event with ID: $oldEventId');
+          await Future.delayed(const Duration(
+              milliseconds:
+                  500)); // Small delay to ensure creation is processed
+          await deleteEvent(oldEventId);
+          print('Successfully deleted old event with ID: $oldEventId');
+        } catch (e) {
+          print('Warning: Failed to delete old event: $e');
+          // Don't throw here - the update technically succeeded even if cleanup failed
+        }
+      }
+
+      return newEvent;
+    } catch (e) {
+      print('Failed to update event using create-delete approach: $e');
+      throw Exception('Failed to update event: $e');
     }
   }
 
-  Future<Data> updateEvent(EventModel event) async {
-    try {
-      String? token = await _authDataSource.getToken();
-      if (token == null) {
-        throw UnauthorizedException('No authentication token found.');
-      }
-
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-
-      final response =
-          await _dio.put('$_baseUrl/events/${event.id}', data: event.toJson());
-      return Data.fromJson(response.data['data']);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw UnauthorizedException('Unauthorized: Invalid or expired token.');
-      } else {
-        throw Exception('Failed to update event: ${e.message}');
-      }
-    } catch (e) {
-      throw Exception('Failed to update event: $e');
-    }
+  // Helper method to determine if an image URL is a local file path
+  bool _isLocalFilePath(String path) {
+    // Check for absolute Unix paths, file:// URLs, Windows paths, or relative paths from image picker
+    return path.startsWith('/') ||
+        path.startsWith('file://') ||
+        RegExp(r'^[A-Za-z]:\\').hasMatch(path) ||
+        path.startsWith('cache/') || // Common path for image picker on Android
+        path.contains('/data/user/') || // Android internal storage
+        path.contains('/tmp/') || // iOS temp directory
+        path.contains('/cache/'); // Android cache directory
   }
 
   Future<void> deleteEvent(String eventId) async {

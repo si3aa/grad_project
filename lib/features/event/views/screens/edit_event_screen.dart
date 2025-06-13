@@ -110,6 +110,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
         return;
       }
 
+      // Ensure we have either a new image or an existing one
+      if (_image == null &&
+          (widget.event.media == null || widget.event.media!.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select an image for the event'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Create updated event model
       final updatedEvent = EventModel(
         id: widget.event.id.toString(),
         title: _titleController.text.trim(),
@@ -117,24 +130,17 @@ class _EditEventScreenState extends State<EditEventScreen> {
         startDate: _startDate!,
         endDate: _endDate!,
         price: double.parse(_priceController.text),
-        imageUrl:
-            widget.event.media ?? '', // Keep existing image if no new image
+        imageUrl: _image?.path ??
+            widget.event.media ??
+            '', // Use new image path or keep existing URL
         organizerId: 'merchant',
       );
 
       print('Updating event: ${updatedEvent.title}');
-
-      // If there's a new image, we need to handle it differently
-      if (_image != null) {
-        // For now, we'll use the create method with the new image
-        // In a real implementation, you might want a separate update with image method
-        await context.read<EventCubit>().createEvent(updatedEvent, _image!);
-      } else {
-        // Update without changing the image
-        await context.read<EventCubit>().updateEvent(updatedEvent);
-      }
+      await context.read<EventCubit>().updateEvent(updatedEvent, _image);
 
       if (mounted) {
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Event updated successfully! 🎉'),
@@ -142,7 +148,12 @@ class _EditEventScreenState extends State<EditEventScreen> {
             duration: Duration(seconds: 3),
           ),
         );
-        Navigator.pop(context);
+
+        // Pop back to the events screen
+        if (mounted) {
+          Navigator.of(context)
+              .pop(true); // Pass true to indicate successful update
+        }
       }
     } catch (e) {
       print('Error updating event: $e');
@@ -310,9 +321,24 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 ),
 
               // New Image Selection (Optional)
-              const Text(
-                'Update Event Image (required)',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Update Event Image (required)',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  _image == null && widget.event.media == null
+                      ? const Text(
+                          'Please select a new image for the event',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ],
               ),
               const SizedBox(height: 8),
               ImagePickerWidget(

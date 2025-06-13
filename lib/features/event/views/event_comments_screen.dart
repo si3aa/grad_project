@@ -156,6 +156,7 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
+              // ignore: deprecated_member_use
               kPrimaryColor.withOpacity(0.1),
               Colors.white,
             ],
@@ -238,6 +239,7 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
                               borderRadius: BorderRadius.circular(16.0),
                               boxShadow: [
                                 BoxShadow(
+                                  // ignore: deprecated_member_use
                                   color: Colors.grey.withOpacity(0.1),
                                   spreadRadius: 2,
                                   blurRadius: 8,
@@ -258,6 +260,7 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
                                         children: [
                                           CircleAvatar(
                                             backgroundColor:
+                                                // ignore: deprecated_member_use
                                                 kPrimaryColor.withOpacity(0.1),
                                             child: Icon(
                                               Icons.person,
@@ -311,6 +314,7 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.grey.withOpacity(0.1),
                     spreadRadius: 2,
                     blurRadius: 8,

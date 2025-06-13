@@ -6,9 +6,109 @@ import '../../viewmodels/cubit/event_cubit.dart';
 import '../../data/models/return_event.dart';
 import 'add_event_screen.dart';
 import 'event_details_screen.dart';
+import 'package:Herfa/features/event/views/screens/edit_event_screen.dart';
 
 class EventsScreen extends StatelessWidget {
   const EventsScreen({Key? key}) : super(key: key);
+
+  Widget _buildErrorWidget(BuildContext context, String message) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (context.mounted) {
+          await context.read<EventCubit>().refreshEvents();
+        }
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Oops! Something went wrong',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (context.mounted) {
+                      context.read<EventCubit>().refreshEvents();
+                    }
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kPrimaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventsList(BuildContext context, List<Data> events) {
+    if (events.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          if (context.mounted) {
+            await context.read<EventCubit>().refreshEvents();
+          }
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.8,
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.event_busy, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'No events found',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text('Pull down to refresh or add a new event'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (context.mounted) {
+          await context.read<EventCubit>().refreshEvents();
+        }
+      },
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        itemCount: events.length,
+        itemBuilder: (context, index) => EventCard(event: events[index]),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,116 +119,25 @@ class EventsScreen extends StatelessWidget {
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
       ),
-      body: BlocBuilder<EventCubit, EventState>(
-        builder: (context, state) {
-          if (state is EventLoading) {
-            return const Center(child: CircularProgressIndicator());
+      body: RefreshIndicator(
+        onRefresh: () async {
+          if (context.mounted) {
+            await context.read<EventCubit>().refreshEvents();
           }
-
-          if (state is EventError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Oops! Something went wrong',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.message,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        context.read<EventCubit>().refreshEvents();
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Try Again'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          if (state is EventLoaded) {
-            if (state.events.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'No events found',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AddEventScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text('Create Your First Event'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return RefreshIndicator(
-              onRefresh: () async {
-                await context.read<EventCubit>().refreshEvents();
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.events.length,
-                itemBuilder: (context, index) {
-                  final event = state.events[index];
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EventDetailsScreen(event: event),
-                        ),
-                      );
-                    },
-                    child: EventCard(event: event),
-                  );
-                },
-              ),
-            );
-          }
-
-          return const SizedBox.shrink();
         },
+        child: BlocBuilder<EventCubit, EventState>(
+          builder: (context, state) {
+            if (state is EventLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is EventError) {
+              return _buildErrorWidget(context, state.message);
+            } else if (state is EventLoaded) {
+              return _buildEventsList(context, state.events);
+            } else {
+              return const Center(child: Text('Unknown state'));
+            }
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -137,7 +146,12 @@ class EventsScreen extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => const AddEventScreen(),
             ),
-          );
+          ).then((_) {
+            // Refresh after adding new event
+            if (context.mounted) {
+              context.read<EventCubit>().refreshEvents();
+            }
+          });
         },
         backgroundColor: kPrimaryColor,
         child: const Icon(Icons.add, color: Colors.white),
@@ -372,15 +386,22 @@ class EventCard extends StatelessWidget {
   }
 
   void _editEvent(BuildContext context, Data event) {
-    // For now, show a placeholder message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text('Edit functionality for "${event.name}" will be implemented'),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 2),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditEventScreen(event: event),
       ),
-    );
+    ).then((result) {
+      // Only refresh if the update was successful
+      if (result == true) {
+        // Use Future.microtask to ensure the refresh happens after the navigation
+        Future.microtask(() {
+          if (context.mounted) {
+            context.read<EventCubit>().refreshEvents();
+          }
+        });
+      }
+    });
   }
 
   void _confirmDeleteEvent(BuildContext context, Data event) {
