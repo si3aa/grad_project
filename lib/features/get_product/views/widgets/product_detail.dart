@@ -47,7 +47,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Text(
                 widget.productName,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 2,
@@ -59,11 +59,11 @@ class _ProductDetailsState extends State<ProductDetails> {
                   Text(
                     '\$${widget.originalPrice.toStringAsFixed(2)}',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: widget.discountedPrice != null
                           ? Colors.grey.shade500
-                          : Colors.black,
+                          : Colors.red,
                       decoration: widget.discountedPrice != null
                           ? TextDecoration.lineThrough
                           : null,
@@ -74,16 +74,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                     Text(
                       '\$${widget.discountedPrice!.toStringAsFixed(2)}',
                       style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '\$${widget.discountedPrice!.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
                       ),

@@ -1,18 +1,24 @@
-
 import 'package:Herfa/app_strings.dart';
+import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class AppIntercepters extends Interceptor {
-  AppIntercepters();
+  final AuthSharedPrefLocalDataSource _authDataSource;
+
+  AppIntercepters() : _authDataSource = AuthSharedPrefLocalDataSource();
 
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
+    final token = await _authDataSource.getToken();
+
     options.headers[AppStrings.contentType] = AppStrings.applicationJson;
     options.headers[AppStrings.xRequested] = AppStrings.xmlHttpRequest;
-    options.headers[AppStrings.authorization] =
-        "${AppStrings.bearer}eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M";
+
+    if (token != null) {
+      options.headers[AppStrings.authorization] = "${AppStrings.bearer}$token";
+    }
 
     super.onRequest(options, handler);
   }
