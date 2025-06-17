@@ -52,6 +52,7 @@ class EventDetailsScreen extends StatelessWidget {
                         // ignore: deprecated_member_use
                         colors: [
                           Colors.transparent,
+                          // ignore: deprecated_member_use
                           Colors.black.withOpacity(0.8)
                         ],
                       ).createShader(rect);
