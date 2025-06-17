@@ -82,7 +82,8 @@ class EventCubit extends Cubit<EventState> {
       final currentState = state;
       if (currentState is EventLoaded) {
         final updatedEvents = [...currentState.events, createdEvent];
-        print('EventCubit: Added event to existing list. Total events: ${updatedEvents.length}');
+        print(
+            'EventCubit: Added event to existing list. Total events: ${updatedEvents.length}');
         emit(EventLoaded(updatedEvents));
       } else {
         print('EventCubit: Created first event');

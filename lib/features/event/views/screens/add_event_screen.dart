@@ -140,7 +140,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
           startDate: _startDate!,
           endDate: _endDate!,
           price: double.parse(_priceController.text),
-          imageUrl: widget.eventToEdit!.media ?? '', // Keep existing image if no new image
+          imageUrl: widget.eventToEdit!.media ??
+              '', // Keep existing image if no new image
           organizerId: 'merchant',
         );
 
@@ -174,7 +175,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
           endDate: _endDate!,
           price: double.parse(_priceController.text),
           imageUrl: '', // Will be set by the repository
-          organizerId: 'merchant', // This will be handled by the backend based on the token
+          organizerId:
+              'merchant', // This will be handled by the backend based on the token
         );
 
         print('Creating event: ${event.title}');
@@ -194,15 +196,19 @@ class _AddEventScreenState extends State<AddEventScreen> {
     } catch (e) {
       print('Error ${isEditMode ? 'updating' : 'creating'} event: $e');
       if (mounted) {
-        String errorMessage = isEditMode ? 'Failed to update event' : 'Failed to create event';
+        String errorMessage =
+            isEditMode ? 'Failed to update event' : 'Failed to create event';
 
         // Provide more user-friendly error messages
         if (e.toString().contains('UnauthorizedException')) {
-          errorMessage = 'Please log in again to ${isEditMode ? 'update' : 'create'} events';
+          errorMessage =
+              'Please log in again to ${isEditMode ? 'update' : 'create'} events';
         } else if (e.toString().contains('Access forbidden')) {
-          errorMessage = 'You don\'t have permission to ${isEditMode ? 'update' : 'create'} events';
+          errorMessage =
+              'You don\'t have permission to ${isEditMode ? 'update' : 'create'} events';
         } else if (e.toString().contains('File too large')) {
-          errorMessage = 'Image file is too large. Please choose a smaller image';
+          errorMessage =
+              'Image file is too large. Please choose a smaller image';
         } else if (e.toString().contains('Validation error')) {
           errorMessage = 'Please check your input data and try again';
         } else if (e.toString().contains('Network')) {
@@ -212,7 +218,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
         } else {
           // Extract the actual error message if possible
           String fullError = e.toString();
-          String searchPattern = isEditMode ? 'Failed to update event: ' : 'Failed to create event: ';
+          String searchPattern = isEditMode
+              ? 'Failed to update event: '
+              : 'Failed to create event: ';
           if (fullError.contains(searchPattern)) {
             errorMessage = fullError.split(searchPattern).last;
           } else {

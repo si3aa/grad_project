@@ -50,7 +50,10 @@ class EventDetailsScreen extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         // ignore: deprecated_member_use
-                        colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.8)
+                        ],
                       ).createShader(rect);
                     },
                     blendMode: BlendMode.darken,
@@ -60,7 +63,8 @@ class EventDetailsScreen extends StatelessWidget {
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey[300],
-                          child: const Icon(Icons.image_not_supported, size: 80),
+                          child:
+                              const Icon(Icons.image_not_supported, size: 80),
                         );
                       },
                     ),
@@ -124,7 +128,8 @@ class EventDetailsScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Date',
@@ -165,7 +170,8 @@ class EventDetailsScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Price',
@@ -178,7 +184,8 @@ class EventDetailsScreen extends StatelessWidget {
                                       Text(
                                         '\$${event.price?.toStringAsFixed(2) ?? 'N/A'}',
                                         style: const TextStyle(
-                                          color: Color.fromARGB(255, 65, 182, 69),
+                                          color:
+                                              Color.fromARGB(255, 65, 182, 69),
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),

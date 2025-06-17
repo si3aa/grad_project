@@ -26,6 +26,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
 import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
+import 'package:Herfa/constants.dart';
+import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
+import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -121,6 +124,10 @@ class RouteGenerator {
               create: (context) => CommentCubit(CommentRepository()),
               child: ProductDetailScreen(product: product),
             ),
+            builder: (_) => BlocProvider(
+              create: (context) => CommentCubit(CommentRepository()),
+              child: ProductDetailScreen(product: product),
+            ),
           );
         }
         return _undefinedRoute();
@@ -173,6 +180,11 @@ class RouteGenerator {
         appBar: AppBar(
           title: const Text('Error'),
           backgroundColor: kPrimaryColor,
+          title: const Text('Error'),
+          backgroundColor: kPrimaryColor,
+        ),
+        body: const Center(
+          child: Text('Route not found'),
         ),
         body: const Center(
           child: Text('Route not found'),
