@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
+import 'package:dio/dio.dart';
+import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 import '../../viewmodels/cubit/event_cubit.dart';
 import '../../data/models/return_event.dart';
 import 'add_event_screen.dart';
@@ -214,18 +216,25 @@ class EventCard extends StatelessWidget {
                 // Event Date and Location
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today, size: 16),
+                    Icon(Icons.calendar_today, size: 16, color: kPrimaryColor),
                     const SizedBox(width: 8),
                     Text(
                       '${_formatDate(event.startTime)} - ${_formatDate(event.endTime)}',
                       style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    const Spacer(),
+                    _InterestButton(
+                      event: event,
+                      onToggleInterest: (eventId) => context
+                          .read<EventCubit>()
+                          .toggleEventInterest(eventId),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.money, size: 16),
+                    Icon(Icons.money, size: 16, color: kPrimaryColor),
                     const SizedBox(width: 8),
                     Text(
                       'Price: \$${event.price?.toStringAsFixed(2) ?? 'N/A'}',
@@ -449,5 +458,171 @@ class EventCard extends StatelessWidget {
 
     // Call the delete method from EventCubit
     context.read<EventCubit>().deleteEvent(event.id.toString());
+  }
+}
+
+class _InterestButton extends StatefulWidget {
+  final Data event;
+  final Function(String) onToggleInterest;
+
+  const _InterestButton({
+    required this.event,
+    required this.onToggleInterest,
+  });
+
+  @override
+  State<_InterestButton> createState() => _InterestButtonState();
+}
+
+class _InterestButtonState extends State<_InterestButton> {
+  bool isInterested = false;
+  String? _currentUsername;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUserAndInterestState();
+  }
+
+  Future<void> _loadCurrentUserAndInterestState() async {
+    final authDataSource = AuthSharedPrefLocalDataSource();
+    final userData = await authDataSource.getUserData();
+    _currentUsername = userData?['username']?.toString();
+
+    if (mounted) {
+      setState(() {
+        isInterested =
+            widget.event.interestedUsers?.contains(_currentUsername) == true;
+      });
+    }
+  }
+
+  Future<void> _handleLongPress() async {
+    if (!isInterested) return;
+    if (_currentUsername == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User not authenticated.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Interest'),
+        content: const Text(
+            'Are you sure you want to remove this event from your interests?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        final dio = Dio();
+        final token = await AuthSharedPrefLocalDataSource().getToken();
+
+        final response = await dio.delete(
+          'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/events/${widget.event.id}/interest',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          ),
+        );
+
+        if (response.statusCode == 200) {
+          setState(() {
+            isInterested = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Removed from interest'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('Failed to remove interest: ${response.statusCode}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        print('Error removing interest: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to remove interest'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: _handleLongPress,
+      child: IconButton(
+        icon: Icon(
+          isInterested ? Icons.star : Icons.star_border,
+          color: isInterested ? Colors.amber : kPrimaryColor,
+          size: 28,
+        ),
+        onPressed: () async {
+          if (_currentUsername == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('User not authenticated.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+          if (!isInterested) {
+            final success =
+                await widget.onToggleInterest(widget.event.id.toString());
+            if (success) {
+              setState(() {
+                isInterested = true;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Added to interest'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Failed to add interest'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+      ),
+    );
   }
 }

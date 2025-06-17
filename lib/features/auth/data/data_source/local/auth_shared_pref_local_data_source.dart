@@ -38,4 +38,19 @@ class AuthSharedPrefLocalDataSource extends AuthLocalDataSource {
       return null;
     }
   }
+
+  // New method to save user data
+  Future<void> saveUserData(Map<String, dynamic> userData) async {
+    final sharedPref = await SharedPreferences.getInstance();
+    await sharedPref.setString(
+        CacheConstant.userDataKey, json.encode(userData));
+  }
+
+  // New method to get user data
+  Future<Map<String, dynamic>?> getUserData() async {
+    final sharedPref = await SharedPreferences.getInstance();
+    final userDataString = sharedPref.getString(CacheConstant.userDataKey);
+    if (userDataString == null) return null;
+    return json.decode(userDataString) as Map<String, dynamic>;
+  }
 }

@@ -47,25 +47,24 @@ class AuthRepository {
     }
   }
 
- Future<LoginResponse> login(LoginRequest request) async {
-  try {
-    final response = await remoteDataSource.login(request);
-    if (response.success == true && response.token != null) {
-      await localDataSource.saveToken(response.token!);
-    }
-    return response; 
-  } catch (e) {
-    if (e is DioException) {
+  Future<LoginResponse> login(LoginRequest request) async {
+    try {
+      final response = await remoteDataSource.login(request);
+      if (response.success == true && response.token != null) {
+        await localDataSource.saveToken(response.token!);
+      }
+      return response;
+    } catch (e) {
+      if (e is DioException) {
+        return LoginResponse(
+          success: false,
+          message: 'Failed to login: ${e.message}',
+        );
+      }
       return LoginResponse(
         success: false,
-        message: 'Failed to login: ${e.message}',
+        message: 'Failed to login: $e',
       );
     }
-    return LoginResponse(
-      success: false,
-      message: 'Failed to login: $e',
-    );
   }
-}
-
 }

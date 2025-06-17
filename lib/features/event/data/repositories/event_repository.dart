@@ -498,4 +498,48 @@ class EventRepository {
       rethrow;
     }
   }
+
+  Future<bool> toggleEventInterest(String eventId) async {
+    try {
+      String? token = await _authDataSource.getToken();
+      if (token == null) {
+        throw UnauthorizedException('No authentication token found.');
+      }
+
+      print('=== Event Interest Request ===');
+      print('Token: $token');
+      print('Event ID: $eventId');
+      print('Request URL: $_baseUrl/events/$eventId/interest');
+      print('===========================');
+
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+
+      final response = await _dio.post(
+        '$_baseUrl/events/$eventId/interest',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      print('Response Status: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      print('===========================');
+
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      print('Error toggling event interest: $e');
+      if (e is DioException) {
+        print('Dio Error Type: ${e.type}');
+        print('Dio Error Message: ${e.message}');
+        if (e.response != null) {
+          print('Error Response Status: ${e.response?.statusCode}');
+          print('Error Response Data: ${e.response?.data}');
+        }
+      }
+      return false;
+    }
+  }
 }
