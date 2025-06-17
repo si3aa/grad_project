@@ -440,6 +440,55 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
     }
   }
 
+  /// Load products for a specific merchant
+  Future<void> loadMerchantProducts(String merchantId) async {
+    emit(const viewmodels.ProductLoading());
+    try {
+      developer.log('Loading merchant products from repository',
+          name: 'ProductCubit');
+      final repository = ProductApiRepository();
+      final apiProducts = await repository.getMerchantProducts(merchantId);
+
+      developer.log('Received ${apiProducts.length} merchant products from API',
+          name: 'ProductCubit');
+
+      // Convert API products to UI Product model
+      final products = apiProducts.map((apiProduct) {
+        developer.log(
+            'Processing merchant product: ${apiProduct.id} - ${apiProduct.name}',
+            name: 'ProductCubit');
+        return Product(
+          id: apiProduct.id!,
+          userName: 'Merchant', // Default or fetch from user API
+          userHandle: '@merchant',
+          userImage: 'assets/images/arrow-small-left.png', // Default image
+          productImage: apiProduct.media ?? 'assets/images/product_img.png',
+          productName: apiProduct.name ?? 'Unknown Product',
+          originalPrice: apiProduct.price ?? 0.0,
+          discountedPrice: apiProduct.discountedPrice ?? 0.0,
+          likes: 0, // Default value since it's not from API
+          comments: 0, // Default value since it's not from API
+          title: apiProduct.shortDescription ?? '',
+          description: apiProduct.longDescription ?? '',
+          quantity: apiProduct.quantity ?? 0,
+        );
+      }).toList();
+
+      developer.log(
+          'Converted ${products.length} merchant products to UI model',
+          name: 'ProductCubit');
+
+      emit(viewmodels.ProductLoaded(
+        products: products,
+        filteredProducts: products,
+      ));
+    } catch (e) {
+      developer.log('Error loading merchant products',
+          name: 'ProductCubit', error: e);
+      emit(viewmodels.ProductError('Failed to load merchant products: $e'));
+    }
+  }
+
   // Make this method public so it can be called from UI
   Future<void> loadProducts() async {
     return _loadProducts();

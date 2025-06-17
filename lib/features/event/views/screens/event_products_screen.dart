@@ -25,6 +25,13 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
     authDataSource: AuthSharedPrefLocalDataSource(),
   );
 
+  @override
+  void initState() {
+    super.initState();
+    // Load products for merchant ID 3
+    context.read<ProductCubit>().loadMerchantProducts('3');
+  }
+
   Future<void> _addProductToEvent(int productId) async {
     try {
       print('=== Starting Add Product Process ===');
@@ -109,7 +116,7 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 const Text(
-                  'Products',
+                  'Your Products',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
