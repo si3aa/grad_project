@@ -150,6 +150,7 @@ class _EventCommentsScreenState extends State<EventCommentsScreen> {
         ),
         backgroundColor: kPrimaryColor,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [

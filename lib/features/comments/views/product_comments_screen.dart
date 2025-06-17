@@ -101,7 +101,7 @@ class _ProductCommentsScreenState extends State<ProductCommentsScreen> {
   }
 
   String _formatDate(String dateStr) {
-    final date = DateTime.parse(dateStr);
+    final date = DateTime.parse(dateStr).add(const Duration(hours: 3));
     return DateFormat('MMM d, y • h:mm a').format(date);
   }
 
@@ -238,9 +238,14 @@ class _ProductCommentsScreenState extends State<ProductCommentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Comments'),
+        title: const Text(
+          'Product Comments',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
         backgroundColor: kPrimaryColor,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
