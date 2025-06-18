@@ -8,4 +8,5 @@ class APIConstants {
 
 class CacheConstant {
   static const String tokenKey = 'token';
+  static const String userDataKey = 'user_data';
 }
