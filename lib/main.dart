@@ -7,6 +7,8 @@ import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
@@ -59,26 +61,37 @@ Future<void> main() async {
   final eventCommentRepository = EventCommentRepository();
 
   runApp(
-    MultiBlocProvider(
+    MultiProvider(
       providers: [
-        BlocProvider(create: (_) => HomeCubit()),
-        BlocProvider(create: (_) => ContentCubit()),
-        BlocProvider(create: (_) => NotificationCubit()),
-        BlocProvider(create: (_) => SearchCubit()),
-        BlocProvider(create: (_) => NewPostCubit()),
-        BlocProvider(create: (_) => EventCubit(eventRepository)),
-        BlocProvider(create: (_) => EventCommentCubit(eventCommentRepository)),
-        BlocProvider(create: (_) => CartCubit()),
-        BlocProvider(create: (_) => ProductCubit()),
-        BlocProvider(create: (_) => AuthCubit()),
-        BlocProvider(
-            create: (_) =>
-                SavedProductCubit()..fetchSavedProductsWithDetails()),
-        BlocProvider(
-            create: (_) => EventInterestCubit(eventInterestRepository)),
-        // SavedProductCubit is provided in the route generator for the SavedScreen
+        ChangeNotifierProvider(
+          create: (_) => UserViewModel(),
+        ),
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => HomeCubit()),
+            BlocProvider(create: (_) => ContentCubit()),
+            BlocProvider(create: (_) => NotificationCubit()),
+            BlocProvider(create: (_) => SearchCubit()),
+            BlocProvider(create: (_) => NewPostCubit()),
+            BlocProvider(create: (_) => EventCubit(eventRepository)),
+            BlocProvider(create: (_) => EventCommentCubit(eventCommentRepository)),
+            BlocProvider(create: (_) => CartCubit()),
+            BlocProvider(create: (_) => ProductCubit()),
+            BlocProvider(
+              create: (context) => AuthCubit(
+                userViewModel: context.read<UserViewModel>(),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => SavedProductCubit()..fetchSavedProductsWithDetails(),
+            ),
+            BlocProvider(
+              create: (_) => EventInterestCubit(eventInterestRepository),
+            ),
+          ],
+          child: const Herfa(),
+        ),
       ],
-      child: const Herfa(),
     ),
   );
 }
@@ -88,6 +101,11 @@ class Herfa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Fetch user data when app starts
+    Future.microtask(() {
+      context.read<UserViewModel>().getCurrentUser();
+    });
+
     return ScreenUtilInit(
       designSize: const Size(430, 932),
       minTextAdapt: true,
