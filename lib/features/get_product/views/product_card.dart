@@ -3,7 +3,7 @@ import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
 import 'package:Herfa/features/get_product/views/widgets/user_info.dart';
-import 'package:Herfa/features/get_product/views/widgets/favorite_button.dart';
+import 'package:Herfa/features/favorites/views/widgets/favorite_button.dart';
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatefulWidget {
@@ -75,11 +75,6 @@ class _ProductCardState extends State<ProductCard> {
                 children: [
                   FavoriteButton(
                     productId: widget.product.id.toString(),
-                    initialIsFavorite:
-                        false, // All products start as unfavorited
-                    onFavoriteChanged: (isFavorite) {
-                      // FavoriteButton manages its own state, no need to track here
-                    },
                   ),
                   const SizedBox(width: 10),
                   GestureDetector(
@@ -88,7 +83,9 @@ class _ProductCardState extends State<ProductCard> {
                       Navigator.pushNamed(
                         context,
                         Routes.commentsRoute,
-                        arguments: {'productId': widget.product.id.toString()},
+                        arguments: {
+                          'productId': widget.product.id.toString(),
+                        },
                       );
                     },
                     child: Container(
