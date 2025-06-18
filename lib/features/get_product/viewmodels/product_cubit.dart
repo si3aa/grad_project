@@ -7,23 +7,9 @@ import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/features/get_me/me_repository.dart';
 
 class ProductCubit extends Cubit<viewmodels.ProductState> {
-  final MeRepository _meRepository = MeRepository();
-  String? _currentUserName;
-  String? _currentUserFirstName;
-  String? _currentUserLastName;
-
   ProductCubit() : super(const viewmodels.ProductInitial()) {
-    _loadCurrentUserAndProducts();
-  }
-
-  Future<void> _loadCurrentUserAndProducts() async {
-    final userData = await _meRepository.getMe();
-    _currentUserName = userData?.username;
-    _currentUserFirstName = userData?.firstName;
-    _currentUserLastName = userData?.lastName;
     _loadProducts();
   }
 
@@ -44,9 +30,8 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          ownerFirstName: _currentUserFirstName,
-          ownerLastName: _currentUserLastName,
-          ownerUsername: _currentUserName,
+          userName: 'Merchant', // Default or fetch from user API
+          userHandle: '@merchant',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
@@ -203,7 +188,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
     ).then((edited) {
       if (edited == true) {
         // Refresh product data if edited
-        _loadCurrentUserAndProducts(); // Reload all products and user info
+        _loadProducts();
 
         // Show success message using the stored reference
         scaffoldMessenger.showSnackBar(
@@ -425,9 +410,8 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
           if (product.id.toString() == productId) {
             return Product(
               id: int.parse(newProductData['id']),
-              ownerFirstName: _currentUserFirstName,
-              ownerLastName: _currentUserLastName,
-              ownerUsername: _currentUserName,
+              userName: product.userName,
+              userHandle: product.userHandle,
               userImage: product.userImage,
               productImage: product.productImage,
               productName: productData['name'] as String,
@@ -475,7 +459,8 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          ownerUsername: 'Merchant', // Default or fetch from user API
+          userName: 'Merchant', // Default or fetch from user API
+          userHandle: '@merchant',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
@@ -506,6 +491,6 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
 
   // Make this method public so it can be called from UI
   Future<void> loadProducts() async {
-    return _loadCurrentUserAndProducts();
+    return _loadProducts();
   }
 }

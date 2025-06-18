@@ -1,8 +1,7 @@
 class Product {
   final int id;
-  final String? ownerFirstName;
-  final String? ownerLastName;
-  final String? ownerUsername;
+  final String userName;
+  final String userHandle;
   final String userImage;
   final String productImage;
   final String productName;
@@ -15,10 +14,8 @@ class Product {
   final int quantity;
 
   Product({
-    required this.id,
-    this.ownerFirstName,
-    this.ownerLastName,
-    this.ownerUsername,
+    required this.userName,
+    required this.userHandle,
     required this.userImage,
     required this.productImage,
     required this.productName,
@@ -29,5 +26,6 @@ class Product {
     required this.title,
     required this.description,
     required this.quantity,
+    this.id = 0, // Default value for backward compatibility
   });
 }

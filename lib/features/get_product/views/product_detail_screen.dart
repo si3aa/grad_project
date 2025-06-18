@@ -1,11 +1,9 @@
 // iore_for_file: unnecessary_null_comparison
-// iore_for_file: unnecessary_null_comparison
 
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
 import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_comments.dart';
-
 import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
@@ -228,10 +226,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     // Create a copy of the product with updated quantity
     final updatedProduct = Product(
-      id: widget.product.id,
-      ownerFirstName: widget.product.ownerFirstName,
-      ownerLastName: widget.product.ownerLastName,
-      ownerUsername: widget.product.ownerUsername,
+      userName: widget.product.userName,
+      userHandle: widget.product.userHandle,
       userImage: widget.product.userImage,
       productImage: widget.product.productImage,
       productName: widget.product.productName,
@@ -277,9 +273,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.9,
-        ),
+        height: MediaQuery.of(context).size.height * 0.9,
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
@@ -597,15 +591,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    currentProduct.ownerUsername ??
-                                        'Unknown User',
+                                    currentProduct.userName,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
                                   Text(
-                                    '@${currentProduct.ownerUsername?.toLowerCase() ?? 'user'}',
+                                    currentProduct.userHandle,
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                       fontSize: 14,
@@ -630,7 +623,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ],
                           ),
 
-                          const SizedBox(height: 24),
                           const SizedBox(height: 24),
 
                           // Product Name and Title
@@ -700,12 +692,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
 
                           const SizedBox(height: 24),
-                          const SizedBox(height: 24),
 
                           // Description with expandable text
                           _buildDescription(),
 
-                          const SizedBox(height: 24),
                           const SizedBox(height: 24),
 
                           // Quantity Selector
@@ -774,7 +764,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ],
                           ),
 
-                          const SizedBox(height: 24),
                           const SizedBox(height: 24),
 
                           // Coupon Code
@@ -847,7 +836,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ],
 
-                          const SizedBox(height: 24),
                           const SizedBox(height: 24),
 
                           // Order Summary

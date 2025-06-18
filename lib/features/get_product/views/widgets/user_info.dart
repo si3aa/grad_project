@@ -1,19 +1,15 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 
 class UserInfo extends StatefulWidget {
-  final String? ownerFirstName;
-  final String? ownerLastName;
-  final String? ownerUsername;
+  final String userName;
+  final String userHandle;
   final String userImage;
   final VoidCallback onMore;
 
   const UserInfo({
     super.key,
-    this.ownerFirstName,
-    this.ownerLastName,
-    this.ownerUsername,
+    required this.userName,
+    required this.userHandle,
     required this.userImage,
     required this.onMore,
   });
@@ -42,8 +38,7 @@ class _UserInfoState extends State<UserInfo> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${widget.ownerFirstName ?? ''} ${widget.ownerLastName ?? ''}'
-                    .trim(),
+                widget.userName,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -52,7 +47,7 @@ class _UserInfoState extends State<UserInfo> {
                 maxLines: 1,
               ),
               Text(
-                '@${widget.ownerUsername ?? ''}',
+                widget.userHandle,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -72,9 +67,9 @@ class _UserInfoState extends State<UserInfo> {
             // Here you would typically call an API to follow/unfollow the user
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(isFollowing
-                    ? 'You are now following ${widget.ownerFirstName ?? widget.ownerUsername}'
-                    : 'You unfollowed ${widget.ownerFirstName ?? widget.ownerUsername}'),
+                content: Text(isFollowing 
+                  ? 'You are now following ${widget.userName}' 
+                  : 'You unfollowed ${widget.userName}'),
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -95,9 +90,11 @@ class _UserInfoState extends State<UserInfo> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            backgroundColor: isFollowing
-                ? Colors.green.withOpacity(0.1)
-                : Colors.blue.withOpacity(0.1),
+            backgroundColor: isFollowing 
+              // ignore: deprecated_member_use
+              ? Colors.green.withOpacity(0.1) 
+              // ignore: deprecated_member_use
+              : Colors.blue.withOpacity(0.1),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -115,3 +112,4 @@ class _UserInfoState extends State<UserInfo> {
     );
   }
 }
+

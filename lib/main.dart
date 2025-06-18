@@ -1,7 +1,6 @@
 import 'package:Herfa/features/event/viewmodels/cubit/event_cubit.dart';
 import 'package:Herfa/features/event/viewmodels/event_comment_cubit.dart';
 import 'package:Herfa/features/event/data/repository/event_comment_repository.dart';
-
 import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
@@ -34,7 +33,7 @@ Future<void> main() async {
       baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
     ),
   );
-
+  
   dio.interceptors.add(
     LogInterceptor(
       requestBody: true,
@@ -52,7 +51,7 @@ Future<void> main() async {
     dio: dio,
     authDataSource: authDataSource,
   );
-
+  
   final eventInterestRepository = EventInterestRepository(
     dio: dio,
     authDataSource: authDataSource,
@@ -67,8 +66,6 @@ Future<void> main() async {
         BlocProvider(create: (_) => NotificationCubit()),
         BlocProvider(create: (_) => SearchCubit()),
         BlocProvider(create: (_) => NewPostCubit()),
-        BlocProvider(create: (_) => EventCubit(eventRepository)),
-        BlocProvider(create: (_) => EventCommentCubit(eventCommentRepository)),
         BlocProvider(create: (_) => EventCubit(eventRepository)),
         BlocProvider(create: (_) => EventCommentCubit(eventCommentRepository)),
         BlocProvider(create: (_) => CartCubit()),

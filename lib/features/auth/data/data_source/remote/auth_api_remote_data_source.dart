@@ -55,14 +55,7 @@ class AuthApiRemoteDataSource extends AuthRemoteDataSource {
         throw Exception('Empty response from server');
       }
 
-      final loginResponse = LoginResponse.fromJson(response.data);
-      if (loginResponse.token != null) {
-        print('=== Login Token ===');
-        print('Token: ${loginResponse.token}');
-        print('==================');
-      }
-
-      return loginResponse;
+      return LoginResponse.fromJson(response.data);
     } catch (e) {
       developer.log('Login error: $e', name: 'AuthAPI');
       if (e is DioException) {

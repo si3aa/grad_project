@@ -21,8 +21,7 @@ import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';
 import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/features/saved_products/views/screens/saved_screen_wrapper.dart';
-import 'package:flutter/material.dart' hide Scaffold;
-import 'package:flutter/material.dart' as material;
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
@@ -170,13 +169,13 @@ class RouteGenerator {
 
   static Route<dynamic> _undefinedRoute() {
     return MaterialPageRoute(
-      builder: (_) => material.Scaffold(
-        appBar: material.AppBar(
-          title: const material.Text('Error'),
+      builder: (_) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Error'),
           backgroundColor: kPrimaryColor,
         ),
-        body: const material.Center(
-          child: material.Text('Route not found'),
+        body: const Center(
+          child: Text('Route not found'),
         ),
       ),
     );
