@@ -37,23 +37,5 @@ class AuthSharedPrefLocalDataSource extends AuthLocalDataSource {
       print('Error decoding token: $e');
       return null;
     }
-<<<<<<< HEAD
-=======
-  }
-
-  // New method to save user data
-  Future<void> saveUserData(Map<String, dynamic> userData) async {
-    final sharedPref = await SharedPreferences.getInstance();
-    await sharedPref.setString(
-        CacheConstant.userDataKey, json.encode(userData));
-  }
-
-  // New method to get user data
-  Future<Map<String, dynamic>?> getUserData() async {
-    final sharedPref = await SharedPreferences.getInstance();
-    final userDataString = sharedPref.getString(CacheConstant.userDataKey);
-    if (userDataString == null) return null;
-    return json.decode(userDataString) as Map<String, dynamic>;
->>>>>>> d4c41aced3d31467b8d9e75869fe8df36db0f5f9
   }
 }

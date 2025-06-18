@@ -475,8 +475,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          userName: 'Merchant', // Default or fetch from user API
-          userHandle: '@merchant',
+          ownerUsername: 'Merchant', // Default or fetch from user API
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',

@@ -135,16 +135,4 @@ class EventCubit extends Cubit<EventState> {
       emit(EventError(e.toString()));
     }
   }
-<<<<<<< HEAD
-=======
-
-  Future<bool> toggleEventInterest(String eventId) async {
-    try {
-      return await _eventRepository.toggleEventInterest(eventId);
-    } catch (e) {
-      print('Error toggling event interest: $e');
-      return false;
-    }
-  }
->>>>>>> d4c41aced3d31467b8d9e75869fe8df36db0f5f9
 }

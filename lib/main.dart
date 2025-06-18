@@ -1,6 +1,7 @@
 import 'package:Herfa/features/event/viewmodels/cubit/event_cubit.dart';
 import 'package:Herfa/features/event/viewmodels/event_comment_cubit.dart';
 import 'package:Herfa/features/event/data/repository/event_comment_repository.dart';
+
 import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
@@ -20,11 +21,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:Herfa/features/event/data/repositories/event_repository.dart';
 import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
-<<<<<<< HEAD
 import 'package:Herfa/features/event_interest/data/repositories/event_interest_repository.dart';
 import 'package:Herfa/features/event_interest/viewmodels/cubit/event_interest_cubit.dart';
-=======
->>>>>>> d4c41aced3d31467b8d9e75869fe8df36db0f5f9
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +34,7 @@ Future<void> main() async {
       baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
     ),
   );
-  
+
   dio.interceptors.add(
     LogInterceptor(
       requestBody: true,
@@ -54,14 +52,11 @@ Future<void> main() async {
     dio: dio,
     authDataSource: authDataSource,
   );
-<<<<<<< HEAD
-  
+
   final eventInterestRepository = EventInterestRepository(
     dio: dio,
     authDataSource: authDataSource,
   );
-=======
->>>>>>> d4c41aced3d31467b8d9e75869fe8df36db0f5f9
   final eventCommentRepository = EventCommentRepository();
 
   runApp(
@@ -72,6 +67,8 @@ Future<void> main() async {
         BlocProvider(create: (_) => NotificationCubit()),
         BlocProvider(create: (_) => SearchCubit()),
         BlocProvider(create: (_) => NewPostCubit()),
+        BlocProvider(create: (_) => EventCubit(eventRepository)),
+        BlocProvider(create: (_) => EventCommentCubit(eventCommentRepository)),
         BlocProvider(create: (_) => EventCubit(eventRepository)),
         BlocProvider(create: (_) => EventCommentCubit(eventCommentRepository)),
         BlocProvider(create: (_) => CartCubit()),
