@@ -1,0 +1,2 @@
+E:/TestApp/grad_project-main/android/app/.cxx/Debug/414p2p5m/x86/CMakeFiles/edit_cache.dir
+E:/TestApp/grad_project-main/android/app/.cxx/Debug/414p2p5m/x86/CMakeFiles/rebuild_cache.dir
