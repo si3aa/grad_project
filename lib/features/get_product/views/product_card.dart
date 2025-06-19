@@ -46,8 +46,8 @@ class _ProductCardState extends State<ProductCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserInfoNew(
-                userName: widget.product.userName,          
-                userHandle: widget.product.userHandle,
+                userName: widget.product.userFirstName,
+                userHandle: widget.product.userUsername,
                 userImage: widget.product.userImage,
                 onMore: () => widget.onMore(context),
               ),

@@ -30,8 +30,8 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          userName: 'Merchant', // Default or fetch from user API
-          userHandle: 'merchant',
+          userFirstName: apiProduct.userFirstName ?? '',
+          userUsername: apiProduct.userUsername ?? '',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
@@ -381,17 +381,17 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
         final updatedProducts = currentState.products.map((product) {
           if (product.id.toString() == productId) {
             return Product(
-              id: int.parse(newProductData['id']),
-              userName: product.userName,
-              userHandle: product.userHandle,
+              id: product.id,
+              userFirstName: product.userFirstName,
+              userUsername: product.userUsername,
               userImage: product.userImage,
               productImage: product.productImage,
-              productName: productData['name'] as String,
-              originalPrice: productData['price'] as double,
-              discountedPrice: productData['price'] as double,
-              title: productData['title'] as String,
-              description: productData['description'] as String,
-              quantity: productData['quantity'] as int,
+              productName: product.productName,
+              originalPrice: product.originalPrice,
+              discountedPrice: product.discountedPrice,
+              title: product.title,
+              description: product.description,
+              quantity: product.quantity,
             );
           }
           return product;
@@ -429,8 +429,8 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          userName: 'Merchant', // Default or fetch from user API
-          userHandle: '@merchant',
+          userFirstName: apiProduct.userFirstName ?? '',
+          userUsername: apiProduct.userUsername ?? '',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',

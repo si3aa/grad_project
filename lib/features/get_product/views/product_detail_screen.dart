@@ -208,8 +208,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     // Create a copy of the product with updated quantity
     final updatedProduct = Product(
-      userName: widget.product.userName,
-      userHandle: widget.product.userHandle,
+      userFirstName: widget.product.userFirstName,
+      userUsername: widget.product.userUsername,
       userImage: widget.product.userImage,
       productImage: widget.product.productImage,
       productName: widget.product.productName,
@@ -219,6 +219,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       description: widget.product.description,
       quantity: widget.product.quantity -
           selectedQuantity, // Decrease the available quantity
+      id: widget.product.id,
     );
 
     // Update the product in the state
@@ -571,14 +572,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    currentProduct.userName,
+                                    currentProduct.userFirstName,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
                                   Text(
-                                    currentProduct.userHandle,
+                                    currentProduct.userUsername,
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                       fontSize: 14,

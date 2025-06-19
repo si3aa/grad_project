@@ -26,9 +26,9 @@ void main() {
         originalPrice: 99.99,
         discountedPrice: 89.99,
         quantity: 10,
-        productImage: 'test_image.jpg', 
-        userName: 'Test User',
-        userHandle: '@testuser',
+        productImage: 'test_image.jpg',
+        userFirstName: 'Test',
+        userUsername: 'testuser',
         userImage: 'user_image.jpg',
       );
 
