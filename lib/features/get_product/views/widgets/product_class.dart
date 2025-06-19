@@ -7,8 +7,7 @@ class Product {
   final String productName;
   final double originalPrice;
   final double discountedPrice;
-  int likes;
-  int comments;
+  
   final String title;
   final String description;
   final int quantity;
@@ -21,8 +20,7 @@ class Product {
     required this.productName,
     required this.originalPrice,
     required this.discountedPrice,
-    required this.likes,
-    required this.comments,
+   
     required this.title,
     required this.description,
     required this.quantity,

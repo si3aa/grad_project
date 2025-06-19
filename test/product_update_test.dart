@@ -26,12 +26,10 @@ void main() {
         originalPrice: 99.99,
         discountedPrice: 89.99,
         quantity: 10,
-        productImage: 'test_image.jpg',
+        productImage: 'test_image.jpg', 
         userName: 'Test User',
         userHandle: '@testuser',
         userImage: 'user_image.jpg',
-        likes: 0,
-        comments: 0,
       );
 
       // Act

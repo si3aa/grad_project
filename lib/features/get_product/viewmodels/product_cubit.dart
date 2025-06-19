@@ -31,14 +31,12 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
         return Product(
           id: apiProduct.id!,
           userName: 'Merchant', // Default or fetch from user API
-          userHandle: '@merchant',
+          userHandle: 'merchant',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
           originalPrice: apiProduct.price ?? 0.0,
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
-          likes: 0, // Default value since it's not from API
-          comments: 0, // Default value since it's not from API
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
           quantity: apiProduct.quantity ?? 0,
@@ -72,38 +70,12 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
       ));
     }
   }
-
-  void likeProduct(Product product) {
-    final state = this.state;
-    if (state is viewmodels.ProductLoaded) {
-      product.likes++;
-      emit(viewmodels.ProductLoaded(
-        products: state.products,
-        filteredProducts: List.from(state.filteredProducts),
-      ));
-    }
-  }
-
-  /// Handle comment action (placeholder for now).
-  void commentProduct(Product product) {
-    final state = this.state;
-    if (state is viewmodels.ProductLoaded) {
-      product.comments++;
-      emit(viewmodels.ProductLoaded(
-        products: state.products,
-        filteredProducts: List.from(state.filteredProducts),
-      ));
-    }
-  }
-
-  /// Handle cart action (placeholder for now).
   void addToCart(Product product) {
     // Placeholder: In a real app, this might add the product to a cart
   }
 
   /// Handle more options action for a product
   void moreOptions(Product product, BuildContext context) {
-    // Show bottom sheet with options
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -417,8 +389,6 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
               productName: productData['name'] as String,
               originalPrice: productData['price'] as double,
               discountedPrice: productData['price'] as double,
-              likes: product.likes,
-              comments: product.comments,
               title: productData['title'] as String,
               description: productData['description'] as String,
               quantity: productData['quantity'] as int,
@@ -466,8 +436,6 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
           productName: apiProduct.name ?? 'Unknown Product',
           originalPrice: apiProduct.price ?? 0.0,
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
-          likes: 0, // Default value since it's not from API
-          comments: 0, // Default value since it's not from API
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
           quantity: apiProduct.quantity ?? 0,

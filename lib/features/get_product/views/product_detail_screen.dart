@@ -68,9 +68,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _navigateToEditProduct(Product product) {
-    // Navigate to edit product screen with product ID
-    // Since the Product class doesn't have an ID, we'll use a hardcoded ID for now
-    // In a real app, you would get the ID from the API
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -129,20 +126,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 _showDeleteConfirmation(product);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.visibility_off_outlined),
-              title: const Text('Hide Product'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement hide product functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Product hidden from marketplace'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
           ],
         ),
       ),
@@ -150,9 +133,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _showDeleteConfirmation(Product product) {
-    // Store a reference to the ScaffoldMessengerState
-    // ignore: unused_local_variable
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+   
+    ScaffoldMessenger.of(context);
 
     showDialog(
       context: context,
@@ -233,8 +215,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       productName: widget.product.productName,
       originalPrice: widget.product.originalPrice,
       discountedPrice: widget.product.discountedPrice,
-      likes: widget.product.likes,
-      comments: widget.product.comments,
       title: widget.product.title,
       description: widget.product.description,
       quantity: widget.product.quantity -

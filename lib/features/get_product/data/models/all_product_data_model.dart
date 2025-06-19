@@ -8,7 +8,10 @@ class AllproductDataModel {
   String? media;
   bool? active;
   List<String>? colors;
-  double? discountedPrice; // Changed from int? to double?
+  double? discountedPrice;
+  String? userUsername;
+  String? userFirstName;
+  String? userLastName;
   int likes = 0;
   int comments = 0;
 
@@ -23,6 +26,9 @@ class AllproductDataModel {
       this.active,
       this.colors,
       this.discountedPrice,
+      this.userUsername,
+      this.userFirstName,
+      this.userLastName,
       this.likes = 0,
       this.comments = 0});
 
@@ -36,6 +42,9 @@ class AllproductDataModel {
     media = json['media'];
     active = json['active'];
     colors = json['colors'] != null ? List<String>.from(json['colors']) : [];
+    userUsername = json['userUsername'];
+    userFirstName = json['userFirstName'];
+    userLastName = json['userLastName'];
     
     // Handle discountedPrice as double
     if (json['discountedPrice'] != null) {
@@ -64,6 +73,26 @@ class AllproductDataModel {
     data['active'] = this.active;
     data['colors'] = this.colors;
     data['discountedPrice'] = this.discountedPrice;
+    data['userUsername'] = this.userUsername;
+    data['userFirstName'] = this.userFirstName;
+    data['userLastName'] = this.userLastName;
     return data;
+  }
+
+  // Helper method to get formatted user name
+  String get userFullName {
+    String firstName = userFirstName?.trim() ?? '';
+    String lastName = userLastName?.trim() ?? '';
+    
+    // Capitalize first letter of last name
+    if (lastName.isNotEmpty) {
+      lastName = lastName[0].toUpperCase() + lastName.substring(1).toLowerCase();
+    }
+    
+    if (firstName.isNotEmpty || lastName.isNotEmpty) {
+      return '$firstName $lastName'.trim();
+    }
+    
+    return userUsername ?? 'Anonymous';
   }
 }

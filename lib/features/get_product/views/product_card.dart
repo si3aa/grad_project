@@ -2,8 +2,8 @@ import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
-import 'package:Herfa/features/get_product/views/widgets/user_info_new.dart';
 import 'package:Herfa/features/favorites/views/widgets/favorite_button.dart';
+import 'package:Herfa/features/get_product/views/widgets/user_info_new.dart';
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatefulWidget {
@@ -22,11 +22,6 @@ class ProductCard extends StatefulWidget {
   State<ProductCard> createState() => _ProductCardState();
 }
 
-// Remove this duplicate declaration
-// class _ProductCardState extends State<ProductCard> {
-//   @override
-//   State<ProductCard> createState() => _ProductCardState();
-// }
 
 class _ProductCardState extends State<ProductCard> {
   @override
@@ -51,7 +46,7 @@ class _ProductCardState extends State<ProductCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserInfoNew(
-                userName: widget.product.userName,
+                userName: widget.product.userName,          
                 userHandle: widget.product.userHandle,
                 userImage: widget.product.userImage,
                 onMore: () => widget.onMore(context),
