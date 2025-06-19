@@ -2,7 +2,7 @@ import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
-import 'package:Herfa/features/get_product/views/widgets/user_info.dart';
+import 'package:Herfa/features/get_product/views/widgets/user_info_new.dart';
 import 'package:Herfa/features/favorites/views/widgets/favorite_button.dart';
 import 'package:flutter/material.dart';
 
@@ -50,7 +50,7 @@ class _ProductCardState extends State<ProductCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              UserInfo(
+              UserInfoNew(
                 userName: widget.product.userName,
                 userHandle: widget.product.userHandle,
                 userImage: widget.product.userImage,

@@ -307,7 +307,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
             Expanded(
               child: BlocProvider(
-                create: (context) => CommentCubit(CommentRepository())
+                create: (context) => CommentCubit(CommentRepository(),)
                   ..fetchComments(widget.product.id.toString()),
                 child: ProductComments(
                   productId: widget.product.id.toString(),

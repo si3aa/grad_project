@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../user/viewmodel/user_viewmodel.dart';
 
-class UserInfo extends StatefulWidget {
+class UserInfoNew extends StatefulWidget {
   final String userName;
   final String userHandle;
   final String userImage;
   final VoidCallback onMore;
 
-  const UserInfo({
+  const UserInfoNew({
     super.key,
     required this.userName,
     required this.userHandle,
@@ -17,10 +17,10 @@ class UserInfo extends StatefulWidget {
   });
 
   @override
-  State<UserInfo> createState() => _UserInfoState();
+  State<UserInfoNew> createState() => _UserInfoNewState();
 }
 
-class _UserInfoState extends State<UserInfo> {
+class _UserInfoNewState extends State<UserInfoNew> {
   bool isFollowing = false;
 
   @override
@@ -52,11 +52,12 @@ class _UserInfoState extends State<UserInfo> {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
+              const SizedBox(height: 2),
               Text(
                 "@$displayUsername",
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: Colors.grey[600],
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
@@ -64,58 +65,31 @@ class _UserInfoState extends State<UserInfo> {
             ],
           ),
         ),
-        // Follow button
-        TextButton.icon(
+        IconButton(
+          icon: const Icon(Icons.more_vert),
+          onPressed: widget.onMore,
+        ),
+        TextButton(
           onPressed: () {
             setState(() {
               isFollowing = !isFollowing;
             });
-            // Here you would typically call an API to follow/unfollow the user
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(isFollowing 
-                  ? 'You are now following ${widget.userName}' 
-                  : 'You unfollowed ${widget.userName}'),
-                duration: const Duration(seconds: 2),
-              ),
-            );
           },
-          icon: Icon(
-            isFollowing ? Icons.check : Icons.add,
-            size: 16,
-            color: isFollowing ? Colors.purpleAccent : Colors.blueGrey,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            backgroundColor: isFollowing ? Colors.grey[200] : Colors.blue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
-          label: Text(
+          child: Text(
             isFollowing ? 'Following' : 'Follow',
             style: TextStyle(
-              color: isFollowing ? Colors.purpleAccent : Colors.blueGrey,
-              fontWeight: FontWeight.bold,
+              color: isFollowing ? Colors.black87 : Colors.white,
             ),
           ),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            backgroundColor: isFollowing 
-              // ignore: deprecated_member_use
-              ? Colors.green.withOpacity(0.1) 
-              // ignore: deprecated_member_use
-              : Colors.blue.withOpacity(0.1),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-        ),
-        const SizedBox(width: 4),
-        IconButton(
-          icon: const Icon(
-            Icons.more_horiz,
-            semanticLabel: 'More options',
-          ),
-          onPressed: widget.onMore,
         ),
       ],
     );
   }
 }
-
