@@ -2,6 +2,7 @@ class Product {
   final int id;
   final String userFirstName;
   final String userUsername;
+  final String userLastName;
   final String userImage;
   final String productImage;
   final String productName;
@@ -22,6 +23,7 @@ class Product {
     required this.title,
     required this.description,
     required this.quantity,
-    this.id = 0, // Default value for backward compatibility
+    this.id = 0,
+    required this.userLastName,
   });
 }

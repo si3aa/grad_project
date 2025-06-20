@@ -30,6 +30,7 @@ void main() {
         userFirstName: 'Test',
         userUsername: 'testuser',
         userImage: 'user_image.jpg',
+         userLastName:'testuser' ,
       );
 
       // Act
