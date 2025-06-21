@@ -1,7 +1,6 @@
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/get_product/views/product_card.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
-import 'package:Herfa/features/get_product/viewmodels/product_state.dart';
 import 'package:Herfa/features/favorites/viewmodels/favorite_cubit.dart';
 import 'package:Herfa/ui/widgets/home/header.dart';
 import 'package:Herfa/ui/widgets/home/nav_and_categ.dart';
@@ -10,6 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
+
+import '../../../../features/get_product/viewmodels/product_state.dart';
 
 class PostsTab extends StatelessWidget {
   const PostsTab({super.key});

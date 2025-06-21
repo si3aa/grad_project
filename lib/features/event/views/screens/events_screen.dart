@@ -3,11 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/event_interest/views/widgets/event_interest_button.dart';
+import 'package:provider/provider.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 import '../../viewmodels/cubit/event_cubit.dart';
 import '../../data/models/return_event.dart';
 import 'add_event_screen.dart';
 import 'event_details_screen.dart';
 import 'event_products_list_screen.dart';
+import 'edit_event_screen.dart';
 
 class EventsScreen extends StatelessWidget {
   const EventsScreen({Key? key}) : super(key: key);
@@ -142,18 +145,20 @@ class EventsScreen extends StatelessWidget {
           return const SizedBox.shrink();
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddEventScreen(),
+      floatingActionButton: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
+          ? null
+          : FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddEventScreen(),
+                  ),
+                );
+              },
+              backgroundColor: kPrimaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
             ),
-          );
-        },
-        backgroundColor: kPrimaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 }
@@ -280,7 +285,9 @@ class EventCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
-                      onPressed: () => _showEventOptions(context, event),
+                      onPressed: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
+                          ? null
+                          : () => _showEventOptions(context, event),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryColor,
                         foregroundColor: Colors.white,
@@ -393,13 +400,10 @@ class EventCard extends StatelessWidget {
   }
 
   void _editEvent(BuildContext context, Data event) {
-    // For now, show a placeholder message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text('Edit functionality for "${event.name}" will be implemented'),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 2),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditEventScreen(event: event),
       ),
     );
   }

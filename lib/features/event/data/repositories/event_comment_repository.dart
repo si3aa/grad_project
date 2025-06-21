@@ -98,4 +98,30 @@ class EventCommentRepository {
       return false;
     }
   }
+
+  Future<bool> editComment(String eventId, String commentId, String content) async {
+    try {
+      final token = await _authDataSource.getToken();
+      developer.log('Editing comment with ID: $commentId', name: 'EventCommentAPI');
+      final response = await _dio.put(
+        '$_baseUrl/events/$eventId/comments/$commentId',
+        queryParameters: {
+          'commentText': content,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+      developer.log('Edit comment response: ${response.statusCode} - ${response.data}',
+          name: 'EventCommentAPI');
+      return response.statusCode == 200;
+    } catch (e) {
+      developer.log('Error editing comment: $e', name: 'EventCommentAPI');
+      return false;
+    }
+  }
 }

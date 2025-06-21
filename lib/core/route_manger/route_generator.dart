@@ -145,7 +145,7 @@ class RouteGenerator {
           return MaterialPageRoute(
             builder: (_) => BlocProvider(
               create: (context) {
-                final cubit = CommentCubit(CommentRepository());
+                final cubit = CommentCubit(CommentRepository(),);
                 cubit.fetchComments(eventId);
                 return cubit;
               },
