@@ -3,15 +3,18 @@ import 'package:Herfa/features/auth/data/data_source/remote/auth_api_remote_data
 import 'package:Herfa/features/auth/data/models/login_request.dart';
 import 'package:Herfa/features/auth/data/models/register_request.dart';
 import 'package:Herfa/features/auth/data/repositories/auth_repository.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 
 part 'auth_state.dart';
 
+
 class AuthCubit extends Cubit<AuthState> {
   late final AuthRepository repository;
+  final UserViewModel userViewModel;
 
-  AuthCubit() : super(AuthInitial()) {
+  AuthCubit({required this.userViewModel}) : super(AuthInitial()) {
     repository = AuthRepository(
       AuthApiRemoteDataSource(),
       AuthSharedPrefLocalDataSource(),
@@ -46,6 +49,14 @@ class AuthCubit extends Cubit<AuthState> {
           name: 'AuthCubit');
 
       if (response.success == true && response.token != null) {
+        // After successful login, fetch and print user data
+        try {
+          await userViewModel.getCurrentUser();
+          developer.log('Successfully fetched user data after login', name: 'AuthCubit');
+        } catch (e) {
+          developer.log('Error fetching user data after login: $e', 
+            name: 'AuthCubit', error: e);
+        }
         emit(AuthSuccess());
       } else if (response.message?.contains('email is not verified') == true) {
         emit(AuthError(

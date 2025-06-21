@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/models/event_comment_model.dart';
-import '../data/repository/event_comment_repository.dart';
+import '../data/repositories/event_comment_repository.dart';
 import 'dart:developer' as developer;
 
 abstract class EventCommentState {}
@@ -70,6 +70,21 @@ class EventCommentCubit extends Cubit<EventCommentState> {
     } catch (e) {
       developer.log('Error deleting comment: $e', name: 'EventCommentCubit');
       emit(EventCommentError('Failed to delete comment: $e'));
+    }
+  }
+
+  Future<void> editComment(String eventId, String commentId, String content) async {
+    emit(EventCommentLoading());
+    try {
+      final success = await repository.editComment(eventId, commentId, content);
+      if (success) {
+        await fetchComments(eventId); // Refresh comments after editing
+      } else {
+        emit(EventCommentError('Failed to edit comment'));
+      }
+    } catch (e) {
+      developer.log('Error editing comment: $e', name: 'EventCommentCubit');
+      emit(EventCommentError('Failed to edit comment: $e'));
     }
   }
 }

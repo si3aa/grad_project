@@ -32,9 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: currentTabIndex,
-        children: tabs,
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: currentTabIndex,
+            children: tabs,
+          ),
+         
+        ],
       ),
       bottomNavigationBar: NavBarWidget(
         currentIndex: currentTabIndex,

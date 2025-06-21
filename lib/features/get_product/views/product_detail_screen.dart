@@ -3,17 +3,19 @@
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
 import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
-import 'package:Herfa/features/get_product/views/widgets/product_comments.dart';
 import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
     as viewmodels;
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
+import 'package:Herfa/features/product_rating/product_rating_mvvm.dart' show ProductRatingBar;
+import 'package:Herfa/features/product_rating/token_helper.dart';
 import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
+
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -67,10 +69,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+  }
+
+// Helper method to build full name (add this at the top of your class)
+  String buildFullName(String firstName, String lastName) {
+    // Handle null or empty values
+    final cleanFirstName = (firstName).trim();
+    final cleanLastName = (lastName).trim();
+
+    if (cleanFirstName.isEmpty && cleanLastName.isEmpty) {
+      return 'Unknown User';
+    }
+
+    if (cleanFirstName.isEmpty) {
+      return capitalizeFirstLetter(cleanLastName);
+    }
+
+    if (cleanLastName.isEmpty) {
+      return cleanFirstName;
+    }
+
+    return '$cleanFirstName ${capitalizeFirstLetter(cleanLastName)}';
+  }
+
   void _navigateToEditProduct(Product product) {
-    // Navigate to edit product screen with product ID
-    // Since the Product class doesn't have an ID, we'll use a hardcoded ID for now
-    // In a real app, you would get the ID from the API
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -129,20 +154,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 _showDeleteConfirmation(product);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.visibility_off_outlined),
-              title: const Text('Hide Product'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement hide product functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Product hidden from marketplace'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
           ],
         ),
       ),
@@ -150,9 +161,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _showDeleteConfirmation(Product product) {
-    // Store a reference to the ScaffoldMessengerState
-    // ignore: unused_local_variable
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    ScaffoldMessenger.of(context);
 
     showDialog(
       context: context,
@@ -226,19 +235,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     // Create a copy of the product with updated quantity
     final updatedProduct = Product(
-      userName: widget.product.userName,
-      userHandle: widget.product.userHandle,
+      userFirstName: widget.product.userFirstName,
+      userUsername: widget.product.userUsername,
+      userLastName: widget.product.userLastName,
       userImage: widget.product.userImage,
       productImage: widget.product.productImage,
       productName: widget.product.productName,
       originalPrice: widget.product.originalPrice,
       discountedPrice: widget.product.discountedPrice,
-      likes: widget.product.likes,
-      comments: widget.product.comments,
       title: widget.product.title,
       description: widget.product.description,
       quantity: widget.product.quantity -
           selectedQuantity, // Decrease the available quantity
+      id: widget.product.id,
     );
 
     // Update the product in the state
@@ -260,62 +269,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           },
         ),
         duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _showComments() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.9,
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.black12,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Comments',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: BlocProvider(
-                create: (context) => CommentCubit(CommentRepository())
-                  ..fetchComments(widget.product.id.toString()),
-                child: ProductComments(
-                  productId: widget.product.id.toString(),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -525,42 +478,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       );
                     },
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.share),
-                    onPressed: () {
-                      // Implement share functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sharing product...'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                  ),
                   // Add edit button for product owner
                   IconButton(
                     icon: const Icon(Icons.more_vert),
                     onPressed: () {
                       _showEditOptions(currentProduct);
                     },
-                  ),
-                  // Comment Icon
-                  GestureDetector(
-                    onTap: () {
-                      _showComments();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.comment,
-                        color: kPrimaryColor,
-                        size: 24,
-                      ),
-                    ),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -571,7 +494,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   children: [
                     // Product Image with error handling
                     _buildProductImage(),
-
                     // Product Info
                     Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -579,6 +501,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Seller Info
+                          const SizedBox(height: 24),
                           Row(
                             children: [
                               CircleAvatar(
@@ -591,14 +514,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    currentProduct.userName,
+                                    buildFullName(currentProduct.userFirstName,
+                                        currentProduct.userLastName),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
                                   Text(
-                                    currentProduct.userHandle,
+                                    currentProduct.userUsername,
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                       fontSize: 14,
@@ -622,9 +546,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 24),
-
                           // Product Name and Title
                           Text(
                             currentProduct.productName,
@@ -902,6 +823,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ],
                             ),
                           ),
+                          // Add rating stars at the end of the screen
+                          Padding(
+  padding: const EdgeInsets.symmetric(vertical: 16.0),
+  child: FutureBuilder<String?>(
+    future: TokenHelper.getToken(),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData || snapshot.data == null) {
+        return const Text('Unable to rate: Not authenticated');
+      }
+      return ProductRatingBar(
+        productId: currentProduct.id,
+        token: snapshot.data!,
+        initialRating: 0, // Replace with actual rating if available
+      );
+    },
+  ),
+),
                         ],
                       ),
                     ),

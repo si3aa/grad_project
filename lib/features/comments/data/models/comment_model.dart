@@ -2,19 +2,21 @@ class CommentModel {
   final int id;
   final String content;
   final String createdAt;
-  final String? userName;
-  final String? productId;
-  final String? productName;
-  final String? productImage;
+  final String? updatedAt;
+  final String userFirstName;
+  final String userLastName;
+  final int userId;
+  final int productId;
 
   CommentModel({
     required this.id,
     required this.content,
     required this.createdAt,
-    this.userName,
-    this.productId,
-    this.productName,
-    this.productImage,
+    this.updatedAt,
+    required this.userFirstName,
+    required this.userLastName,
+    required this.userId,
+    required this.productId,
   });
 
   factory CommentModel.fromJson(Map<String, dynamic> json) {
@@ -22,27 +24,24 @@ class CommentModel {
       id: json['id'] ?? 0,
       content: json['content'] ?? '',
       createdAt: json['createdAt'] ?? '',
-      userName: json['userName'] ?? '',
-      productId: json['productId']?.toString(),
-      productName: json['productName'],
-      productImage: json['productImage'],
+      updatedAt: json['updatedAt'],
+      userFirstName: json['userFirstName'] ?? '',
+      userLastName: json['userLastName'] ?? '',
+      userId: json['userId'] ?? 0,
+      productId: json['productId'] ?? 0,
     );
   }
 
-  // Create a copy with additional product information
-  CommentModel copyWithProductInfo({
-    String? productId,
-    String? productName,
-    String? productImage,
-  }) {
-    return CommentModel(
-      id: id,
-      content: content,
-      createdAt: createdAt,
-      userName: userName,
-      productId: productId ?? this.productId,
-      productName: productName ?? this.productName,
-      productImage: productImage ?? this.productImage,
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'content': content,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'userFirstName': userFirstName,
+      'userLastName': userLastName,
+      'userId': userId,
+      'productId': productId,
+    };
   }
 }
