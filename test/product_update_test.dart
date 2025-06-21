@@ -27,11 +27,10 @@ void main() {
         discountedPrice: 89.99,
         quantity: 10,
         productImage: 'test_image.jpg',
-        userName: 'Test User',
-        userHandle: '@testuser',
+        userFirstName: 'Test',
+        userUsername: 'testuser',
         userImage: 'user_image.jpg',
-        likes: 0,
-        comments: 0,
+         userLastName:'testuser' ,
       );
 
       // Act

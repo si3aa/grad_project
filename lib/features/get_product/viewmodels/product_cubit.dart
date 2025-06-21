@@ -30,18 +30,17 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          userName: 'Merchant', // Default or fetch from user API
-          userHandle: '@merchant',
+          userFirstName: apiProduct.userFirstName ?? '',
+          userLastName: apiProduct.userLastName ?? '',
+          userUsername: apiProduct.userUsername ?? '',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
           originalPrice: apiProduct.price ?? 0.0,
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
-          likes: 0, // Default value since it's not from API
-          comments: 0, // Default value since it's not from API
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
-          quantity: apiProduct.quantity ?? 0,
+          quantity: apiProduct.quantity ?? 0, 
         );
       }).toList();
 
@@ -72,38 +71,12 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
       ));
     }
   }
-
-  void likeProduct(Product product) {
-    final state = this.state;
-    if (state is viewmodels.ProductLoaded) {
-      product.likes++;
-      emit(viewmodels.ProductLoaded(
-        products: state.products,
-        filteredProducts: List.from(state.filteredProducts),
-      ));
-    }
-  }
-
-  /// Handle comment action (placeholder for now).
-  void commentProduct(Product product) {
-    final state = this.state;
-    if (state is viewmodels.ProductLoaded) {
-      product.comments++;
-      emit(viewmodels.ProductLoaded(
-        products: state.products,
-        filteredProducts: List.from(state.filteredProducts),
-      ));
-    }
-  }
-
-  /// Handle cart action (placeholder for now).
   void addToCart(Product product) {
     // Placeholder: In a real app, this might add the product to a cart
   }
 
   /// Handle more options action for a product
   void moreOptions(Product product, BuildContext context) {
-    // Show bottom sheet with options
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -409,19 +382,19 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
         final updatedProducts = currentState.products.map((product) {
           if (product.id.toString() == productId) {
             return Product(
-              id: int.parse(newProductData['id']),
-              userName: product.userName,
-              userHandle: product.userHandle,
+              id: product.id,
+              userFirstName: product.userFirstName,
+              userLastName:product.userLastName,
+              userUsername: product.userUsername,
               userImage: product.userImage,
               productImage: product.productImage,
-              productName: productData['name'] as String,
-              originalPrice: productData['price'] as double,
-              discountedPrice: productData['price'] as double,
-              likes: product.likes,
-              comments: product.comments,
-              title: productData['title'] as String,
-              description: productData['description'] as String,
-              quantity: productData['quantity'] as int,
+              productName: product.productName,
+              originalPrice: product.originalPrice,
+              discountedPrice: product.discountedPrice,
+              title: product.title,
+              description: product.description,
+              quantity: product.quantity, 
+              
             );
           }
           return product;
@@ -459,18 +432,17 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          userName: 'Merchant', // Default or fetch from user API
-          userHandle: '@merchant',
+          userFirstName: apiProduct.userFirstName ?? '',
+          userUsername: apiProduct.userUsername ?? '',
+          userLastName:apiProduct.userLastName ?? '',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
           originalPrice: apiProduct.price ?? 0.0,
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
-          likes: 0, // Default value since it's not from API
-          comments: 0, // Default value since it's not from API
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
-          quantity: apiProduct.quantity ?? 0,
+          quantity: apiProduct.quantity ?? 0, 
         );
       }).toList();
 

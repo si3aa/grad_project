@@ -2,7 +2,6 @@ import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
-import 'package:Herfa/features/get_product/views/widgets/user_info.dart';
 import 'package:Herfa/features/favorites/views/widgets/favorite_button.dart';
 import 'package:flutter/material.dart';
 
@@ -22,15 +21,51 @@ class ProductCard extends StatefulWidget {
   State<ProductCard> createState() => _ProductCardState();
 }
 
-// Remove this duplicate declaration
-// class _ProductCardState extends State<ProductCard> {
-//   @override
-//   State<ProductCard> createState() => _ProductCardState();
-// }
-
 class _ProductCardState extends State<ProductCard> {
+  bool isFollowing = false;
+
+  // Helper method to capitalize first letter
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+  }
+
+  // Helper method to build full name with debugging
+  String buildFullName(String firstName, String lastName) {
+    print('Debug - First Name: "$firstName"');
+    print('Debug - Last Name: "$lastName"');
+    
+    // Handle null or empty values
+    final cleanFirstName = firstName.trim();
+    final cleanLastName = lastName.trim();
+    
+    if (cleanFirstName.isEmpty && cleanLastName.isEmpty) {
+      return 'Unknown User';
+    }
+    
+    if (cleanFirstName.isEmpty) {
+      return capitalizeFirstLetter(cleanLastName);
+    }
+    
+    if (cleanLastName.isEmpty) {
+      return cleanFirstName;
+    }
+    
+    final fullName = '$cleanFirstName ${capitalizeFirstLetter(cleanLastName)}';
+    print('Debug - Full Name: "$fullName"');
+    return fullName;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentProduct = widget.product;
+    
+    // Build full name with debugging
+    final fullName = buildFullName(
+      currentProduct.userFirstName, 
+      currentProduct.userLastName
+    );
+    
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -42,7 +77,7 @@ class _ProductCardState extends State<ProductCard> {
           Navigator.pushNamed(
             context,
             Routes.productDetailRoute,
-            arguments: {'product': widget.product},
+            arguments: {'product': currentProduct},
           );
         },
         child: Padding(
@@ -50,22 +85,76 @@ class _ProductCardState extends State<ProductCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              UserInfo(
-                userName: widget.product.userName,
-                userHandle: widget.product.userHandle,
-                userImage: widget.product.userImage,
-                onMore: () => widget.onMore(context),
+              // Custom user info display to match product details screen
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: AssetImage(currentProduct.userImage),
+                    radius: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fullName, // Combined first name + capitalized last name
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        Text(
+                          currentProduct.userUsername, // Handle null username
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        isFollowing = !isFollowing;
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      backgroundColor:
+                          isFollowing ? Colors.grey[200] : Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      isFollowing ? 'Following' : 'Follow',
+                      style: TextStyle(
+                        color: isFollowing ? Colors.black87 : Colors.white,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () => widget.onMore(context),
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               ProductImage(
-                productImage: widget.product.productImage,
+                productImage: currentProduct.productImage,
               ),
               const SizedBox(height: 10),
               ProductDetails(
-                productId: widget.product.id.toString(),
-                productName: widget.product.productName,
-                originalPrice: widget.product.originalPrice,
-                description: widget.product.title,
+                productId: currentProduct.id.toString(),
+                productName: currentProduct.productName,
+                originalPrice: currentProduct.originalPrice,
+                description: currentProduct.title,
                 onCart: widget.onCart,
                 isSaved: false,
               ),
@@ -74,7 +163,7 @@ class _ProductCardState extends State<ProductCard> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   FavoriteButton(
-                    productId: widget.product.id.toString(),
+                    productId: currentProduct.id.toString(),
                   ),
                   const SizedBox(width: 10),
                   GestureDetector(
@@ -84,7 +173,8 @@ class _ProductCardState extends State<ProductCard> {
                         context,
                         Routes.commentsRoute,
                         arguments: {
-                          'productId': widget.product.id.toString(),
+                          'productId': currentProduct.id.toString(),
+                          'userUsername': currentProduct.userUsername,
                         },
                       );
                     },
