@@ -8,15 +8,14 @@ import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
     as viewmodels;
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
-import 'package:Herfa/features/product_rating/product_rating_mvvm.dart' show ProductRatingBar;
+import 'package:Herfa/features/product_rating/product_rating_mvvm.dart'
+    show ProductRatingBar;
 import 'package:Herfa/features/product_rating/token_helper.dart';
 import 'package:Herfa/features/saved_products/viewmodels/states/saved_product_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
-import 'package:Herfa/features/rating/widgets/star_rating_widget.dart';
-
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -826,38 +825,41 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           // Add rating stars at the end of the screen
                           Padding(
-  padding: const EdgeInsets.symmetric(vertical: 16.0),
-  child: FutureBuilder<String?>(
-    future: TokenHelper.getToken(),
-    builder: (context, snapshot) {
-      if (!snapshot.hasData || snapshot.data == null) {
-        return const Text('Unable to rate: Not authenticated');
-      }
-      return ProductRatingBar(
-        productId: currentProduct.id,
-        token: snapshot.data!,
-        initialRating: 0, // Replace with actual rating if available
-      );
-    },
-  ),
-),
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: FutureBuilder<String?>(
+                              future: TokenHelper.getToken(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData ||
+                                    snapshot.data == null) {
+                                  return const Text(
+                                      'Unable to rate: Not authenticated');
+                                }
+                                return ProductRatingBar(
+                                  productId: currentProduct.id,
+                                  token: snapshot.data!,
+                                  initialRating:
+                                      0, // Replace with actual rating if available
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     // Star Rating Widget at the bottom
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: StarRatingWidget(
-                        productId: currentProduct.id,
-                        token:
-                            'YOUR_USER_TOKEN', // Replace with actual user token
-                        productOwnerId: currentProduct
-                            .userUsername, // Or the correct owner id
-                        starSize: 36.0,
-                        activeColor: Colors.amber,
-                        inactiveColor: Colors.grey,
-                      ),
-                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    //   child: StarRatingWidget(
+                    //     productId: currentProduct.id,
+                    //     token:
+                    //         'YOUR_USER_TOKEN', // Replace with actual user token
+                    //     productOwnerId: currentProduct
+                    //         .userUsername, // Or the correct owner id
+                    //     starSize: 36.0,
+                    //     activeColor: Colors.amber,
+                    //     inactiveColor: Colors.grey,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
