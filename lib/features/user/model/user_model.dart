@@ -44,19 +44,19 @@ class UserModel {
 
     return '$cleanFirstName $capitalizedLastName'.trim();
   }
-//   @override
-//   String toString() {
-//     return '''
-//     ================ User Details ================
-//     ID: $id
-//     Username: $username
-//     Name: $fullName
-//     Role: $role
-//     Verified: $verified
-//     Profile Info: ${profile != null ? '\n      Name: ${profile!.firstName} ${profile!.lastName}\n      Phone: ${profile!.phone}\n      Address: ${profile!.address}\n      Bio: ${profile!.bio}' : 'No profile data'}
-//     ============================================
-//     ''';
-// }
+  @override
+  String toString() {
+    return '''
+    ================ User Details ================
+    ID: $id
+    Username: $username
+    Name: $fullName
+    Role: $role
+    Verified: $verified
+    Profile Info: ${profile != null ? '\n      Name: ${profile!.firstName} ${profile!.lastName}\n      Phone: ${profile!.phone}\n      Address: ${profile!.address}\n      Bio: ${profile!.bio}' : 'No profile data'}
+    ============================================
+    ''';
+}
 }
 
 class UserProfile {

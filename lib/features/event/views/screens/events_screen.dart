@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/event_interest/views/widgets/event_interest_button.dart';
+import 'package:provider/provider.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 import '../../viewmodels/cubit/event_cubit.dart';
 import '../../data/models/return_event.dart';
 import 'add_event_screen.dart';
@@ -142,18 +144,20 @@ class EventsScreen extends StatelessWidget {
           return const SizedBox.shrink();
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddEventScreen(),
+      floatingActionButton: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
+          ? null
+          : FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddEventScreen(),
+                  ),
+                );
+              },
+              backgroundColor: kPrimaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
             ),
-          );
-        },
-        backgroundColor: kPrimaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 }
@@ -280,7 +284,9 @@ class EventCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
-                      onPressed: () => _showEventOptions(context, event),
+                      onPressed: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
+                          ? null
+                          : () => _showEventOptions(context, event),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryColor,
                         foregroundColor: Colors.white,

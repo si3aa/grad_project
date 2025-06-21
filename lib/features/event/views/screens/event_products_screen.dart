@@ -7,6 +7,8 @@ import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
 import 'package:Herfa/features/event/data/repositories/event_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
+import 'package:provider/provider.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 
 class EventProductsScreen extends StatefulWidget {
   final String eventId;
@@ -33,6 +35,16 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
   }
 
   Future<void> _addProductToEvent(int productId) async {
+    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    if (userRole == 'USER') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are not allowed to add products to events.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     try {
       print('=== Starting Add Product Process ===');
       print('Event ID: ${widget.eventId}');
@@ -112,6 +124,7 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
           }
 
           if (state is product_states.ProductLoaded) {
+            final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -189,31 +202,32 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
                                 ],
                               ),
                             ),
-                            // Add Button
-                            ElevatedButton(
-                              onPressed: isAdded
-                                  ? null
-                                  : () => _addProductToEvent(product.id),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    isAdded ? Colors.grey : kPrimaryColor,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                            // Add Button (only for non-USER roles)
+                            if (userRole != 'USER')
+                              ElevatedButton(
+                                onPressed: isAdded
+                                    ? null
+                                    : () => _addProductToEvent(product.id),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      isAdded ? Colors.grey : kPrimaryColor,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                                child: Text(
+                                  isAdded ? 'Added' : 'Add',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                isAdded ? 'Added' : 'Add',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),

@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
+import 'package:provider/provider.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -96,6 +98,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _navigateToEditProduct(Product product) {
+    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    if (userRole == 'USER') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are not allowed to edit products.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -120,6 +132,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // ignore: unused_element
   void _showEditOptions(Product product) {
+    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    if (userRole == 'USER') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are not allowed to edit or delete products.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -161,8 +183,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _showDeleteConfirmation(Product product) {
-    ScaffoldMessenger.of(context);
-    ScaffoldMessenger.of(context);
+    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    if (userRole == 'USER') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are not allowed to delete products.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     showDialog(
       context: context,

@@ -5,6 +5,8 @@ import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_loca
 import 'package:Herfa/features/event/data/repositories/event_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 
 class EventProductsListScreen extends StatefulWidget {
   final String eventId;
@@ -186,6 +188,8 @@ class _EventProductsListScreenState extends State<EventProductsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Event Products'),
@@ -249,38 +253,39 @@ class _EventProductsListScreenState extends State<EventProductsListScreen> {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                await Navigator.pushNamed(
-                                  context,
-                                  '/event-products',
-                                  arguments: {
-                                    'eventId': widget.eventId,
-                                  },
-                                );
-                                // Refresh the product list when returning from the Add Products screen
-                                await _loadEventProducts();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: kPrimaryColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
+                            if (userRole != 'USER')
+                              ElevatedButton.icon(
+                                onPressed: () async {
+                                  await Navigator.pushNamed(
+                                    context,
+                                    '/event-products',
+                                    arguments: {
+                                      'eventId': widget.eventId,
+                                    },
+                                  );
+                                  // Refresh the product list when returning from the Add Products screen
+                                  await _loadEventProducts();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: kPrimaryColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                icon: const Icon(Icons.add),
+                                label: const Text(
+                                  'Add Products',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                              icon: const Icon(Icons.add),
-                              label: const Text(
-                                'Add Products',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       )
@@ -412,25 +417,25 @@ class _EventProductsListScreenState extends State<EventProductsListScreen> {
                                       ),
                                     ),
                                     // Delete Button
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.red.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: IconButton(
-                                        onPressed: () =>
-                                            _showDeleteConfirmation(
-                                          productId,
-                                          productName,
+                                    if (userRole != 'USER')
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: Colors.red,
-                                          size: 24,
+                                        child: IconButton(
+                                          onPressed: () => _showDeleteConfirmation(
+                                            productId,
+                                            productName,
+                                          ),
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.red,
+                                            size: 24,
+                                          ),
+                                          tooltip: 'Remove product',
                                         ),
-                                        tooltip: 'Remove product',
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),

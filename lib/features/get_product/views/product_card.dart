@@ -5,6 +5,8 @@ import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
 import 'package:Herfa/features/favorites/views/widgets/favorite_button.dart';
 import 'package:Herfa/features/show_rating/widgets/show_rating_star.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
@@ -59,6 +61,7 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
+    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
     final currentProduct = widget.product;
     
     // Build full name with debugging
@@ -142,7 +145,7 @@ class _ProductCardState extends State<ProductCard> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.more_vert),
-                    onPressed: () => widget.onMore(context),
+                    onPressed: userRole == 'USER' ? null : () => widget.onMore(context),
                   ),
                 ],
               ),

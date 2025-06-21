@@ -1,6 +1,8 @@
 import 'package:Herfa/ui/widgets/home/build_cate_button.dart';
 import 'package:Herfa/ui/widgets/home/build_nav_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 
 
 class NavBarWidget extends StatelessWidget {
@@ -15,6 +17,7 @@ class NavBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
     return Container(
       height: 60,
       decoration: BoxDecoration(
@@ -58,7 +61,7 @@ class NavBarWidget extends StatelessWidget {
             label: "Add",
             route: "/new-post",
             isSelected: currentIndex == 3,
-            onTap: () => onTap(3),
+            onTap: userRole == 'USER' ? () {} : () => onTap(3), // Disable for USER by using empty function
           ),
           BuildNavIcon(
             icon: Icons.shopping_cart,
