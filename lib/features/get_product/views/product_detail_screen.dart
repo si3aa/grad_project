@@ -855,25 +855,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ],
                             ),
                           ),
-                          // Add rating stars at the end of the screen
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: FutureBuilder<String?>(
-                              future: TokenHelper.getToken(),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData ||
-                                    snapshot.data == null) {
-                                  return const Text(
-                                      'Unable to rate: Not authenticated');
-                                }
-                                return ProductRatingBar(
-                                  productId: currentProduct.id,
-                                  token: snapshot.data!,
-                                  initialRating:
-                                      0, // Replace with actual rating if available
-                                );
-                              },
-                            ),
+                            child: Provider.of<UserViewModel>(context, listen: false)
+                                        .userRole ==
+                                    'USER'
+                                ? FutureBuilder<String?>(
+                                    future: TokenHelper.getToken(),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData ||
+                                          snapshot.data == null) {
+                                        return const Text(
+                                            'Unable to rate: Not authenticated');
+                                      }
+                                      return ProductRatingBar(
+                                        productId: currentProduct.id,
+                                        token: snapshot.data!,
+                                        initialRating:
+                                            0, // Replace with actual rating if available
+                                      );
+                                    },
+                                  )
+                                : const SizedBox.shrink(),
                           ),
                         ],
                       ),

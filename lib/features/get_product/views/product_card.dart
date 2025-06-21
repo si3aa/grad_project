@@ -208,12 +208,14 @@ class _ProductCardState extends State<ProductCard> {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: ShowRatingStar(
-                        productId: currentProduct.id,
-                        iconSize: 24,
-                        iconColor: Colors.amber,
-                        textColor: Colors.black,
-                      ),
+                      child: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
+                          ? ShowRatingStar(
+                              productId: currentProduct.id,
+                              iconSize: 24,
+                              iconColor: Colors.amber,
+                              textColor: Colors.black,
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ),
                 ],
