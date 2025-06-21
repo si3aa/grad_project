@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
+import 'package:Herfa/features/rating/widgets/star_rating_widget.dart';
 
 
 class ProductDetailScreen extends StatefulWidget {
@@ -841,6 +842,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   ),
 ),
                         ],
+                      ),
+                    ),
+                    // Star Rating Widget at the bottom
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: StarRatingWidget(
+                        productId: currentProduct.id,
+                        token:
+                            'YOUR_USER_TOKEN', // Replace with actual user token
+                        productOwnerId: currentProduct
+                            .userUsername, // Or the correct owner id
+                        starSize: 36.0,
+                        activeColor: Colors.amber,
+                        inactiveColor: Colors.grey,
                       ),
                     ),
                   ],

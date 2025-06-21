@@ -4,6 +4,7 @@ import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/posts_tab.dart';
 import 'package:Herfa/features/saved_products/views/screens/saved_screen.dart';
 import 'package:Herfa/ui/widgets/home/nav_and_categ.dart';
+
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -38,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
             index: currentTabIndex,
             children: tabs,
           ),
-         
         ],
       ),
       bottomNavigationBar: NavBarWidget(
