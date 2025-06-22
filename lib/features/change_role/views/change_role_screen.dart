@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/change_role_repository.dart';
@@ -19,6 +20,7 @@ class _ChangeRoleScreenState extends State<ChangeRoleScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _acceptedTerms = false;
+  bool _isSuccess = false;
 
   @override
   void dispose() {
@@ -35,13 +37,9 @@ class _ChangeRoleScreenState extends State<ChangeRoleScreen> {
       child: BlocListener<ChangeRoleCubit, ChangeRoleState>(
         listener: (context, state) {
           if (state is ChangeRoleSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Role changed successfully!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.pop(context);
+            setState(() {
+              _isSuccess = true;
+            });
           } else if (state is ChangeRoleError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -55,100 +53,165 @@ class _ChangeRoleScreenState extends State<ChangeRoleScreen> {
           body: Stack(
             children: [
               Positioned.fill(child: backgroundImage),
-              SafeArea(
-                child: Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Text(
-                              'CHANGE ROLE',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: kPrimaryColor,
-                                letterSpacing: 2,
+              if (_isSuccess)
+                _buildSuccessView()
+              else
+                SafeArea(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Text(
+                                'CHANGE ROLE',
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: kPrimaryColor,
+                                  letterSpacing: 2,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 40),
-                          Container(
-                            padding: const EdgeInsets.all(30.0),
-                            decoration: BoxDecoration(
-                              // ignore: duplicate_ignore
-                              // ignore: deprecated_member_use
-                              color: Colors.white.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(25.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  "Change Your Role",
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                            const SizedBox(height: 40),
+                            Container(
+                              padding: const EdgeInsets.all(30.0),
+                              decoration: BoxDecoration(
+                                // ignore: duplicate_ignore
+                                // ignore: deprecated_member_use
+                                color: Colors.white.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(25.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
                                   ),
-                                ),
-                                const SizedBox(height: 30),
-                                _buildTextField(
-                                  controller: _usernameController,
-                                  label: "Username",
-                                  hint: "Enter your username",
-                                  icon: Icons.person,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your username';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 20),
-                                _buildTextField(
-                                  controller: _passwordController,
-                                  label: "Password",
-                                  hint: "Enter your password",
-                                  icon: Icons.lock,
-                                  isPassword: true,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your password';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 25),
-                                _buildTermsCheckbox(),
-                                const SizedBox(height: 30),
-                                BlocBuilder<ChangeRoleCubit, ChangeRoleState>(
-                                  builder: (context, state) {
-                                    return _buildSubmitButton(
-                                        context, state, screenWidth);
-                                  },
-                                ),
-                              ],
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    "Change Your Role",
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 30),
+                                  _buildTextField(
+                                    controller: _usernameController,
+                                    label: "Username",
+                                    hint: "Enter your username",
+                                    icon: Icons.person,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter your username';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _buildTextField(
+                                    controller: _passwordController,
+                                    label: "Password",
+                                    hint: "Enter your password",
+                                    icon: Icons.lock,
+                                    isPassword: true,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter your password';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 25),
+                                  _buildTermsCheckbox(),
+                                  const SizedBox(height: 30),
+                                  BlocBuilder<ChangeRoleCubit, ChangeRoleState>(
+                                    builder: (context, state) {
+                                      return _buildSubmitButton(
+                                          context, state, screenWidth);
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuccessView() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(30),
+        margin: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(25.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 80),
+            const SizedBox(height: 20),
+            const Text(
+              'Success!',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
+            const Text(
+              'Your role has been updated. Please login again to continue.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      Routes.loginRoute, (route) => false);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: const Text(
+                  'Login Now',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
