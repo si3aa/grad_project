@@ -211,12 +211,12 @@ class _PostsTabContent extends StatelessWidget {
       userImage: json['userImage'] ??
           json['user_image'] ??
           json['image'] ??
-          'assets/images/default_user.png',
+          'assets/images/arrow-small-left.png',
       productImage: json['media'] ??
           json['productImage'] ??
           json['image'] ??
           json['product_image'] ??
-          'assets/images/default_product.png',
+          'assets/images/product_img.png',
       productName: json['productName'] ?? json['name'] ?? '',
       originalPrice: (json['originalPrice'] is int)
           ? (json['originalPrice'] as int).toDouble()

@@ -11,6 +11,7 @@ import 'package:Herfa/features/auth/views/screens/login_screen.dart';
 import 'package:Herfa/features/auth/views/screens/register_screen.dart';
 import 'package:Herfa/features/auth/views/screens/verify_otp_screen.dart';
 import 'package:Herfa/features/auth/welcom.dart';
+import 'package:Herfa/features/change_role/views/change_role_screen.dart';
 import 'package:Herfa/features/comments/views/product_comments_screen.dart';
 import 'package:Herfa/features/event/views/screens/events_screen.dart';
 import 'package:Herfa/features/event/views/screens/event_products_screen.dart';
@@ -62,6 +63,12 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const NotificationScreen());
       case Routes.newPostRoute:
         return MaterialPageRoute(builder: (_) => const NewPostScreen());
+      case Routes.changeRoleRoute:
+        return MaterialPageRoute(builder: (_) => const ChangeRoleScreen());
+      case Routes.settingsRoute:
+        return MaterialPageRoute(
+            builder: (_) =>
+                const NotificationScreen()); // Placeholder for settings
       case Routes.addProductRoute:
         final isEditMode = arguments?['isEditMode'] ?? false;
         final product = arguments?['product'];
@@ -144,7 +151,9 @@ class RouteGenerator {
           return MaterialPageRoute(
             builder: (_) => BlocProvider(
               create: (context) {
-                final cubit = CommentCubit(CommentRepository(),);
+                final cubit = CommentCubit(
+                  CommentRepository(),
+                );
                 cubit.fetchComments(eventId);
                 return cubit;
               },
