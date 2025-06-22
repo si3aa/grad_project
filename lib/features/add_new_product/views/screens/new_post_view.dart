@@ -1,3 +1,4 @@
+import 'package:Herfa/core/widgets/back_to_home_button.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/states/new_post_state.dart';
 import 'package:Herfa/features/add_new_product/views/widgets/active_status.dart';
@@ -42,11 +43,11 @@ class _NewPostViewState extends State<NewPostView> {
 
   // Category list with IDs (1-based indexing for simplicity)
   static const _categories = [
-    {'id': 1, 'name': 'Clothing'},
-    {'id': 2, 'name': 'Accessories'},
-    {'id': 3, 'name': 'Home Decor'},
-    {'id': 4, 'name': 'Art'},
-    {'id': 5, 'name': 'Handmade'},
+    {'id': 1, 'name': 'Accessories'},
+    {'id': 2, 'name': 'Handmade'},
+    {'id': 3, 'name': 'Art'},
+    {'id': 4, 'name': 'Clothing'},
+    {'id': 5, 'name': 'Home Decore'},
   ];
 
   // Color options and their names
@@ -112,6 +113,7 @@ class _NewPostViewState extends State<NewPostView> {
 
         return Scaffold(
           appBar: AppBar(
+            leading: const BackToHomeButton(),
             title: Text(widget.isEditMode ? 'Edit Product' : 'Add New Product'),
           ),
           body: SafeArea(

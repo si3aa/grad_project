@@ -6,6 +6,7 @@ import 'package:Herfa/ui/widgets/auth_widgets/otp_input.dart';
 import 'package:Herfa/ui/widgets/auth_widgets/verify_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:Herfa/core/widgets/back_to_home_button.dart';
 
 class VerifyOTPScreen extends StatefulWidget {
   final String email;
@@ -81,10 +82,7 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: kPrimaryColor, size: 30),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const BackToHomeButton(),
         title: Text(
           "Verify Code",
           style: TextStyle(

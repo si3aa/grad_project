@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 class CategoryButton extends StatelessWidget {
   final String title;
   final String route;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   const CategoryButton({
     super.key,
     required this.title,
     required this.route,
+    this.isSelected = false,
+    this.onTap,
   });
 
   @override
@@ -18,12 +22,12 @@ class CategoryButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           // ignore: deprecated_member_use
-          backgroundColor: kPrimaryColor,
+          backgroundColor: isSelected ? Colors.black : kPrimaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        onPressed: () {},
+        onPressed: onTap,
         child: Text(
           title,
           style: const TextStyle(

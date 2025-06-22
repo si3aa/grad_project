@@ -63,7 +63,6 @@ class RouteGenerator {
       case Routes.newPostRoute:
         return MaterialPageRoute(builder: (_) => const NewPostScreen());
       case Routes.addProductRoute:
-        // Check if we have arguments for edit mode
         final isEditMode = arguments?['isEditMode'] ?? false;
         final product = arguments?['product'];
         final productId = arguments?['productId'];

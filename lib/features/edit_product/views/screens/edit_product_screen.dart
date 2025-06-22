@@ -38,11 +38,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   // Category list with IDs (1-based indexing for simplicity)
   static const _categories = [
-    {'id': 1, 'name': 'Clothing'},
-    {'id': 2, 'name': 'Accessories'},
-    {'id': 3, 'name': 'Home Decor'},
-    {'id': 4, 'name': 'Art'},
-    {'id': 5, 'name': 'Handmade'},
+    {'id': 1, 'name': 'Accessories'},
+    {'id': 2, 'name': 'Handmade'},
+    {'id': 3, 'name': 'Art'},
+    {'id': 4, 'name': 'Clothing'},
+    {'id': 5, 'name': 'Home Decore'},
   ];
 
   // Color options and their names

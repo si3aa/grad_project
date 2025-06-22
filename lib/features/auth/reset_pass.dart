@@ -3,6 +3,7 @@ import 'package:Herfa/ui/widgets/auth_widgets/submit_button.dart';
 import 'package:Herfa/ui/widgets/auth_widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
+import 'package:Herfa/core/widgets/back_to_home_button.dart';
 
 class ResetPass extends StatefulWidget {
   const ResetPass({super.key});
@@ -20,10 +21,7 @@ class _ResetPassState extends State<ResetPass> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: kPrimaryColor, size: 30),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const BackToHomeButton(),
         title: Text(
           "Reset Password",
           style: TextStyle(

@@ -76,23 +76,44 @@ class NavBarWidget extends StatelessWidget {
   }
 }
 
-class CategoriesList extends StatelessWidget {
+class CategoriesList extends StatefulWidget {
   const CategoriesList({super.key});
+
+  @override
+  State<CategoriesList> createState() => _CategoriesListState();
+}
+
+class _CategoriesListState extends State<CategoriesList> {
+  int selectedIndex = 0;
+  final List<Map<String, String>> categories = [
+    {"title": "All", "route": "/All"},
+    {"title": "Accessories", "route": "/jewelry"},
+    {"title": "handmade", "route": "/clothing"},
+    {"title": "Art", "route": "/home_decor"},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 50,
-      child: ListView(
+      child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        children: [
-          CategoryButton(title: "All", route: "/All"),
-          CategoryButton(title: "Jewelry", route: "/jewelry"),
-          CategoryButton(title: "Clothing", route: "/clothing"),
-          CategoryButton(title: "Home Decor", route: "/home_decor"),
-          CategoryButton(title: "Find", route: "/find"),
-        ],
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          return CategoryButton(
+            title: category["title"]!,
+            route: category["route"]!,
+            isSelected: selectedIndex == index,
+            onTap: () {
+              setState(() {
+                selectedIndex = index;
+              });
+              // Optionally, navigate or do something with category["route"]
+            },
+          );
+        },
       ),
     );
   }
