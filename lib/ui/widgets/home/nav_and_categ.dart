@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 
-
 class NavBarWidget extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
-  
+
   const NavBarWidget({
-    super.key, 
+    super.key,
     required this.currentIndex,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    final userRole =
+        Provider.of<UserViewModel>(context, listen: false).userRole;
     return Container(
       height: 60,
       decoration: BoxDecoration(
@@ -61,7 +61,9 @@ class NavBarWidget extends StatelessWidget {
             label: "Add",
             route: "/new-post",
             isSelected: currentIndex == 3,
-            onTap: userRole == 'USER' ? () {} : () => onTap(3), // Disable for USER by using empty function
+            onTap: userRole == 'USER'
+                ? () {}
+                : () => onTap(3), // Disable for USER by using empty function
           ),
           BuildNavIcon(
             icon: Icons.shopping_cart,
@@ -77,23 +79,32 @@ class NavBarWidget extends StatelessWidget {
 }
 
 class CategoriesList extends StatefulWidget {
-  const CategoriesList({super.key});
+  final void Function(int? categoryId)? onCategorySelected;
+  final int? selectedCategoryId;
+  const CategoriesList(
+      {super.key, this.onCategorySelected, this.selectedCategoryId});
 
   @override
   State<CategoriesList> createState() => _CategoriesListState();
 }
 
 class _CategoriesListState extends State<CategoriesList> {
-  int selectedIndex = 0;
-  final List<Map<String, String>> categories = [
-    {"title": "All", "route": "/All"},
-    {"title": "Accessories", "route": "/jewelry"},
-    {"title": "handmade", "route": "/clothing"},
-    {"title": "Art", "route": "/home_decor"},
+  final List<Map<String, dynamic>> categories = [
+    {"title": "All", "categoryId": null},
+    {"title": "Accessories", "categoryId": 1},
+    {"title": "handmade", "categoryId": 2},
+    {"title": "Art", "categoryId": 3},
   ];
+
+  int _getSelectedIndex() {
+    final idx = categories
+        .indexWhere((cat) => cat["categoryId"] == widget.selectedCategoryId);
+    return idx == -1 ? 0 : idx;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = _getSelectedIndex();
     return SizedBox(
       height: 50,
       child: ListView.builder(
@@ -104,13 +115,12 @@ class _CategoriesListState extends State<CategoriesList> {
           final category = categories[index];
           return CategoryButton(
             title: category["title"]!,
-            route: category["route"]!,
+            route: "", // route is not used
             isSelected: selectedIndex == index,
             onTap: () {
-              setState(() {
-                selectedIndex = index;
-              });
-              // Optionally, navigate or do something with category["route"]
+              if (widget.onCategorySelected != null) {
+                widget.onCategorySelected!(category["categoryId"]);
+              }
             },
           );
         },

@@ -37,23 +37,23 @@ class _ProductCardState extends State<ProductCard> {
   String buildFullName(String firstName, String lastName) {
     print('Debug - First Name: "$firstName"');
     print('Debug - Last Name: "$lastName"');
-    
+
     // Handle null or empty values
     final cleanFirstName = firstName.trim();
     final cleanLastName = lastName.trim();
-    
+
     if (cleanFirstName.isEmpty && cleanLastName.isEmpty) {
       return 'Unknown User';
     }
-    
+
     if (cleanFirstName.isEmpty) {
       return capitalizeFirstLetter(cleanLastName);
     }
-    
+
     if (cleanLastName.isEmpty) {
       return cleanFirstName;
     }
-    
+
     final fullName = '$cleanFirstName ${capitalizeFirstLetter(cleanLastName)}';
     print('Debug - Full Name: "$fullName"');
     return fullName;
@@ -61,15 +61,14 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
-    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    final userRole =
+        Provider.of<UserViewModel>(context, listen: false).userRole;
     final currentProduct = widget.product;
-    
+
     // Build full name with debugging
     final fullName = buildFullName(
-      currentProduct.userFirstName, 
-      currentProduct.userLastName
-    );
-    
+        currentProduct.userFirstName, currentProduct.userLastName);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -93,7 +92,7 @@ class _ProductCardState extends State<ProductCard> {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: AssetImage(currentProduct.userImage),
+                    backgroundImage: _buildUserImage(currentProduct.userImage),
                     radius: 20,
                   ),
                   const SizedBox(width: 12),
@@ -145,7 +144,9 @@ class _ProductCardState extends State<ProductCard> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.more_vert),
-                    onPressed: userRole == 'USER' ? null : () => widget.onMore(context),
+                    onPressed: userRole == 'USER'
+                        ? null
+                        : () => widget.onMore(context),
                   ),
                 ],
               ),
@@ -208,7 +209,9 @@ class _ProductCardState extends State<ProductCard> {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
+                      child: Provider.of<UserViewModel>(context, listen: false)
+                                  .userRole ==
+                              'USER'
                           ? ShowRatingStar(
                               productId: currentProduct.id,
                               iconSize: 24,
@@ -225,5 +228,13 @@ class _ProductCardState extends State<ProductCard> {
         ),
       ),
     );
+  }
+
+  ImageProvider _buildUserImage(String userImage) {
+    if (userImage.startsWith('http://') || userImage.startsWith('https://')) {
+      return NetworkImage(userImage);
+    } else {
+      return AssetImage(userImage);
+    }
   }
 }
