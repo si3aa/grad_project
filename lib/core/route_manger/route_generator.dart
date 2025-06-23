@@ -1,4 +1,5 @@
 import 'package:Herfa/core/route_manger/routes.dart';
+import 'package:Herfa/features/add_new_product/views/screens/edit_product_screen.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_view.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
@@ -93,7 +94,6 @@ class RouteGenerator {
         );
       case Routes.editProductRoute:
         final product = arguments?['product'] as Product?;
-        final productId = arguments?['productId'];
         if (product != null) {
           return MaterialPageRoute(
             builder: (context) => BlocProvider(
@@ -102,11 +102,7 @@ class RouteGenerator {
                 cubit.initWithProductData(product);
                 return cubit;
               },
-              child: NewPostView(
-                isEditMode: true,
-                product: product,
-                productId: productId,
-              ),
+              child: EditProductScreen(product: product),
             ),
           );
         }

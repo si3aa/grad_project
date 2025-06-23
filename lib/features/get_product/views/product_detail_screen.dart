@@ -3,7 +3,6 @@
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
 import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
-import 'package:Herfa/features/edit_product/views/screens/edit_product_screen.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
     as viewmodels;
@@ -76,7 +75,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 
-// Helper method to build full name (add this at the top of your class)
   String buildFullName(String firstName, String lastName) {
     // Handle null or empty values
     final cleanFirstName = (firstName).trim();
@@ -97,8 +95,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return '$cleanFirstName ${capitalizeFirstLetter(cleanLastName)}';
   }
 
+  ImageProvider _buildUserImage(String userImage) {
+    if (userImage.startsWith('http://') || userImage.startsWith('https://')) {
+      return NetworkImage(userImage);
+    } else if (userImage.startsWith('assets/')) {
+      return AssetImage(userImage);
+    } else {
+      // For any other case, use a default asset image
+      return const AssetImage('assets/images/icon.png');
+    }
+  }
+
   void _navigateToEditProduct(Product product) {
-    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    final userRole =
+        Provider.of<UserViewModel>(context, listen: false).userRole;
     if (userRole == 'USER') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -108,14 +118,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       );
       return;
     }
-    Navigator.push(
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (context) => EditProductScreen(
-          product: product,
-          productId: 1,
-        ),
-      ),
+      '/edit_product',
+      arguments: {'product': product},
     ).then((edited) {
       if (edited == true) {
         // Refresh product data if edited
@@ -132,7 +138,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // ignore: unused_element
   void _showEditOptions(Product product) {
-    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    final userRole =
+        Provider.of<UserViewModel>(context, listen: false).userRole;
     if (userRole == 'USER') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -183,7 +190,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _showDeleteConfirmation(Product product) {
-    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    final userRole =
+        Provider.of<UserViewModel>(context, listen: false).userRole;
     if (userRole == 'USER') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -538,7 +546,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             children: [
                               CircleAvatar(
                                 backgroundImage:
-                                    AssetImage(currentProduct.userImage),
+                                    _buildUserImage(currentProduct.userImage),
                                 radius: 20,
                               ),
                               const SizedBox(width: 12),
@@ -857,7 +865,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: Provider.of<UserViewModel>(context, listen: false)
+                            child: Provider.of<UserViewModel>(context,
+                                            listen: false)
                                         .userRole ==
                                     'USER'
                                 ? FutureBuilder<String?>(

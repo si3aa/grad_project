@@ -233,8 +233,11 @@ class _ProductCardState extends State<ProductCard> {
   ImageProvider _buildUserImage(String userImage) {
     if (userImage.startsWith('http://') || userImage.startsWith('https://')) {
       return NetworkImage(userImage);
-    } else {
+    } else if (userImage.startsWith('assets/')) {
       return AssetImage(userImage);
+    } else {
+      // For any other case, use a default asset image
+      return const AssetImage('assets/images/icon.png');
     }
   }
 }

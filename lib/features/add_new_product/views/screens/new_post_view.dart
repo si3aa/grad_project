@@ -14,7 +14,9 @@ import 'package:Herfa/features/add_new_product/views/widgets/submit_button.dart'
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dio/dio.dart';
+
+import 'dart:io';
+import 'package:image_picker/image_picker.dart' as img_picker;
 
 /// The view for creating a new product post, displaying the form UI.
 class NewPostView extends StatefulWidget {
@@ -131,13 +133,220 @@ class _NewPostViewState extends State<NewPostView> {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
-                    ImagePickerWidget(
-                      images: state.images,
-                      onAddImage: cubit.addImage,
-                      onDeleteImage: cubit.deleteImage,
-                      maxImages: 5,
-                    ),
-                    if (state.error != null && state.images.isEmpty)
+
+                    // Show current image and new image field when in edit mode
+                    if (widget.isEditMode && widget.product != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Current Image Section
+                          const Text(
+                            'Current Image',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: widget.product!.productImage
+                                      .startsWith('http')
+                                  ? Image.network(
+                                      widget.product!.productImage,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey.shade200,
+                                          child: const Icon(
+                                            Icons.image_not_supported,
+                                            size: 50,
+                                            color: Colors.grey,
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Image.asset(
+                                      widget.product!.productImage,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey.shade200,
+                                          child: const Icon(
+                                            Icons.image_not_supported,
+                                            size: 50,
+                                            color: Colors.grey,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline,
+                                color: Colors.orange,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '(Change Image is required)',
+                                style: TextStyle(
+                                  color: Colors.orange.shade700,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // New Image Section
+                          const Text(
+                            'New Image',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.grey.shade50,
+                            ),
+                            child: Column(
+                              children: [
+                                const Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 48,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Add new product image',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    // Show image picker options
+                                    _showImagePickerOptions(context, cubit);
+                                  },
+                                  icon: const Icon(Icons.photo_library),
+                                  label: const Text('Choose Image'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Show selected new images
+                          if (state.images.isNotEmpty)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Selected New Images:',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  height: 100,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: state.images.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        width: 100,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.grey.shade300),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.file(
+                                                File(state.images[index]),
+                                                width: 100,
+                                                height: 100,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 4,
+                                              right: 4,
+                                              child: GestureDetector(
+                                                onTap: () => cubit.deleteImage(
+                                                    state.images[index]),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(4),
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color: Colors.red,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.white,
+                                                    size: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      )
+                    else
+                      // Original image picker for new products
+                      ImagePickerWidget(
+                        images: state.images,
+                        onAddImage: cubit.addImage,
+                        onDeleteImage: cubit.deleteImage,
+                        maxImages: 5,
+                      ),
+
+                    if (state.error != null &&
+                        state.images.isEmpty &&
+                        !widget.isEditMode)
                       const Padding(
                         padding: EdgeInsets.only(top: 8.0),
                         child: Text(
@@ -255,63 +464,67 @@ class _NewPostViewState extends State<NewPostView> {
       },
     );
   }
-}
 
-Future<void> updateProduct({
-  required String productId,
-  required String name,
-  required String shortDescription,
-  required String longDescription,
-  required double price,
-  required int quantity,
-  required int categoryId,
-  required String filePath, // Local path to the image file
-  required bool active,
-  required List<String> colors, // e.g. ['red', 'blue']
-}) async {
-  final dio = Dio();
-
-  // Convert colors to JSON string
-  final colorsJson =
-      colors.toString(); // or jsonEncode(colors) if you import dart:convert
-
-  // Print all data before sending
-  print('--- Data to be sent for product update ---');
-  print('product_id: $productId');
-  print('name: $name');
-  print('shortDescription: $shortDescription');
-  print('longDescription: $longDescription');
-  print('price: $price');
-  print('quantity: $quantity');
-  print('categoryId: $categoryId');
-  print('filePath: $filePath');
-  print('active: $active');
-  print('colors: $colorsJson');
-  print('------------------------------------------');
-
-  final formData = FormData.fromMap({
-    'name': name,
-    'shortDescription': shortDescription,
-    'longDescription': longDescription,
-    'price': price.toString(),
-    'quantity': quantity.toString(),
-    'categoryId': categoryId.toString(),
-    'file': await MultipartFile.fromFile(filePath),
-    'product_id': productId,
-    'active': active.toString(),
-    'colors': colorsJson,
-  });
-
-  final response = await dio.put(
-    'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products',
-    data: formData,
-    options: Options(
-      headers: {
-        'Authorization': 'Bearer YOUR_TOKEN',
-        'Content-Type': 'multipart/form-data',
+  void _showImagePickerOptions(BuildContext context, NewPostCubit cubit) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Choose Image Source',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take Photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(context, cubit, img_picker.ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(context, cubit, img_picker.ImageSource.gallery);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
       },
-    ),
-  );
+    );
+  }
 
-  print(response.data);
+  Future<void> _pickImage(BuildContext context, NewPostCubit cubit,
+      img_picker.ImageSource source) async {
+    try {
+      final picker = img_picker.ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        cubit.addImage(pickedFile.path);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error picking image: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 }

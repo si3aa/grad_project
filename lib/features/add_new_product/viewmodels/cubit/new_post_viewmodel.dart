@@ -12,10 +12,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import '../states/new_post_state.dart';
-import 'package:Herfa/features/get_product/data/repository/product_api_repository.dart';
 
 class NewPostCubit extends Cubit<NewPostState> {
-  final ProductApiRepository _productApiRepository = ProductApiRepository();
   NewPostCubit() : super(NewPostState());
 
   void addImage(String imagePath) {
@@ -241,7 +239,7 @@ class NewPostCubit extends Cubit<NewPostState> {
       price: product.originalPrice,
       quantity: product.quantity,
       categoryId: 1, // Default category ID - adjust as needed
-      images: [product.productImage], // Assuming one image for now
+      images: [], // Start with empty images list for new images
       selectedColors: [], // Initialize empty colors list
       selectedColorNames: [], // Initialize empty color names list
     ));
@@ -250,6 +248,17 @@ class NewPostCubit extends Cubit<NewPostState> {
 
   /// Update an existing product with comprehensive validation and error handling
   Future<bool> updateProduct() async {
+    // If no new image is selected, keep the old image
+    if (state.images.isEmpty && state.productId != null) {
+      // You may need to pass the old image path from the product to the state
+      // For now, let's assume you can access the old image via a field or parameter
+      // (You may need to adjust this if the old image is not available here)
+      final oldProduct = await _getOldProductById(state.productId!);
+      if (oldProduct != null && oldProduct.productImage.isNotEmpty) {
+        emit(state.copyWith(images: [oldProduct.productImage]));
+      }
+    }
+
     // Validate required fields
     if (!_validateProductData()) {
       return false;
@@ -577,6 +586,25 @@ class NewPostCubit extends Cubit<NewPostState> {
   /// Get appropriate button text based on mode
   String get submitButtonText =>
       isEditMode ? 'UPDATE PRODUCT' : 'CREATE PRODUCT';
+
+  // Helper to get the old product by ID (you may need to implement this based on your data source)
+  Future<Product?> _getOldProductById(int id) async {
+    // Use the current state as the fallback for the old product
+    return Product(
+      id: state.productId ?? 0,
+      userFirstName: '',
+      userUsername: '',
+      userLastName: '',
+      userImage: '',
+      productImage: state.images.isNotEmpty ? state.images[0] : '',
+      productName: state.productName,
+      originalPrice: state.price,
+      discountedPrice: 0,
+      title: state.productTitle,
+      description: state.description,
+      quantity: state.quantity,
+    );
+  }
 }
 
 Future postFormData(String path,
