@@ -188,7 +188,8 @@ class _EventProductsListScreenState extends State<EventProductsListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    final userRole =
+        Provider.of<UserViewModel>(context, listen: false).userRole;
 
     return Scaffold(
       appBar: AppBar(
@@ -421,10 +422,12 @@ class _EventProductsListScreenState extends State<EventProductsListScreen> {
                                       Container(
                                         decoration: BoxDecoration(
                                           color: Colors.red.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: IconButton(
-                                          onPressed: () => _showDeleteConfirmation(
+                                          onPressed: () =>
+                                              _showDeleteConfirmation(
                                             productId,
                                             productName,
                                           ),

@@ -28,7 +28,9 @@ class UserModel {
       lastName: json['lastName'] as String,
       role: json['role'] as String,
       verified: json['verified'] as bool,
-      profile: json['profile'] != null ? UserProfile.fromJson(json['profile']) : null,
+      profile: json['profile'] != null
+          ? UserProfile.fromJson(json['profile'])
+          : null,
     );
   }
 
@@ -36,14 +38,15 @@ class UserModel {
     // Remove extra spaces and trim
     final cleanFirstName = firstName.trim();
     final cleanLastName = lastName.trim();
-    
+
     // Capitalize first letter of lastName
-    final capitalizedLastName = cleanLastName.isNotEmpty 
-      ? '${cleanLastName[0].toUpperCase()}${cleanLastName.substring(1)}'
-      : '';
+    final capitalizedLastName = cleanLastName.isNotEmpty
+        ? '${cleanLastName[0].toUpperCase()}${cleanLastName.substring(1)}'
+        : '';
 
     return '$cleanFirstName $capitalizedLastName'.trim();
   }
+
   @override
   String toString() {
     return '''
@@ -56,7 +59,7 @@ class UserModel {
     Profile Info: ${profile != null ? '\n      Name: ${profile!.firstName} ${profile!.lastName}\n      Phone: ${profile!.phone}\n      Address: ${profile!.address}\n      Bio: ${profile!.bio}' : 'No profile data'}
     ============================================
     ''';
-}
+  }
 }
 
 class UserProfile {

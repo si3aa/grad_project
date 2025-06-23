@@ -30,12 +30,48 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
   @override
   void initState() {
     super.initState();
-    // Load products for merchant ID 3
-    context.read<ProductCubit>().loadMerchantProducts('3');
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userId = Provider.of<UserViewModel>(context, listen: false).userId;
+      context.read<ProductCubit>().loadMerchantProducts(userId.toString());
+      // Fetch products already added to this event
+      await _fetchAddedProducts();
+    });
+  }
+
+  Future<void> _fetchAddedProducts() async {
+    try {
+      final dio = Dio();
+      final authDataSource = AuthSharedPrefLocalDataSource();
+      final token = await authDataSource.getToken();
+      if (token == null) return;
+      dio.options.headers['Authorization'] = 'Bearer $token';
+      final url =
+          'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/events/${widget.eventId}/products';
+      final response = await dio.get(url);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        List<dynamic> products;
+        if (data is List) {
+          products = data;
+        } else if (data is Map && data['data'] != null) {
+          products = data['data'];
+        } else if (data is Map && data['products'] != null) {
+          products = data['products'];
+        } else {
+          products = [];
+        }
+        setState(() {
+          addedProductIds = products.map<int>((p) => p['id'] as int).toSet();
+        });
+      }
+    } catch (e) {
+      // Optionally handle error
+    }
   }
 
   Future<void> _addProductToEvent(int productId) async {
-    final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+    final userRole =
+        Provider.of<UserViewModel>(context, listen: false).userRole;
     if (userRole == 'USER') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -124,7 +160,12 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
           }
 
           if (state is product_states.ProductLoaded) {
-            final userRole = Provider.of<UserViewModel>(context, listen: false).userRole;
+            final userRole =
+                Provider.of<UserViewModel>(context, listen: false).userRole;
+            // Filter out products already added to the event
+            final productsToShow = state.products
+                .where((product) => !addedProductIds.contains(product.id))
+                .toList();
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -139,11 +180,10 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: state.products.length,
+                  itemCount: productsToShow.length,
                   itemBuilder: (context, index) {
-                    final product = state.products[index];
-                    final bool isAdded = addedProductIds.contains(product.id);
-
+                    final product = productsToShow[index];
+                    // No need to check isAdded anymore, since filtered
                     return Card(
                       elevation: 2,
                       margin: const EdgeInsets.only(bottom: 12),
@@ -205,12 +245,9 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
                             // Add Button (only for non-USER roles)
                             if (userRole != 'USER')
                               ElevatedButton(
-                                onPressed: isAdded
-                                    ? null
-                                    : () => _addProductToEvent(product.id),
+                                onPressed: () => _addProductToEvent(product.id),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      isAdded ? Colors.grey : kPrimaryColor,
+                                  backgroundColor: kPrimaryColor,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
@@ -220,9 +257,9 @@ class _EventProductsScreenState extends State<EventProductsScreen> {
                                     vertical: 12,
                                   ),
                                 ),
-                                child: Text(
-                                  isAdded ? 'Added' : 'Add',
-                                  style: const TextStyle(
+                                child: const Text(
+                                  'Add',
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),
