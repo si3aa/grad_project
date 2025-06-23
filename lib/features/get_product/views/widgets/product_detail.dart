@@ -105,26 +105,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                 log('SavedProductState: $state');
                 if (state is SavedProductSuccess) {
                   log('Product save status changed: ${state.message}');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      duration: const Duration(seconds: 2),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      action: SnackBarAction(
-                        label: 'View',
-                        textColor: Colors.white,
-                        onPressed: () {
-                          if (state.message.contains('saved')) {
-                            // Navigate to saved items screen
-                            Navigator.pushNamed(context, '/saved');
-                          }
-                        },
-                      ),
-                    ),
-                  );
                 } else if (state is SavedProductError) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
