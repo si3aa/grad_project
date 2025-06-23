@@ -533,59 +533,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   children: [
                     // Product Image with error handling
                     _buildProductImage(),
+                    // User Info (moved below product image)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 24.0, top: 24.0, bottom: 24.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundImage:
+                                _buildUserImage(currentProduct.userImage),
+                            radius: 28, // Smaller image
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                buildFullName(currentProduct.userFirstName,
+                                    currentProduct.userLastName),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18, // Smaller name
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                currentProduct.userUsername,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 14, // Smaller username
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                     // Product Info
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Seller Info
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundImage:
-                                    _buildUserImage(currentProduct.userImage),
-                                radius: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    buildFullName(currentProduct.userFirstName,
-                                        currentProduct.userLastName),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  Text(
-                                    currentProduct.userUsername,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Implement contact seller functionality
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimaryColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: const Text('Contact Seller'),
-                              ),
-                            ],
-                          ),
                           // Product Name and Title
                           Text(
                             currentProduct.productName,

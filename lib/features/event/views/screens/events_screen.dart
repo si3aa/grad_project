@@ -17,148 +17,164 @@ class EventsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Events'),
-        centerTitle: true,
-        backgroundColor: kPrimaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: BlocBuilder<EventCubit, EventState>(
-        builder: (context, state) {
-          if (state is EventLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushNamedAndRemoveUntil(
+            context, Routes.homeRoute, (route) => false);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Events'),
+          centerTitle: true,
+          backgroundColor: kPrimaryColor,
+          foregroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, Routes.homeRoute, (route) => false);
+            },
+          ),
+        ),
+        body: BlocBuilder<EventCubit, EventState>(
+          builder: (context, state) {
+            if (state is EventLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state is EventError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Oops! Something went wrong',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.message,
-                      style: const TextStyle(
+            if (state is EventError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
                         color: Colors.red,
-                        fontSize: 16,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        context.read<EventCubit>().refreshEvents();
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Try Again'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+                      const SizedBox(height: 16),
+                      Text(
+                        'Oops! Something went wrong',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          if (state is EventLoaded) {
-            if (state.events.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'No events found',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AddEventScreen(),
+                      const SizedBox(height: 8),
+                      Text(
+                        state.message,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          context.read<EventCubit>().refreshEvents();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Try Again'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
                           ),
-                        );
-                      },
-                      child: const Text('Create Your First Event'),
-                    ),
-                  ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                await context.read<EventCubit>().refreshEvents();
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.events.length,
-                itemBuilder: (context, index) {
-                  final event = state.events[index];
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EventProductsListScreen(
-                            eventId: event.id.toString(),
-                          ),
-                        ),
-                      );
-                    },
-                    onDoubleTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EventDetailsScreen(event: event),
-                        ),
-                      );
-                    },
-                    child: EventCard(event: event),
-                  );
-                },
-              ),
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
-      ),
-      floatingActionButton: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
-          ? null
-          : FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddEventScreen(),
+            if (state is EventLoaded) {
+              if (state.events.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'No events found',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AddEventScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('Create Your First Event'),
+                      ),
+                    ],
                   ),
                 );
-              },
-              backgroundColor: kPrimaryColor,
-              child: const Icon(Icons.add, color: Colors.white),
-            ),
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await context.read<EventCubit>().refreshEvents();
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.events.length,
+                  itemBuilder: (context, index) {
+                    final event = state.events[index];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EventProductsListScreen(
+                              eventId: event.id.toString(),
+                            ),
+                          ),
+                        );
+                      },
+                      onDoubleTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EventDetailsScreen(event: event),
+                          ),
+                        );
+                      },
+                      child: EventCard(event: event),
+                    );
+                  },
+                ),
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
+        ),
+        floatingActionButton:
+            Provider.of<UserViewModel>(context, listen: false).userRole ==
+                    'USER'
+                ? null
+                : FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddEventScreen(),
+                        ),
+                      );
+                    },
+                    backgroundColor: kPrimaryColor,
+                    child: const Icon(Icons.add, color: Colors.white),
+                  ),
+      ),
     );
   }
 }
@@ -285,9 +301,12 @@ class EventCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
-                      onPressed: Provider.of<UserViewModel>(context, listen: false).userRole == 'USER'
-                          ? null
-                          : () => _showEventOptions(context, event),
+                      onPressed:
+                          Provider.of<UserViewModel>(context, listen: false)
+                                      .userRole ==
+                                  'USER'
+                              ? null
+                              : () => _showEventOptions(context, event),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryColor,
                         foregroundColor: Colors.white,
