@@ -22,14 +22,14 @@ class HomeAppBar extends StatelessWidget {
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
+                    children: [
+                      const Text(
                         "Welcome 👋",
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                       Text(
-                        "Rahma Moammed",
-                        style: TextStyle(
+                        userViewModel.fullName,
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],

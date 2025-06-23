@@ -12,8 +12,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import '../states/new_post_state.dart';
+import 'package:Herfa/features/get_product/data/repository/product_api_repository.dart';
 
 class NewPostCubit extends Cubit<NewPostState> {
+  final ProductApiRepository _productApiRepository = ProductApiRepository();
   NewPostCubit() : super(NewPostState());
 
   void addImage(String imagePath) {
@@ -206,6 +208,13 @@ class NewPostCubit extends Cubit<NewPostState> {
         } else if (e.type == DioExceptionType.unknown) {
           errorMessage =
               'Network error. Please check your internet connection.';
+        } else if (e.response?.statusCode == 401) {
+          errorMessage =
+              'Authentication failed. Please check your login status.';
+        } else if (e.response?.statusCode == 404) {
+          errorMessage = 'Product not found. Please check the product ID.';
+        } else if (e.response?.statusCode == 500) {
+          errorMessage = 'Server error occurred. Please try again later.';
         }
       }
       emit(state.copyWith(isLoading: false, error: errorMessage));
@@ -222,47 +231,39 @@ class NewPostCubit extends Cubit<NewPostState> {
     _printCurrentState("Product ID set to $id");
   }
 
-  /// Update an existing product
+  /// Initialize the cubit's state with existing product data for editing.
+  void initWithProductData(Product product) {
+    emit(state.copyWith(
+      productId: product.id,
+      productName: product.productName,
+      productTitle: product.title,
+      description: product.description,
+      price: product.originalPrice,
+      quantity: product.quantity,
+      categoryId: 1, // Default category ID - adjust as needed
+      images: [product.productImage], // Assuming one image for now
+      selectedColors: [], // Initialize empty colors list
+      selectedColorNames: [], // Initialize empty color names list
+    ));
+    print('Product data initialized for editing: ${product.productName}');
+  }
+
+  /// Update an existing product with comprehensive validation and error handling
   Future<bool> updateProduct() async {
-    // Validate all required fields
-    if (state.productName.isEmpty ||
-        state.productTitle.isEmpty ||
-        state.productTitle.length < 10 ||
-        state.description.isEmpty ||
-        state.description.length < 20 ||
-        state.price <= 0 ||
-        state.quantity <= 0 ||
-        state.categoryId <= 0 ||
-        state.selectedColors.isEmpty) {
-      String errorMessage =
-          'Please fill all required fields and select at least one color';
-
-      if (state.productTitle.isNotEmpty && state.productTitle.length < 10) {
-        errorMessage = 'Product title must be at least 10 characters';
-      } else if (state.description.isNotEmpty &&
-          state.description.length < 20) {
-        errorMessage = 'Product description must be at least 20 characters';
-      }
-
-      emit(state.copyWith(error: errorMessage));
+    // Validate required fields
+    if (!_validateProductData()) {
       return false;
     }
+
+    // Store the old product ID for deletion
+    final oldProductId = state.productId.toString();
 
     try {
       emit(state.copyWith(isLoading: true, error: null));
 
-      // First, delete the old product
-      final deleteResponse =
-          await deleteProductById(state.productId.toString());
-
-      if (!deleteResponse.success) {
-        throw Exception(
-            'Failed to delete old product: ${deleteResponse.message}');
-      }
-
-      // Create a new product with updated data
+      // Create product model from current state
       final product = ProductModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate new ID
+        id: state.productId.toString(),
         name: state.productName.trim(),
         title: state.productTitle.trim(),
         description: state.description.trim(),
@@ -274,55 +275,102 @@ class NewPostCubit extends Cubit<NewPostState> {
         images: state.images,
       );
 
-      // Print product data for debugging
-      print('======= CREATING NEW PRODUCT WITH UPDATED DATA =======');
-      print('New Product ID: ${product.id}');
-      print('Product Name: ${product.name}');
-      print('Product Title: ${product.title}');
-      print('Description: ${product.description}');
-      print('Price: ${product.price}');
-      print('Quantity: ${product.quantity}');
-      print('Category ID: ${product.categoryId}');
-      print('Colors: ${product.colors}');
-      print('Images: ${product.images}');
-      print('======================================');
+      // Log product data for debugging
+      _logProductData('UPDATING', product);
 
-      // Send data to API (using the same method as for creating a new product)
-      final response = await sendProductToApi(product);
+      // Send update request to API
+      final response = await _sendUpdateRequest(product);
 
-      // Print API response for debugging
-      print('API response success: ${response.success}');
-      print('API response message: ${response.message}');
-      if (response.data != null) {
-        print('API response data: ${response.data}');
-      }
+      if (response.success) {
+        // After successful update, delete the old product
+        print(
+            'Product updated successfully. Now deleting old product: $oldProductId');
 
-      if (!response.success) {
+        final deleteResponse = await deleteProductById(oldProductId);
+
+        if (deleteResponse.success) {
+          print('Old product deleted successfully: $oldProductId');
+          emit(state.copyWith(isLoading: false, error: null));
+          return true;
+        } else {
+          print(
+              'Warning: Product updated but failed to delete old version: ${deleteResponse.message}');
+          // Still return true since the update was successful
+          emit(state.copyWith(isLoading: false, error: null));
+          return true;
+        }
+      } else {
         throw Exception(response.message);
       }
-
-      emit(state.copyWith(
-        isLoading: false,
-        error: null,
-      ));
-      return true;
     } catch (e) {
-      print('Error updating product: $e');
-      emit(state.copyWith(
-          isLoading: false, error: 'Failed to update product: $e'));
+      _handleUpdateError(e);
       return false;
     }
   }
 
-  // Method to update product data via API
-  Future<ApiResponse> updateProductApi(ProductModel product) async {
-    try {
-      // API URL: https://zygotic-marys-herfa-c2dd67a8.koyeb.app/products
-      print('Updating product with ID: ${product.id}');
+  /// Validate product data before update
+  bool _validateProductData() {
+    if (state.productId == null || state.productId == 0) {
+      emit(state.copyWith(error: 'Product ID is missing. Cannot update.'));
+      print('Validation Error: Product ID is missing');
+      return false;
+    }
 
-      // Convert all product fields to strings
+    if (state.productName.isEmpty) {
+      emit(state.copyWith(error: 'Product name cannot be empty.'));
+      print('Validation Error: Product name is empty');
+      return false;
+    }
+
+    if (state.productTitle.isEmpty || state.productTitle.length < 10) {
+      emit(state.copyWith(
+          error: 'Product title must be at least 10 characters.'));
+      print(
+          'Validation Error: Product title is too short (${state.productTitle.length} chars)');
+      return false;
+    }
+
+    if (state.description.isEmpty || state.description.length < 20) {
+      emit(state.copyWith(
+          error: 'Product description must be at least 20 characters.'));
+      print(
+          'Validation Error: Product description is too short (${state.description.length} chars)');
+      return false;
+    }
+
+    if (state.price <= 0) {
+      emit(state.copyWith(error: 'Product price must be greater than 0.'));
+      print('Validation Error: Invalid price (${state.price})');
+      return false;
+    }
+
+    if (state.quantity <= 0) {
+      emit(state.copyWith(error: 'Product quantity must be greater than 0.'));
+      print('Validation Error: Invalid quantity (${state.quantity})');
+      return false;
+    }
+
+    if (state.categoryId <= 0) {
+      emit(state.copyWith(error: 'Please select a valid category.'));
+      print('Validation Error: Invalid category ID (${state.categoryId})');
+      return false;
+    }
+
+    if (state.images.isEmpty) {
+      emit(state.copyWith(error: 'Please add at least one product image.'));
+      print('Validation Error: No images provided');
+      return false;
+    }
+
+    return true;
+  }
+
+  /// Send update request to API
+  Future<ApiResponse> _sendUpdateRequest(ProductModel product) async {
+    try {
+      // Prepare product data for API
       final productData = {
-        'id': product.id, // Include product ID in the request body
+        'id': product.id,
         'name': product.name,
         'shortDescription': product.title,
         'longDescription': product.description,
@@ -330,28 +378,33 @@ class NewPostCubit extends Cubit<NewPostState> {
         'quantity': product.quantity.toString(),
         'categoryId': product.categoryId.toString(),
         'active': product.isActive.toString(),
-        'colors': "[${product.colors.join(',').toString()}]",
+        'colors': "[${product.colors.join(',')}]",
       };
 
-      // Make the API call using Dio - use the main products endpoint
+      // Prepare files for multipart request
+      Map<String, File>? files;
+      if (product.images.isNotEmpty) {
+        files = {'file': File(product.images[0])};
+      }
+
+      // Send update request
       final response = await postFormData(
-        '/products', // Use the main endpoint without ID in the path
+        '/products',
         body: productData,
-        files: product.images.isNotEmpty
-            ? {'file': File(product.images[0])}
-            : null,
-        isUpdate: true, // Indicate this is an update operation
+        files: files,
+        isUpdate: true,
       );
 
-      // Print response to console
-      print('API Response Status Code: ${response.statusCode}');
-      print('API Response Data: ${response.data}');
+      // Log response for debugging
+      print('Update API Response Status: ${response.statusCode}');
+      print('Update API Response Data: ${response.data}');
 
+      // Handle response
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Attempt to parse response data as JSON
         final responseData = response.data is Map<String, dynamic>
             ? response.data
             : {'productId': product.id};
+
         return ApiResponse(
           success: true,
           message: 'Product updated successfully',
@@ -361,20 +414,16 @@ class NewPostCubit extends Cubit<NewPostState> {
         final errorMessage = response.data is Map<String, dynamic>
             ? response.data['message'] ?? 'Failed to update product'
             : 'Failed to update product: ${response.statusCode}';
+
         return ApiResponse(
           success: false,
           message: errorMessage,
         );
       }
     } catch (e) {
-      // Print error to console
-      print('Error updating product via API: ${e.toString()}');
+      print('Error in _sendUpdateRequest: ${e.toString()}');
       if (e is DioException) {
-        print('Dio error type: ${e.type}');
-        print('Dio error message: ${e.message}');
-        if (e.response != null) {
-          print('Dio error response: ${e.response?.data}');
-        }
+        _logDioError(e);
       }
 
       return ApiResponse(
@@ -382,6 +431,58 @@ class NewPostCubit extends Cubit<NewPostState> {
         message: 'Error updating product: ${e.toString()}',
       );
     }
+  }
+
+  /// Handle update errors
+  void _handleUpdateError(dynamic error) {
+    print('Error in updateProduct: ${error.toString()}');
+
+    String errorMessage = error.toString();
+
+    if (error is DioException) {
+      _logDioError(error);
+
+      if (error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (error.type == DioExceptionType.unknown) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.response?.statusCode == 401) {
+        errorMessage = 'Authentication failed. Please check your login status.';
+      } else if (error.response?.statusCode == 404) {
+        errorMessage = 'Product not found. Please check the product ID.';
+      } else if (error.response?.statusCode == 500) {
+        errorMessage = 'Server error occurred. Please try again later.';
+      }
+    }
+
+    emit(state.copyWith(isLoading: false, error: errorMessage));
+  }
+
+  /// Log Dio error details
+  void _logDioError(DioException error) {
+    print('Dio Error Details:');
+    print('  Type: ${error.type}');
+    print('  Message: ${error.message}');
+    print('  Status Code: ${error.response?.statusCode}');
+    print('  Response Data: ${error.response?.data}');
+  }
+
+  /// Log product data for debugging
+  void _logProductData(String action, ProductModel product) {
+    print('======= $action PRODUCT DATA =======');
+    print('Product ID: ${product.id}');
+    print('Product Name: ${product.name}');
+    print('Product Title: ${product.title}');
+    print('Description: ${product.description}');
+    print('Price: ${product.price}');
+    print('Quantity: ${product.quantity}');
+    print('Category ID: ${product.categoryId}');
+    print('Colors: ${product.colors}');
+    print('Images: ${product.images}');
+    print('====================================');
   }
 
   // Method to send product data to API
@@ -468,41 +569,6 @@ class NewPostCubit extends Cubit<NewPostState> {
     print("Selected Colors: ${state.selectedColorNames}");
     print("Images Count: ${state.images.length}");
     print("====================");
-  }
-
-  /// Initialize with existing product data for editing
-  void initWithProductData(Product product) {
-    // Reset state first to clear any existing data
-    resetState();
-
-    // Set the product ID first to ensure it's available
-    setProductId(product.id);
-
-    // Set all the other product data fields
-    updateProductName(product.productName);
-    updateProductTitle(product.title);
-    updateDescription(product.description);
-    updatePrice(product.originalPrice);
-    updateQuantity(product.quantity);
-
-    // Add the product image if available
-    if (product.productImage.isNotEmpty &&
-        !product.productImage.startsWith('assets/')) {
-      addImage(product.productImage);
-    }
-
-    // Set category ID (you might need to map the category name to ID)
-    // This is a placeholder - adjust based on your actual category structure
-    updateCategoryId(1); // Default to first category if unknown
-
-    // Set colors if available - for now we'll add a default color
-    // This is a placeholder - adjust based on your actual color structure
-    if (state.selectedColors.isEmpty) {
-      toggleColor(Colors.red, 'Red');
-    }
-
-    print('Product data initialized for editing: ${product.productName}');
-    _printCurrentState("After initialization for editing");
   }
 
   /// Check if we're in edit mode
@@ -609,12 +675,17 @@ dynamic _handleDioError(DioException error) {
 Future<ApiResponse> deleteProductById(String productId) async {
   try {
     print('Deleting product with ID: $productId');
+    final authDataSource = AuthSharedPrefLocalDataSource();
+    final token = await authDataSource.getToken();
+
+    if (token == null) {
+      throw UnauthorizedException();
+    }
 
     final response = await Dio(BaseOptions(
         baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
         headers: {
-          "Authorization":
-              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJST0xFIjoiTUVSQ0hBTlQiLCJpc3MiOiJlQ29tbWVyY2UiLCJVU0VSTkFNRSI6Im1obWQiLCJleHAiOjE3NDY4OTQxOTJ9.wdfbolRgFJ28Jqskgz6ufmaokxnX11qTHpc2eoeLL0M",
+          "Authorization": "Bearer $token",
         })).delete('/products/$productId');
 
     print('Delete response status: ${response.statusCode}');
