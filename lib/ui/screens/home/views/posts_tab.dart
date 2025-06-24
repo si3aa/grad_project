@@ -12,6 +12,7 @@ import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_loca
 import 'package:Herfa/features/Product_filteration/viewmodels/product_filter_cubit.dart';
 import 'package:Herfa/features/Product_filteration/data/product_filter_repository.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
+import 'package:Herfa/core/route_manger/routes.dart';
 
 import '../../../../features/get_product/viewmodels/product_state.dart';
 
@@ -104,6 +105,27 @@ class _PostsTabContent extends StatelessWidget {
                         .fetchProducts(categoryId);
                   }
                 },
+              ),
+              const SizedBox(height: 20),
+              // Bundle Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  color: Colors.amber.shade50,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.all_inbox, color: Colors.orange),
+                    title: const Text('Bundle',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('Check out our special bundles!'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.pushNamed(context, Routes.bundleRoute);
+                    },
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
               _buildProductList(context),

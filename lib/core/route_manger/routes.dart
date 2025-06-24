@@ -22,4 +22,5 @@ class Routes {
   static const String eventProductsRoute = '/event-products';
   static const String changeRoleRoute = '/change-role';
   static const String settingsRoute = '/settings';
+  static const String bundleRoute = '/bundle';
 }

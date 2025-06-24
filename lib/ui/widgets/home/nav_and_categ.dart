@@ -3,6 +3,7 @@ import 'package:Herfa/ui/widgets/home/build_nav_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
+import 'package:Herfa/core/route_manger/routes.dart';
 
 class NavBarWidget extends StatelessWidget {
   final int currentIndex;
@@ -94,6 +95,7 @@ class _CategoriesListState extends State<CategoriesList> {
     {"title": "Accessories", "categoryId": 1},
     {"title": "handmade", "categoryId": 2},
     {"title": "Art", "categoryId": 3},
+    {"title": "Bundle", "isBundle": true},
   ];
 
   int _getSelectedIndex() {
@@ -117,8 +119,11 @@ class _CategoriesListState extends State<CategoriesList> {
             title: category["title"]!,
             route: "", // route is not used
             isSelected: selectedIndex == index,
+            isBundle: category["isBundle"] == true,
             onTap: () {
-              if (widget.onCategorySelected != null) {
+              if (category["isBundle"] == true) {
+                Navigator.pushNamed(context, Routes.bundleRoute);
+              } else if (widget.onCategorySelected != null) {
                 widget.onCategorySelected!(category["categoryId"]);
               }
             },
