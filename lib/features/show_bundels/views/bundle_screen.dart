@@ -326,28 +326,31 @@ class _BundleScreenState extends State<BundleScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateBundleScreen()),
-          );
-          if (result == true) {
-            if (selectedIndex == 1) {
-              context.read<BundleCubit>().fetchMyBundles();
-            } else {
-              context.read<BundleCubit>().fetchBundles();
-            }
-          }
-        },
-        backgroundColor: kPrimaryColor,
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        tooltip: 'Create Bundle',
-      ),
+      floatingActionButton: isMerchant
+          ? FloatingActionButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const CreateBundleScreen()),
+                );
+                if (result == true) {
+                  if (selectedIndex == 1) {
+                    context.read<BundleCubit>().fetchMyBundles();
+                  } else {
+                    context.read<BundleCubit>().fetchBundles();
+                  }
+                }
+              },
+              backgroundColor: kPrimaryColor,
+              child: const Icon(Icons.add, color: Colors.white, size: 32),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              tooltip: 'Create Bundle',
+            )
+          : null,
     );
   }
 }
