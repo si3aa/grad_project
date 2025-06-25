@@ -28,7 +28,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
 import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
-import 'package:Herfa/features/Bundle/views/bundle_screen.dart';
+import 'package:Herfa/features/show_bundels/views/bundle_screen_wrapper.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -168,7 +168,7 @@ class RouteGenerator {
         }
         return _undefinedRoute();
       case Routes.bundleRoute:
-        return MaterialPageRoute(builder: (_) => const BundleScreen());
+        return MaterialPageRoute(builder: (_) => const BundleScreenWrapper());
       default:
         return _undefinedRoute();
     }
