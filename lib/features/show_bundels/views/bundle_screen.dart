@@ -193,128 +193,318 @@ class _BundleScreenState extends State<BundleScreen> {
                         const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final bundle = bundles[index];
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              // ignore: deprecated_member_use
-                              color: Colors.black.withOpacity(0.06),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 110,
-                              decoration: BoxDecoration(
-                                color: kPrimaryColor,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(18),
-                                  bottomLeft: Radius.circular(18),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                      return GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) {
+                              final products = bundle.products;
+                              return DraggableScrollableSheet(
+                                initialChildSize: 0.45,
+                                minChildSize: 0.3,
+                                maxChildSize: 0.85,
+                                expand: false,
+                                builder: (context, scrollController) {
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(28),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0x22000000),
+                                          blurRadius: 16,
+                                          offset: Offset(0, -4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Expanded(
-                                          child: Text(
-                                            bundle.name,
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF333366),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12),
+                                          child: Container(
+                                            width: 40,
+                                            height: 5,
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[300],
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
                                             ),
                                           ),
                                         ),
-                                        if (isMerchant)
-                                          IconButton(
-                                            icon: const Icon(Icons.delete,
-                                                color: Colors.red),
-                                            tooltip: 'Delete',
-                                            onPressed: () async {
-                                              final confirm =
-                                                  await showDialog<bool>(
-                                                context: context,
-                                                builder: (context) =>
-                                                    AlertDialog(
-                                                  title: const Text(
-                                                      'Delete Bundle'),
-                                                  content: const Text(
-                                                      'Are you sure you want to delete this bundle?'),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.of(context)
-                                                              .pop(false),
-                                                      child:
-                                                          const Text('Cancel'),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.of(context)
-                                                              .pop(true),
-                                                      child: const Text(
-                                                          'Delete',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.red)),
-                                                    ),
-                                                  ],
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 24.0, vertical: 4),
+                                          child: Row(
+                                            children: [
+                                              const Icon(Icons.shopping_bag,
+                                                  color: Colors.deepPurple,
+                                                  size: 28),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: Text(
+                                                  'Products in "${bundle.name}"',
+                                                  style: const TextStyle(
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xFF222244),
+                                                  ),
                                                 ),
-                                              );
-                                              if (confirm == true) {
-                                                context
-                                                    .read<BundleCubit>()
-                                                    .deleteBundle(bundle.id);
-                                              }
-                                            },
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      bundle.description,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    const Divider(
-                                        height: 1, color: Color(0xFFE0E0E0)),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.attach_money,
-                                            color: Colors.orange, size: 20),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${bundle.bundlePrice} EGP',
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.orange,
+                                              ),
+                                            ],
                                           ),
                                         ),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 24.0),
+                                          child: Divider(
+                                              height: 24,
+                                              thickness: 1.2,
+                                              color: Color(0xFFE0E0E0)),
+                                        ),
+                                        Expanded(
+                                          child: products.isEmpty
+                                              ? const Center(
+                                                  child: Text(
+                                                    'No products in this bundle.',
+                                                    style: TextStyle(
+                                                        fontSize: 17,
+                                                        color: Colors.grey),
+                                                  ),
+                                                )
+                                              : ListView.separated(
+                                                  controller: scrollController,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 18,
+                                                      vertical: 8),
+                                                  itemCount: products.length,
+                                                  separatorBuilder:
+                                                      (context, i) =>
+                                                          const SizedBox(
+                                                              height: 12),
+                                                  itemBuilder: (context, i) {
+                                                    final p = products[i];
+                                                    return Card(
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(16),
+                                                      ),
+                                                      elevation: 2,
+                                                      color: const Color(
+                                                          0xFFF7F8FA),
+                                                      child: ListTile(
+                                                        leading: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors
+                                                                .deepPurple
+                                                                .withOpacity(
+                                                                    0.08),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12),
+                                                          ),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8),
+                                                          child: const Icon(
+                                                              Icons
+                                                                  .shopping_cart,
+                                                              color: Colors
+                                                                  .deepPurple,
+                                                              size: 28),
+                                                        ),
+                                                        title: Text(
+                                                          p.productName,
+                                                          style:
+                                                              const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 17,
+                                                            color: Color(
+                                                                0xFF333366),
+                                                          ),
+                                                        ),
+                                                        trailing: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      14,
+                                                                  vertical: 7),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors
+                                                                .deepPurple
+                                                                .withOpacity(
+                                                                    0.12),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        18),
+                                                          ),
+                                                          child: Text(
+                                                            'x${p.quantity}',
+                                                            style:
+                                                                const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 16,
+                                                              color: Colors
+                                                                  .deepPurple,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                        ),
+                                        const SizedBox(height: 16),
                                       ],
                                     ),
-                                  ],
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                // ignore: deprecated_member_use
+                                color: Colors.black.withOpacity(0.06),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 110,
+                                decoration: BoxDecoration(
+                                  color: kPrimaryColor,
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(18),
+                                    bottomLeft: Radius.circular(18),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              bundle.name,
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF333366),
+                                              ),
+                                            ),
+                                          ),
+                                          if (isMerchant)
+                                            IconButton(
+                                              icon: const Icon(Icons.delete,
+                                                  color: Colors.red),
+                                              tooltip: 'Delete',
+                                              onPressed: () async {
+                                                final confirm =
+                                                    await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      AlertDialog(
+                                                    title: const Text(
+                                                        'Delete Bundle'),
+                                                    content: const Text(
+                                                        'Are you sure you want to delete this bundle?'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(false),
+                                                        child: const Text(
+                                                            'Cancel'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(true),
+                                                        child: const Text(
+                                                            'Delete',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .red)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                if (confirm == true) {
+                                                  context
+                                                      .read<BundleCubit>()
+                                                      .deleteBundle(bundle.id);
+                                                }
+                                              },
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        bundle.description,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      const Divider(
+                                          height: 1, color: Color(0xFFE0E0E0)),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.attach_money,
+                                              color: Colors.orange, size: 20),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${bundle.bundlePrice} EGP',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
