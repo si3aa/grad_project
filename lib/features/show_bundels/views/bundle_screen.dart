@@ -109,7 +109,7 @@ class _BundleScreenState extends State<BundleScreen> {
                         setState(() {
                           selectedIndex = 1;
                         });
-                        // TODO: Implement 'My Bundles' filter if needed
+                        context.read<BundleCubit>().fetchMyBundles();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: selectedIndex == 1

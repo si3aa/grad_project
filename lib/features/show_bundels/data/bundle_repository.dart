@@ -43,4 +43,28 @@ class BundleRepository {
       throw Exception('Failed to delete bundle: \\${response.statusCode}');
     }
   }
+
+  Future<List<BundleModel>> fetchMyBundles() async {
+    final token = await TokenHelper.getToken();
+    final response = await http.get(
+      Uri.parse(
+          'https://zygotic-marys-herfa-c2dd67a8.koyeb.app/bundles/merchant'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['success'] == true && data['data'] is List) {
+        return (data['data'] as List)
+            .map((e) => BundleModel.fromJson(e))
+            .toList();
+      } else {
+        throw Exception('Failed to fetch my bundles: \\${data['message']}');
+      }
+    } else {
+      throw Exception('Failed to fetch my bundles: \\${response.statusCode}');
+    }
+  }
 }

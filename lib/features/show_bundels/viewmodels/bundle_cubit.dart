@@ -27,4 +27,14 @@ class BundleCubit extends Cubit<BundleState> {
       emit(BundleError(e.toString()));
     }
   }
+
+  Future<void> fetchMyBundles() async {
+    emit(BundleLoading());
+    try {
+      final bundles = await repository.fetchMyBundles();
+      emit(BundleLoaded(bundles));
+    } catch (e) {
+      emit(BundleError(e.toString()));
+    }
+  }
 }
