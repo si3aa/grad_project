@@ -306,6 +306,7 @@ class _BundleScreenState extends State<BundleScreen> {
                                                               BoxDecoration(
                                                             color: Colors
                                                                 .deepPurple
+                                                                // ignore: deprecated_member_use
                                                                 .withOpacity(
                                                                     0.08),
                                                             borderRadius:
@@ -345,6 +346,7 @@ class _BundleScreenState extends State<BundleScreen> {
                                                               BoxDecoration(
                                                             color: Colors
                                                                 .deepPurple
+                                                                // ignore: deprecated_member_use
                                                                 .withOpacity(
                                                                     0.12),
                                                             borderRadius:
