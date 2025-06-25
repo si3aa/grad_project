@@ -10,15 +10,13 @@ class BundleViewModel extends ChangeNotifier {
   // Example: Error message
   String? error;
 
-
   Future<void> fetchAllBundles() async {
     isLoading = true;
     error = null;
     notifyListeners();
     try {
-     
       await Future.delayed(const Duration(seconds: 1));
-      bundles = []; 
+      bundles = [];
     } catch (e) {
       error = e.toString();
     } finally {
