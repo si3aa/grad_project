@@ -24,6 +24,7 @@ import 'package:Herfa/features/event/data/repositories/event_repository.dart';
 import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 import 'package:Herfa/features/event_interest/data/repositories/event_interest_repository.dart';
 import 'package:Herfa/features/event_interest/viewmodels/cubit/event_interest_cubit.dart';
+import 'package:Herfa/features/get-inter-event/get_inter_event_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,7 @@ Future<void> main() async {
       baseUrl: 'https://zygotic-marys-herfa-c2dd67a8.koyeb.app',
     ),
   );
-  
+
   dio.interceptors.add(
     LogInterceptor(
       requestBody: true,
@@ -53,7 +54,7 @@ Future<void> main() async {
     dio: dio,
     authDataSource: authDataSource,
   );
-  
+
   final eventInterestRepository = EventInterestRepository(
     dio: dio,
     authDataSource: authDataSource,
@@ -74,7 +75,8 @@ Future<void> main() async {
             BlocProvider(create: (_) => SearchCubit()),
             BlocProvider(create: (_) => NewPostCubit()),
             BlocProvider(create: (_) => EventCubit(eventRepository)),
-            BlocProvider(create: (_) => EventCommentCubit(eventCommentRepository)),
+            BlocProvider(
+                create: (_) => EventCommentCubit(eventCommentRepository)),
             BlocProvider(create: (_) => CartCubit()),
             BlocProvider(create: (_) => ProductCubit()),
             BlocProvider(
@@ -83,13 +85,16 @@ Future<void> main() async {
               ),
             ),
             BlocProvider(
-              create: (_) => SavedProductCubit()..fetchSavedProductsWithDetails(),
+              create: (_) =>
+                  SavedProductCubit()..fetchSavedProductsWithDetails(),
             ),
             BlocProvider(
               create: (_) => EventInterestCubit(eventInterestRepository),
             ),
           ],
-          child: const Herfa(),
+          child: GetInterEventProvider(
+            child: const Herfa(),
+          ),
         ),
       ],
     ),

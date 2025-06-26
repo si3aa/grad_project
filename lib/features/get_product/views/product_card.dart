@@ -2,6 +2,7 @@ import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
+import 'package:Herfa/features/favorites/views/widgets/favorite_button.dart';
 import 'package:Herfa/features/show_rating/widgets/show_rating_star.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,10 +11,6 @@ import 'package:Herfa/features/follow/widgets/follow_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/features/follow/viewmodels/follow_cubit.dart';
 import 'package:Herfa/features/follow/data/follow_repository.dart';
-import 'package:Herfa/features/get_fav_pro/widgets/fav_icon_button.dart';
-import 'package:Herfa/features/get_fav_pro/viewmodel/fav_viewmodel.dart';
-import 'package:Herfa/features/get_fav_pro/data/fav_repository.dart';
-import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
@@ -162,26 +159,8 @@ class _ProductCardState extends State<ProductCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    FutureBuilder<String?>(
-                      future: AuthSharedPrefLocalDataSource().getToken(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) {
-                          return const SizedBox(
-                              width: 36, height: 36); // Placeholder if no token
-                        }
-                        return ChangeNotifierProvider(
-                          create: (_) {
-                            final vm = FavViewModel(
-                              repository: FavRepository(),
-                              token: snapshot.data!,
-                            );
-                            vm.fetchFavorites();
-                            return vm;
-                          },
-                          child: FavIconButton(
-                              productId: currentProduct.id.toString()),
-                        );
-                      },
+                    FavoriteButton(
+                      productId: currentProduct.id.toString(),
                     ),
                     const SizedBox(width: 10),
                     GestureDetector(

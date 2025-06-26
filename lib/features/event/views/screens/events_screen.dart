@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
-import 'package:Herfa/features/event_interest/views/widgets/event_interest_button.dart';
 import 'package:provider/provider.dart';
 import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 import '../../viewmodels/cubit/event_cubit.dart';
@@ -11,6 +10,7 @@ import 'add_event_screen.dart';
 import 'event_details_screen.dart';
 import 'event_products_list_screen.dart';
 import 'edit_event_screen.dart';
+import 'package:Herfa/features/get-inter-event/widgets/interested_event_star.dart';
 
 class EventsScreen extends StatelessWidget {
   const EventsScreen({Key? key}) : super(key: key);
@@ -259,7 +259,7 @@ class EventCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    EventInterestButton(
+                    InterestedEventStar(
                       eventId: event.id.toString(),
                       size: 35,
                     ),
