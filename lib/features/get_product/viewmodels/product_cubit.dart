@@ -118,20 +118,6 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.visibility_off_outlined),
-              title: const Text('Hide Product'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement hide product functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Product hidden from marketplace'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.share_outlined),
               title: const Text('Share Product'),
               onTap: () {

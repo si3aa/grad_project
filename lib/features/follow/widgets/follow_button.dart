@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../viewmodels/follow_cubit.dart';
 
 class FollowButton extends StatelessWidget {
   final int ownerId;
@@ -14,44 +12,27 @@ class FollowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Agent: Only show if not owner and not already following
     if (currentUserId == null || currentUserId == ownerId) {
       return const SizedBox.shrink();
     }
-    return FutureBuilder(
-      future: context.read<FollowCubit>().initFollowState(ownerId),
-      builder: (context, snapshot) {
-        return BlocBuilder<FollowCubit, FollowState>(
-          builder: (context, state) {
-            final isFollowing = state.isFollowing;
-            if (state is FollowLoading ||
-                snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox
-                  .shrink(); // Hide while loading for agent behavior
-            }
-            if (isFollowing) {
-              return const SizedBox.shrink(); // Hide if already following
-            }
-            return TextButton(
-              onPressed: () =>
-                  context.read<FollowCubit>().toggleFollow(ownerId),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: const Text(
-                'Follow',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-            );
-          },
-        );
+    return TextButton(
+      onPressed: () {
+        print('Attempting to follow userId: $ownerId');
+        // TODO: Add follow logic here
       },
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        backgroundColor: Colors.blue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      child: const Text(
+        'Follow',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }
