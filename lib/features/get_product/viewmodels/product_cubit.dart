@@ -7,6 +7,10 @@ import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
+import 'package:Herfa/features/share_link/viewmodels/share_link_cubit.dart';
+import 'package:Herfa/features/share_link/viewmodels/share_link_state.dart';
+import 'package:Herfa/features/share_link/repository/share_link_repository.dart';
+import 'package:Herfa/features/share_link/views/share_link_dialog.dart';
 
 class ProductCubit extends Cubit<viewmodels.ProductState> {
   ProductCubit() : super(const viewmodels.ProductInitial()) {
@@ -132,12 +136,35 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
               title: const Text('Share Product'),
               onTap: () {
                 Navigator.pop(context);
-                // Implement share product functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Sharing product...'),
-                    duration: Duration(seconds: 2),
-                  ),
+                showDialog(
+                  context: context,
+                  builder: (_) {
+                    return BlocProvider(
+                      create: (_) => ShareLinkCubit(ShareLinkRepository())
+                        ..generateShareLink(product.id),
+                      child: BlocBuilder<ShareLinkCubit, ShareLinkState>(
+                        builder: (context, state) {
+                          if (state is ShareLinkLoading) {
+                            return const AlertDialog(
+                              content: SizedBox(
+                                height: 60,
+                                child:
+                                    Center(child: CircularProgressIndicator()),
+                              ),
+                            );
+                          } else if (state is ShareLinkLoaded) {
+                            return ShareLinkDialog(shareLink: state.shareLink);
+                          } else if (state is ShareLinkError) {
+                            return AlertDialog(
+                              title: const Text('Error'),
+                              content: Text(state.message),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    );
+                  },
                 );
               },
             ),
