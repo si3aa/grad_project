@@ -2,11 +2,18 @@ import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_detail.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_image.dart';
-import 'package:Herfa/features/favorites/views/widgets/favorite_button.dart';
 import 'package:Herfa/features/show_rating/widgets/show_rating_star.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
+import 'package:Herfa/features/follow/widgets/follow_button.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:Herfa/features/follow/viewmodels/follow_cubit.dart';
+import 'package:Herfa/features/follow/data/follow_repository.dart';
+import 'package:Herfa/features/get_fav_pro/widgets/fav_icon_button.dart';
+import 'package:Herfa/features/get_fav_pro/viewmodel/fav_viewmodel.dart';
+import 'package:Herfa/features/get_fav_pro/data/fav_repository.dart';
+import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
@@ -25,7 +32,7 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
-  bool isFollowing = false;
+  // bool isFollowing = false; // Remove this, now handled by cubit
 
   // Helper method to capitalize first letter
   String capitalizeFirstLetter(String text) {
@@ -64,166 +71,174 @@ class _ProductCardState extends State<ProductCard> {
     final userRole =
         Provider.of<UserViewModel>(context, listen: false).userRole;
     final currentProduct = widget.product;
-
+    final currentUserId =
+        Provider.of<UserViewModel>(context, listen: false).userId;
     // Build full name with debugging
     final fullName = buildFullName(
         currentProduct.userFirstName, currentProduct.userLastName);
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            Routes.productDetailRoute,
-            arguments: {'product': currentProduct},
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Custom user info display to match product details screen
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: _buildUserImage(currentProduct.userImage),
-                    radius: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fullName, // Combined first name + capitalized last name
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+    return BlocProvider(
+      create: (_) => FollowCubit(FollowRepository(), isFollowing: false),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: InkWell(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              Routes.productDetailRoute,
+              arguments: {'product': currentProduct},
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Custom user info display to match product details screen
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage:
+                          _buildUserImage(currentProduct.userImage),
+                      radius: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            fullName, // Combined first name + capitalized last name
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                        Text(
-                          currentProduct.userUsername, // Handle null username
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        isFollowing = !isFollowing;
-                      });
-                    },
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      backgroundColor:
-                          isFollowing ? Colors.grey[200] : Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Text(
-                      isFollowing ? 'Following' : 'Follow',
-                      style: TextStyle(
-                        color: isFollowing ? Colors.black87 : Colors.white,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: userRole == 'USER'
-                        ? null
-                        : () => widget.onMore(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              ProductImage(
-                productImage: currentProduct.productImage,
-              ),
-              const SizedBox(height: 10),
-              ProductDetails(
-                productId: currentProduct.id.toString(),
-                productName: currentProduct.productName,
-                originalPrice: currentProduct.originalPrice,
-                description: currentProduct.title,
-                onCart: widget.onCart,
-                isSaved: false,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  FavoriteButton(
-                    productId: currentProduct.id.toString(),
-                  ),
-                  const SizedBox(width: 10),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        Routes.commentsRoute,
-                        arguments: {
-                          'productId': currentProduct.id.toString(),
-                          'userUsername': currentProduct.userUsername,
-                        },
-                      );
-                    },
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            // ignore: deprecated_member_use
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                          Text(
+                            currentProduct.userUsername, // Handle null username
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.chat_bubble_outline,
-                        color: Colors.grey,
-                        size: 22,
+                    ),
+                    FollowButton(
+                      ownerId: currentProduct
+                          .userId, // Use the actual userId of the product owner
+                      currentUserId: currentUserId,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.more_vert),
+                      onPressed: userRole == 'USER'
+                          ? null
+                          : () => widget.onMore(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ProductImage(
+                  productImage: currentProduct.productImage,
+                ),
+                const SizedBox(height: 10),
+                ProductDetails(
+                  productId: currentProduct.id.toString(),
+                  productName: currentProduct.productName,
+                  originalPrice: currentProduct.originalPrice,
+                  description: currentProduct.title,
+                  onCart: widget.onCart,
+                  isSaved: false,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    FutureBuilder<String?>(
+                      future: AuthSharedPrefLocalDataSource().getToken(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data == null) {
+                          return const SizedBox(
+                              width: 36, height: 36); // Placeholder if no token
+                        }
+                        return ChangeNotifierProvider(
+                          create: (_) {
+                            final vm = FavViewModel(
+                              repository: FavRepository(),
+                              token: snapshot.data!,
+                            );
+                            vm.fetchFavorites();
+                            return vm;
+                          },
+                          child: FavIconButton(
+                              productId: currentProduct.id.toString()),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.commentsRoute,
+                          arguments: {
+                            'productId': currentProduct.id.toString(),
+                            'userUsername': currentProduct.userUsername,
+                          },
+                        );
+                      },
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              // ignore: deprecated_member_use
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.chat_bubble_outline,
+                          color: Colors.grey,
+                          size: 22,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Provider.of<UserViewModel>(context, listen: false)
-                                  .userRole ==
-                              'USER'
-                          ? ShowRatingStar(
-                              productId: currentProduct.id,
-                              iconSize: 24,
-                              iconColor: Colors.amber,
-                              textColor: Colors.black,
-                            )
-                          : const SizedBox.shrink(),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child:
+                            Provider.of<UserViewModel>(context, listen: false)
+                                        .userRole ==
+                                    'USER'
+                                ? ShowRatingStar(
+                                    productId: currentProduct.id,
+                                    iconSize: 24,
+                                    iconColor: Colors.amber,
+                                    textColor: Colors.black,
+                                  )
+                                : const SizedBox.shrink(),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

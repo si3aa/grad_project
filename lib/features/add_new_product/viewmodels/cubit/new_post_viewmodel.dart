@@ -592,6 +592,7 @@ class NewPostCubit extends Cubit<NewPostState> {
     // Use the current state as the fallback for the old product
     return Product(
       id: state.productId ?? 0,
+      userId: 0,
       userFirstName: '',
       userUsername: '',
       userLastName: '',

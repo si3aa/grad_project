@@ -19,6 +19,7 @@ void main() {
       // Arrange
       final product = Product(
         id: 1,
+        userId: 0,
         productName: 'Test Product',
         title: 'Test Product Title',
         description:
@@ -30,7 +31,7 @@ void main() {
         userFirstName: 'Test',
         userUsername: 'testuser',
         userImage: 'user_image.jpg',
-         userLastName:'testuser' ,
+        userLastName: 'testuser',
       );
 
       // Act

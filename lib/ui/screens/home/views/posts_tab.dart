@@ -227,6 +227,7 @@ class _PostsTabContent extends StatelessWidget {
     print('Mapping JSON to Product: \\${json.toString()}');
     return Product(
       id: json['id'] ?? json['productId'] ?? 0,
+      userId: json['userId'] ?? 0,
       userFirstName: json['userFirstName'] ?? json['firstName'] ?? '',
       userUsername: json['userUsername'] ?? json['username'] ?? '',
       userLastName: json['userLastName'] ?? json['lastName'] ?? '',

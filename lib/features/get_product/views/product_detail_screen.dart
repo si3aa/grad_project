@@ -274,6 +274,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     // Create a copy of the product with updated quantity
     final updatedProduct = Product(
+      userId: widget.product.userId,
       userFirstName: widget.product.userFirstName,
       userUsername: widget.product.userUsername,
       userLastName: widget.product.userLastName,

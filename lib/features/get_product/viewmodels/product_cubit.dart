@@ -30,6 +30,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
+          userId: apiProduct.userId ?? 0,
           userFirstName: apiProduct.userFirstName ?? '',
           userLastName: apiProduct.userLastName ?? '',
           userUsername: apiProduct.userUsername ?? '',
@@ -40,7 +41,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
-          quantity: apiProduct.quantity ?? 0, 
+          quantity: apiProduct.quantity ?? 0,
         );
       }).toList();
 
@@ -71,6 +72,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
       ));
     }
   }
+
   void addToCart(Product product) {
     // Placeholder: In a real app, this might add the product to a cart
   }
@@ -383,8 +385,9 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
           if (product.id.toString() == productId) {
             return Product(
               id: product.id,
+              userId: product.userId,
               userFirstName: product.userFirstName,
-              userLastName:product.userLastName,
+              userLastName: product.userLastName,
               userUsername: product.userUsername,
               userImage: product.userImage,
               productImage: product.productImage,
@@ -393,8 +396,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
               discountedPrice: product.discountedPrice,
               title: product.title,
               description: product.description,
-              quantity: product.quantity, 
-              
+              quantity: product.quantity,
             );
           }
           return product;
@@ -432,9 +434,10 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
+          userId: apiProduct.userId ?? 0,
           userFirstName: apiProduct.userFirstName ?? '',
           userUsername: apiProduct.userUsername ?? '',
-          userLastName:apiProduct.userLastName ?? '',
+          userLastName: apiProduct.userLastName ?? '',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
@@ -442,7 +445,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
-          quantity: apiProduct.quantity ?? 0, 
+          quantity: apiProduct.quantity ?? 0,
         );
       }).toList();
 

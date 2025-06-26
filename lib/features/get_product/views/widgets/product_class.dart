@@ -1,5 +1,6 @@
 class Product {
   final int id;
+  final int userId;
   final String userFirstName;
   final String userUsername;
   final String userLastName;
@@ -13,6 +14,7 @@ class Product {
   final int quantity;
 
   Product({
+    required this.userId,
     required this.userFirstName,
     required this.userUsername,
     required this.userImage,
