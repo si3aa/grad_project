@@ -24,7 +24,6 @@ import 'package:Herfa/features/event/data/repositories/event_repository.dart';
 import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 import 'package:Herfa/features/event_interest/data/repositories/event_interest_repository.dart';
 import 'package:Herfa/features/event_interest/viewmodels/cubit/event_interest_cubit.dart';
-import 'package:Herfa/features/get-inter-event/get_inter_event_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,9 +91,7 @@ Future<void> main() async {
               create: (_) => EventInterestCubit(eventInterestRepository),
             ),
           ],
-          child: GetInterEventProvider(
-            child: const Herfa(),
-          ),
+          child: const Herfa(),
         ),
       ],
     ),
