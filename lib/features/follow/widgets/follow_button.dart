@@ -1,37 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../follow_cubit.dart';
 
 class FollowButton extends StatelessWidget {
-  final int ownerId;
-  final int? currentUserId;
+  final String userId;
+  final void Function(bool isFollowing)? onChanged;
 
   const FollowButton({
     Key? key,
-    required this.ownerId,
-    required this.currentUserId,
+    required this.userId,
+    this.onChanged,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (currentUserId == null || currentUserId == ownerId) {
-      return const SizedBox.shrink();
-    }
-    return TextButton(
-      onPressed: () {
-        print('Attempting to follow userId: $ownerId');
-        // TODO: Add follow logic here
-      },
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        backgroundColor: Colors.blue,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-      child: const Text(
-        'Follow',
-        style: TextStyle(
-          color: Colors.white,
-        ),
+    return BlocProvider<FollowCubit>(
+      create: (_) => FollowCubit(userId: userId),
+      child: BlocBuilder<FollowCubit, bool>(
+        builder: (context, isFollowing) {
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isFollowing ? Colors.green : Colors.blue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            onPressed: () {
+              context.read<FollowCubit>().toggleFollow();
+              if (onChanged != null)
+                onChanged!(context.read<FollowCubit>().state);
+            },
+            child: Text(isFollowing ? 'Following' : 'Follow'),
+          );
+        },
       ),
     );
   }

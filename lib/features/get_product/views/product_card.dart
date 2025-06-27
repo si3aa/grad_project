@@ -64,8 +64,6 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     final userRole =
         Provider.of<UserViewModel>(context, listen: false).userRole;
-    final currentUserId =
-        Provider.of<UserViewModel>(context, listen: false).userId;
     final currentProduct = widget.product;
     // Build full name with debugging
     final fullName = buildFullName(
@@ -123,10 +121,9 @@ class _ProductCardState extends State<ProductCard> {
                       ],
                     ),
                   ),
-                  FollowButton(
-                    ownerId: currentProduct.userId,
-                    currentUserId: currentUserId,
-                  ),
+                  // Move FollowButton here, before the more icon
+                  FollowButton(userId: currentProduct.userUsername),
+                  const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.more_vert),
                     onPressed: userRole == 'USER'
