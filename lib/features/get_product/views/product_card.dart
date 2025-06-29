@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
 import 'package:Herfa/features/follow/widgets/follow_button.dart';
+import 'package:Herfa/features/get_user_img/index.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
@@ -91,9 +92,12 @@ class _ProductCardState extends State<ProductCard> {
               // Custom user info display to match product details screen
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundImage: _buildUserImage(currentProduct.userImage),
+                  CachedUserImageWidget(
+                    userId: currentProduct.userId,
                     radius: 20,
+                    onTap: () {
+                      // Navigate to user profile if needed
+                    },
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -210,16 +214,5 @@ class _ProductCardState extends State<ProductCard> {
         ),
       ),
     );
-  }
-
-  ImageProvider _buildUserImage(String userImage) {
-    if (userImage.startsWith('http://') || userImage.startsWith('https://')) {
-      return NetworkImage(userImage);
-    } else if (userImage.startsWith('assets/')) {
-      return AssetImage(userImage);
-    } else {
-      // For any other case, use a default asset image
-      return const AssetImage('assets/images/icon.png');
-    }
   }
 }

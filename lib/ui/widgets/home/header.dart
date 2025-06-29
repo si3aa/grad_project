@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
+import 'package:Herfa/features/get_user_img/index.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
@@ -11,6 +12,7 @@ class HomeAppBar extends StatelessWidget {
       builder: (context, userViewModel, child) {
         final userRole = userViewModel.userRole;
         final isUserRole = userRole == 'USER';
+        final userId = userViewModel.userId;
 
         return Column(
           children: [
@@ -18,7 +20,25 @@ class HomeAppBar extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  Image.asset("assets/images/arrow-small-left.png"),
+                  // User Profile Image - Simple and Clean
+                  if (userId != null)
+                    CachedUserImageWidget(
+                      userId: userId,
+                      radius: 20,
+                    )
+                  else
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey.shade300,
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: Colors.grey,
+                      ),
+                    ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
