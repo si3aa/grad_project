@@ -95,7 +95,6 @@ class _CategoriesListState extends State<CategoriesList> {
     {"title": "Accessories", "categoryId": 1},
     {"title": "handmade", "categoryId": 2},
     {"title": "Art", "categoryId": 3},
-    {"title": "Bundle", "isBundle": true},
   ];
 
   int _getSelectedIndex() {
