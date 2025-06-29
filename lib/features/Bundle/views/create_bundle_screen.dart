@@ -322,21 +322,7 @@ class _CreateBundleScreenState extends State<CreateBundleScreen> {
                             body: jsonEncode(bundleData),
                           );
                           if (response.statusCode == 200) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Bundle created successfully!'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
                             Navigator.of(context).pop(true);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Failed to create bundle: \${response.body}'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
                           }
                         }
                       },

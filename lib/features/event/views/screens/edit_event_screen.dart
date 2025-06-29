@@ -153,20 +153,16 @@ class _EditEventScreenState extends State<EditEventScreen> {
         // In a real implementation, you might want a separate update with image method
         await context.read<EventCubit>().createEvent(updatedEvent, _image!);
         // Delete the old event after creating the new one
-        await context.read<EventCubit>().deleteEvent(widget.event.id.toString());
+        await context
+            .read<EventCubit>()
+            .deleteEvent(widget.event.id.toString());
       } else {
         // Update without changing the image
         await context.read<EventCubit>().updateEvent(updatedEvent);
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Event updated successfully! 🎉'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
+        context.read<EventCubit>().refreshEvents();
         Navigator.pop(context);
       }
     } catch (e) {

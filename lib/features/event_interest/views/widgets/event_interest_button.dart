@@ -15,34 +15,14 @@ class EventInterestButton extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {    return BlocConsumer<EventInterestCubit, EventInterestState>(
+  Widget build(BuildContext context) {
+    return BlocConsumer<EventInterestCubit, EventInterestState>(
       listener: (context, state) {
-        if (state is EventInterestSuccess && state.eventId == eventId) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                state.isInterested 
-                    ? 'Event added to your interests! 🌟' 
-                    : 'Event removed from your interests'
-              ),
-              backgroundColor: state.isInterested ? Colors.green : Colors.grey[600],
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        } else if (state is EventInterestError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+        // SnackBar removed as requested
       },
       builder: (context, state) {
-        final isInterested = context.read<EventInterestCubit>().getInterestStatus(eventId);
+        final isInterested =
+            context.read<EventInterestCubit>().getInterestStatus(eventId);
 
         return GestureDetector(
           onLongPress: () => _handleLongPress(context),
@@ -85,7 +65,8 @@ class EventInterestButton extends StatelessWidget {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Remove Interest'),
-            content: const Text('Are you sure you want to remove your interest in this event?'),
+            content: const Text(
+                'Are you sure you want to remove your interest in this event?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../viewmodels/favorite_cubit.dart';
+import 'package:Herfa/features/get_user_fav/views/show_user_fav_dialog.dart';
 
 class FavoriteButton extends StatefulWidget {
   final String productId;
@@ -99,6 +100,11 @@ class _FavoriteButtonState extends State<FavoriteButton>
     }
   }
 
+  void _handleLongPress() {
+    // Show users who favorited this product
+    ShowUserFavDialog.show(context, widget.productId);
+  }
+
   void _showSuccessMessage(String message) {
     if (!mounted) return;
 
@@ -140,6 +146,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: _handleFavoriteTap,
+            onLongPress: _handleLongPress,
             child: Container(
               width: 36,
               height: 36,

@@ -77,206 +77,211 @@ class _EventsScreenBody extends StatelessWidget {
             },
           ),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              BlocBuilder<GetInterestedEventCubit, GetInterestedEventState>(
-                builder: (context, state) {
-                  if (state is GetInterestedEventLoaded) {
-                    if (state.interestedEvents.isEmpty) {
+        body: RefreshIndicator(
+          onRefresh: () async {
+            context.read<EventCubit>().refreshEvents();
+          },
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                BlocBuilder<GetInterestedEventCubit, GetInterestedEventState>(
+                  builder: (context, state) {
+                    if (state is GetInterestedEventLoaded) {
+                      if (state.interestedEvents.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Column(
+                            children: [
+                              Icon(Icons.star_border,
+                                  size: 48, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text(
+                                'You have no interested events yet.',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 16, top: 16, bottom: 8),
+                            child: Text(
+                              'Your Interested Events',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 120,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              physics: const ClampingScrollPhysics(),
+                              itemCount: state.interestedEvents.length,
+                              itemBuilder: (context, index) {
+                                final event = state.interestedEvents[index];
+                                return InterestedEventCard(
+                                  event: event,
+                                  onRemoveInterest: () {
+                                    context
+                                        .read<GetInterestedEventCubit>()
+                                        .removeInterest(event['id'].toString());
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    if (state is GetInterestedEventLoading) {
+                      return const SizedBox(
+                        height: 120,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (state is GetInterestedEventError) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Column(
                           children: [
-                            Icon(Icons.star_border,
-                                size: 48, color: Colors.grey),
-                            SizedBox(height: 8),
-                            Text(
-                              'You have no interested events yet.',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 16),
+                            Text('Failed to load interested events.',
+                                style: TextStyle(color: Colors.red)),
+                            TextButton(
+                              onPressed: () => context
+                                  .read<GetInterestedEventCubit>()
+                                  .fetchInterestedEvents(),
+                              child: Text('Retry'),
                             ),
                           ],
                         ),
                       );
                     }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16, top: 16, bottom: 8),
-                          child: Text(
-                            'Your Interested Events',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
+                    return const SizedBox.shrink();
+                  },
+                ),
+                BlocBuilder<EventCubit, EventState>(
+                  builder: (context, state) {
+                    if (state is EventLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state is EventError) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Oops! Something went wrong',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                state.message,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 16,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  context.read<EventCubit>().refreshEvents();
+                                },
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Try Again'),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(
-                          height: 120,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            shrinkWrap: true,
-                            physics: const ClampingScrollPhysics(),
-                            itemCount: state.interestedEvents.length,
-                            itemBuilder: (context, index) {
-                              final event = state.interestedEvents[index];
-                              return InterestedEventCard(
-                                event: event,
-                                onRemoveInterest: () {
-                                  context
-                                      .read<GetInterestedEventCubit>()
-                                      .removeInterest(event['id'].toString());
+                      );
+                    }
+                    if (state is EventLoaded) {
+                      if (state.events.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'No events found',
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AddEventScreen(),
+                                    ),
+                                  );
                                 },
+                                child: const Text('Create Your First Event'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: state.events.length,
+                        itemBuilder: (context, index) {
+                          final event = state.events[index];
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EventProductsListScreen(
+                                    eventId: event.id.toString(),
+                                  ),
+                                ),
                               );
                             },
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  if (state is GetInterestedEventLoading) {
-                    return const SizedBox(
-                      height: 120,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  if (state is GetInterestedEventError) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Column(
-                        children: [
-                          Text('Failed to load interested events.',
-                              style: TextStyle(color: Colors.red)),
-                          TextButton(
-                            onPressed: () => context
-                                .read<GetInterestedEventCubit>()
-                                .fetchInterestedEvents(),
-                            child: Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-              BlocBuilder<EventCubit, EventState>(
-                builder: (context, state) {
-                  if (state is EventLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state is EventError) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              size: 64,
-                              color: Colors.red,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Oops! Something went wrong',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              state.message,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                context.read<EventCubit>().refreshEvents();
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Try Again'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
+                            onDoubleTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EventDetailsScreen(event: event),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  if (state is EventLoaded) {
-                    if (state.events.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'No events found',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AddEventScreen(),
-                                  ),
-                                );
-                              },
-                              child: const Text('Create Your First Event'),
-                            ),
-                          ],
-                        ),
+                              );
+                            },
+                            child: EventCard(event: event),
+                          );
+                        },
                       );
                     }
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: state.events.length,
-                      itemBuilder: (context, index) {
-                        final event = state.events[index];
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EventProductsListScreen(
-                                  eventId: event.id.toString(),
-                                ),
-                              ),
-                            );
-                          },
-                          onDoubleTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    EventDetailsScreen(event: event),
-                              ),
-                            );
-                          },
-                          child: EventCard(event: event),
-                        );
-                      },
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
         floatingActionButton:
