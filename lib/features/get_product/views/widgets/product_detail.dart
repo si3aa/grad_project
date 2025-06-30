@@ -57,7 +57,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Row(
                 children: [
                   Text(
-                    '\$${widget.originalPrice.toStringAsFixed(2)}',
+                    '${widget.originalPrice.toStringAsFixed(2)} EGP',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

@@ -17,6 +17,7 @@ import 'dart:developer' as developer;
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 import 'package:provider/provider.dart';
 import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
+import 'package:Herfa/features/get_user_img/index.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -93,17 +94,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
 
     return '$cleanFirstName ${capitalizeFirstLetter(cleanLastName)}';
-  }
-
-  ImageProvider _buildUserImage(String userImage) {
-    if (userImage.startsWith('http://') || userImage.startsWith('https://')) {
-      return NetworkImage(userImage);
-    } else if (userImage.startsWith('assets/')) {
-      return AssetImage(userImage);
-    } else {
-      // For any other case, use a default asset image
-      return const AssetImage('assets/images/icon.png');
-    }
   }
 
   void _navigateToEditProduct(Product product) {
@@ -541,10 +531,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            backgroundImage:
-                                _buildUserImage(currentProduct.userImage),
-                            radius: 28, // Smaller image
+                          CachedUserImageWidget(
+                            userId: currentProduct.userId,
+                            radius: 28,
+                            onTap: () {
+                              // Navigate to user profile if needed
+                            },
                           ),
                           const SizedBox(width: 12),
                           Column(
