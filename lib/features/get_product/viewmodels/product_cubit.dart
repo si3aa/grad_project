@@ -7,23 +7,13 @@ import 'package:Herfa/features/get_product/viewmodels/product_state.dart'
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:Herfa/constants.dart';
-import 'package:Herfa/features/get_me/me_repository.dart';
+import 'package:Herfa/features/share_link/viewmodels/share_link_cubit.dart';
+import 'package:Herfa/features/share_link/viewmodels/share_link_state.dart';
+import 'package:Herfa/features/share_link/repository/share_link_repository.dart';
+import 'package:Herfa/features/share_link/views/share_link_dialog.dart';
 
 class ProductCubit extends Cubit<viewmodels.ProductState> {
-  final MeRepository _meRepository = MeRepository();
-  String? _currentUserName;
-  String? _currentUserFirstName;
-  String? _currentUserLastName;
-
   ProductCubit() : super(const viewmodels.ProductInitial()) {
-    _loadCurrentUserAndProducts();
-  }
-
-  Future<void> _loadCurrentUserAndProducts() async {
-    final userData = await _meRepository.getMe();
-    _currentUserName = userData?.username;
-    _currentUserFirstName = userData?.firstName;
-    _currentUserLastName = userData?.lastName;
     _loadProducts();
   }
 
@@ -44,16 +34,15 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          ownerFirstName: _currentUserFirstName,
-          ownerLastName: _currentUserLastName,
-          ownerUsername: _currentUserName,
+          userId: apiProduct.userId ?? 0,
+          userFirstName: apiProduct.userFirstName ?? '',
+          userLastName: apiProduct.userLastName ?? '',
+          userUsername: apiProduct.userUsername ?? '',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
           originalPrice: apiProduct.price ?? 0.0,
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
-          likes: 0, // Default value since it's not from API
-          comments: 0, // Default value since it's not from API
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
           quantity: apiProduct.quantity ?? 0,
@@ -88,37 +77,12 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
     }
   }
 
-  void likeProduct(Product product) {
-    final state = this.state;
-    if (state is viewmodels.ProductLoaded) {
-      product.likes++;
-      emit(viewmodels.ProductLoaded(
-        products: state.products,
-        filteredProducts: List.from(state.filteredProducts),
-      ));
-    }
-  }
-
-  /// Handle comment action (placeholder for now).
-  void commentProduct(Product product) {
-    final state = this.state;
-    if (state is viewmodels.ProductLoaded) {
-      product.comments++;
-      emit(viewmodels.ProductLoaded(
-        products: state.products,
-        filteredProducts: List.from(state.filteredProducts),
-      ));
-    }
-  }
-
-  /// Handle cart action (placeholder for now).
   void addToCart(Product product) {
     // Placeholder: In a real app, this might add the product to a cart
   }
 
   /// Handle more options action for a product
   void moreOptions(Product product, BuildContext context) {
-    // Show bottom sheet with options
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -154,30 +118,39 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.visibility_off_outlined),
-              title: const Text('Hide Product'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement hide product functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Product hidden from marketplace'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.share_outlined),
               title: const Text('Share Product'),
               onTap: () {
                 Navigator.pop(context);
-                // Implement share product functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Sharing product...'),
-                    duration: Duration(seconds: 2),
-                  ),
+                showDialog(
+                  context: context,
+                  builder: (_) {
+                    return BlocProvider(
+                      create: (_) => ShareLinkCubit(ShareLinkRepository())
+                        ..generateShareLink(product.id),
+                      child: BlocBuilder<ShareLinkCubit, ShareLinkState>(
+                        builder: (context, state) {
+                          if (state is ShareLinkLoading) {
+                            return const AlertDialog(
+                              content: SizedBox(
+                                height: 60,
+                                child:
+                                    Center(child: CircularProgressIndicator()),
+                              ),
+                            );
+                          } else if (state is ShareLinkLoaded) {
+                            return ShareLinkDialog(shareLink: state.shareLink);
+                          } else if (state is ShareLinkError) {
+                            return AlertDialog(
+                              title: const Text('Error'),
+                              content: Text(state.message),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -203,7 +176,7 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
     ).then((edited) {
       if (edited == true) {
         // Refresh product data if edited
-        _loadCurrentUserAndProducts(); // Reload all products and user info
+        _loadProducts();
 
         // Show success message using the stored reference
         scaffoldMessenger.showSnackBar(
@@ -424,20 +397,19 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
         final updatedProducts = currentState.products.map((product) {
           if (product.id.toString() == productId) {
             return Product(
-              id: int.parse(newProductData['id']),
-              ownerFirstName: _currentUserFirstName,
-              ownerLastName: _currentUserLastName,
-              ownerUsername: _currentUserName,
+              id: product.id,
+              userId: product.userId,
+              userFirstName: product.userFirstName,
+              userLastName: product.userLastName,
+              userUsername: product.userUsername,
               userImage: product.userImage,
               productImage: product.productImage,
-              productName: productData['name'] as String,
-              originalPrice: productData['price'] as double,
-              discountedPrice: productData['price'] as double,
-              likes: product.likes,
-              comments: product.comments,
-              title: productData['title'] as String,
-              description: productData['description'] as String,
-              quantity: productData['quantity'] as int,
+              productName: product.productName,
+              originalPrice: product.originalPrice,
+              discountedPrice: product.discountedPrice,
+              title: product.title,
+              description: product.description,
+              quantity: product.quantity,
             );
           }
           return product;
@@ -475,16 +447,15 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
             name: 'ProductCubit');
         return Product(
           id: apiProduct.id!,
-          ownerFirstName: _currentUserFirstName,
-          ownerLastName: _currentUserLastName,
-          ownerUsername: _currentUserName,
+          userId: apiProduct.userId ?? 0,
+          userFirstName: apiProduct.userFirstName ?? '',
+          userUsername: apiProduct.userUsername ?? '',
+          userLastName: apiProduct.userLastName ?? '',
           userImage: 'assets/images/arrow-small-left.png', // Default image
           productImage: apiProduct.media ?? 'assets/images/product_img.png',
           productName: apiProduct.name ?? 'Unknown Product',
           originalPrice: apiProduct.price ?? 0.0,
           discountedPrice: apiProduct.discountedPrice ?? 0.0,
-          likes: 0, // Default value since it's not from API
-          comments: 0, // Default value since it's not from API
           title: apiProduct.shortDescription ?? '',
           description: apiProduct.longDescription ?? '',
           quantity: apiProduct.quantity ?? 0,
@@ -508,6 +479,6 @@ class ProductCubit extends Cubit<viewmodels.ProductState> {
 
   // Make this method public so it can be called from UI
   Future<void> loadProducts() async {
-    return _loadCurrentUserAndProducts();
+    return _loadProducts();
   }
 }

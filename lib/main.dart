@@ -12,6 +12,21 @@ import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cub
 import 'package:Herfa/features/coupons/viewmodels/cubit/coupon_cubit.dart';
 import 'package:Herfa/features/coupons/data/repository/coupon_repository.dart';
 import 'package:Herfa/features/coupons/data/data_source/remote/coupon_remote_data_source.dart';
+import 'package:Herfa/features/event/viewmodels/cubit/event_cubit.dart';
+import 'package:Herfa/features/event/viewmodels/event_comment_cubit.dart';
+import 'package:Herfa/features/event/data/repositories/event_comment_repository.dart'
+    as event_comment_repo;
+import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
+import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
+import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
+import 'package:Herfa/ui/provider/cubit/notification_cubit.dart';
+import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
+import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
+import 'package:Herfa/features/user/viewmodel/user_viewmodel.dart';
+import 'package:provider/provider.dart';
+
+import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
+import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 import 'package:Herfa/core/route_manger/routes.dart';
 import 'package:Herfa/core/route_manger/route_generator.dart';
 import 'package:Herfa/core/app_bloc_observer.dart';
@@ -28,6 +43,10 @@ import 'package:Herfa/features/profile/data/data_source/profile_remote_data_sour
 import 'package:Herfa/features/profile/viewmodels/profile_cubit.dart';
 import 'package:Herfa/features/profile/viewmodels/refund_request_cubit.dart';
 import 'package:Herfa/firebase_options.dart';
+import 'package:Herfa/features/event_interest/data/repositories/event_interest_repository.dart';
+import 'package:Herfa/features/event_interest/viewmodels/cubit/event_interest_cubit.dart';
+import 'package:Herfa/features/get_me/current_user_cubit.dart';
+import 'package:Herfa/features/get_me/me_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,14 +82,17 @@ Future<void> main() async {
     dio: dio,
     authDataSource: authDataSource,
   );
-  final eventCommentRepository = EventCommentRepository();
+  final eventCommentRepository = event_comment_repo.EventCommentRepository();
 
   // Coupon dependencies
   final couponRemoteDataSource = CouponRemoteDataSourceImpl(dio: dio);
   final couponRepository = CouponRepositoryImpl(
       remoteDataSource: couponRemoteDataSource,
       authLocalDataSource: authDataSource);
-
+  final eventInterestRepository = EventInterestRepository(
+    dio: dio,
+    authDataSource: authDataSource,
+  );
   runApp(
     MultiBlocProvider(
       providers: [
@@ -99,7 +121,12 @@ Future<void> main() async {
             ProfileRepository(ProfileRemoteDataSource()),
           ),
         ),
-        // SavedProductCubit is provided in the route generator for the SavedScreen
+        BlocProvider(
+          create: (_) => EventInterestCubit(eventInterestRepository),
+        ),
+        BlocProvider(
+          create: (_) => CurrentUserCubit(MeRepository())..fetchCurrentUser(),
+        ),
       ],
       child: const Herfa(),
     ),
@@ -111,6 +138,8 @@ class Herfa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Fetch user data when app starts
+
     return ScreenUtilInit(
       designSize: const Size(430, 932),
       minTextAdapt: true,

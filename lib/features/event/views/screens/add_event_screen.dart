@@ -156,6 +156,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         }
 
         if (mounted) {
+          context.read<EventCubit>().refreshEvents();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Event updated successfully! 🎉'),
@@ -183,6 +184,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         await context.read<EventCubit>().createEvent(event, _image!);
 
         if (mounted) {
+          context.read<EventCubit>().refreshEvents();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Event created successfully! 🎉'),

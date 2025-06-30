@@ -26,10 +26,30 @@ class _EditEventScreenState extends State<EditEventScreen> {
   File? _image;
   bool _isLoading = false;
 
+  bool get _isFormValid {
+    return _titleController.text.trim().isNotEmpty &&
+        _descriptionController.text.trim().isNotEmpty &&
+        _priceController.text.trim().isNotEmpty &&
+        _startDate != null &&
+        _endDate != null &&
+        _image != null;
+  }
+
+  void _addFormListeners() {
+    _titleController.addListener(_onFormChanged);
+    _descriptionController.addListener(_onFormChanged);
+    _priceController.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     _initializeFields();
+    _addFormListeners();
   }
 
   void _initializeFields() {
@@ -58,6 +78,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   @override
   void dispose() {
+    _titleController.removeListener(_onFormChanged);
+    _descriptionController.removeListener(_onFormChanged);
+    _priceController.removeListener(_onFormChanged);
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
@@ -129,19 +152,17 @@ class _EditEventScreenState extends State<EditEventScreen> {
         // For now, we'll use the create method with the new image
         // In a real implementation, you might want a separate update with image method
         await context.read<EventCubit>().createEvent(updatedEvent, _image!);
+        // Delete the old event after creating the new one
+        await context
+            .read<EventCubit>()
+            .deleteEvent(widget.event.id.toString());
       } else {
         // Update without changing the image
         await context.read<EventCubit>().updateEvent(updatedEvent);
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Event updated successfully! 🎉'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
+        context.read<EventCubit>().refreshEvents();
         Navigator.pop(context);
       }
     } catch (e) {
@@ -375,7 +396,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
               // Submit Button
               ElevatedButton(
-                onPressed: _isLoading ? null : _submitEvent,
+                onPressed: _isLoading || !_isFormValid ? null : _submitEvent,
                 style: ElevatedButton.styleFrom(
                     backgroundColor: kPrimaryColor,
                     foregroundColor: Colors.white,

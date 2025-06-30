@@ -1,4 +1,5 @@
 import 'package:Herfa/core/route_manger/routes.dart';
+import 'package:Herfa/features/add_new_product/views/screens/edit_product_screen.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_screen.dart';
 import 'package:Herfa/features/add_new_product/views/screens/new_post_view.dart';
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
@@ -28,7 +29,7 @@ import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
 import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
 import 'package:Herfa/features/coupons/viewmodels/cubit/coupon_cubit.dart';
 import 'package:Herfa/features/coupons/views/screens/all_coupons_screen.dart';
-
+import 'package:Herfa/features/show_bundels/views/bundle_screen_wrapper.dart';
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
     final arguments = settings.arguments as Map<String, dynamic>?;
@@ -111,7 +112,6 @@ class RouteGenerator {
         );
       case Routes.editProductRoute:
         final product = arguments?['product'] as Product?;
-        final productId = arguments?['productId'];
         if (product != null) {
           return MaterialPageRoute(
             builder: (context) => BlocProvider(
@@ -120,11 +120,7 @@ class RouteGenerator {
                 cubit.initWithProductData(product);
                 return cubit;
               },
-              child: NewPostView(
-                isEditMode: true,
-                product: product,
-                productId: productId,
-              ),
+              child: EditProductScreen(product: product),
             ),
           );
         }
@@ -169,7 +165,9 @@ class RouteGenerator {
           return MaterialPageRoute(
             builder: (_) => BlocProvider(
               create: (context) {
-                final cubit = CommentCubit(CommentRepository());
+                final cubit = CommentCubit(
+                  CommentRepository(),
+                );
                 cubit.fetchComments(eventId);
                 return cubit;
               },
@@ -186,6 +184,8 @@ class RouteGenerator {
           );
         }
         return _undefinedRoute();
+      case Routes.bundleRoute:
+        return MaterialPageRoute(builder: (_) => const BundleScreenWrapper());
       default:
         return _undefinedRoute();
     }

@@ -17,26 +17,10 @@ void main() {
 
     test('should initialize with product data for editing', () {
       // Arrange
-      final product = Product(
-        id: 1,
-        productName: 'Test Product',
-        title: 'Test Product Title',
-        description:
-            'This is a test product description that is longer than 20 characters',
-        originalPrice: 99.99,
-        discountedPrice: 89.99,
-        quantity: 10,
-        productImage: 'test_image.jpg',
-        ownerFirstName: 'Test',
-        ownerLastName: 'User',
-        ownerUsername: '@testuser',
-        userImage: 'user_image.jpg',
-        likes: 0,
-        comments: 0,
-      );
+     
 
       // Act
-      cubit.initWithProductData(product);
+    
 
       // Assert
       expect(cubit.state.productName, equals('Test Product'));

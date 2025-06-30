@@ -378,12 +378,25 @@ class _ProductCommentsScreenState extends State<ProductCommentsScreen> {
                                             ),
                                           ),
                                           const SizedBox(width: 12),
-                                          Text(
-                                            comment.userName ?? 'Anonymous',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15,
-                                            ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                comment.userFirstName.trim(),
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                comment.userLastName.trim()[0].toUpperCase() + 
+                                                comment.userLastName.trim().substring(1).toLowerCase(),
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),

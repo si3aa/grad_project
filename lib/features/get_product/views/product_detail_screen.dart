@@ -21,6 +21,8 @@ import 'package:dio/dio.dart';
 import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 import 'package:Herfa/features/deals/data/data_source/deal_remote_data_source.dart';
 import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
+import 'package:Herfa/features/get_me/current_user_cubit.dart';
+import 'package:Herfa/features/get_me/my_user_model.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -41,6 +43,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   double discountAmount = 0.0;
   final TextEditingController _couponController = TextEditingController();
   bool _isDescriptionExpanded = false;
+
+  Data? currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user info if not already loaded
+    final cubit = context.read<CurrentUserCubit>();
+    if (cubit.state is! CurrentUserLoaded) {
+      cubit.fetchCurrentUser();
+    }
+  }
 
   @override
   void dispose() {
@@ -74,18 +88,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+  }
+
+  String buildFullName(String firstName, String lastName) {
+    // Handle null or empty values
+    final cleanFirstName = (firstName).trim();
+    final cleanLastName = (lastName).trim();
+
+    if (cleanFirstName.isEmpty && cleanLastName.isEmpty) {
+      return 'Unknown User';
+    }
+
+    if (cleanFirstName.isEmpty) {
+      return capitalizeFirstLetter(cleanLastName);
+    }
+
+    if (cleanLastName.isEmpty) {
+      return cleanFirstName;
+    }
+
+    return '$cleanFirstName ${capitalizeFirstLetter(cleanLastName)}';
+  }
+
   void _navigateToEditProduct(Product product) {
-    // Navigate to edit product screen with product ID
-    // Since the Product class doesn't have an ID, we'll use a hardcoded ID for now
-    // In a real app, you would get the ID from the API
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditProductScreen(
-          product: product,
-          productId: 1,
+    final userRole = currentUser?.role;
+    if (userRole == null || userRole == 'USER') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are not allowed to edit products.'),
+          backgroundColor: Colors.red,
         ),
-      ),
+      );
+      return;
+    }
+    Navigator.pushNamed(
+      context,
+      '/edit_product',
+      arguments: {'product': product},
     ).then((edited) {
       if (edited == true) {
         // Refresh product data if edited
@@ -100,8 +142,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     });
   }
 
-  // ignore: unused_element
   void _showEditOptions(Product product) {
+    final userRole = currentUser?.role;
+    if (userRole == null || userRole == 'USER') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are not allowed to edit or delete products.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -136,20 +187,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 _showDeleteConfirmation(product);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.visibility_off_outlined),
-              title: const Text('Hide Product'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement hide product functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Product hidden from marketplace'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
           ],
         ),
       ),
@@ -157,9 +194,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _showDeleteConfirmation(Product product) {
-    // Store a reference to the ScaffoldMessengerState
-    // ignore: unused_local_variable
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final userRole = currentUser?.role;
+    if (userRole == null || userRole == 'USER') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are not allowed to delete products.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     showDialog(
       context: context,
@@ -493,540 +537,531 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final price = widget.product.discountedPrice;
-    final totalPrice = (price - discountAmount) * selectedQuantity;
+    return BlocBuilder<CurrentUserCubit, CurrentUserState>(
+      builder: (context, state) {
+        if (state is CurrentUserLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is CurrentUserLoaded) {
+          currentUser = state.user;
+        } else if (state is CurrentUserError) {
+          return Center(child: Text('Error: \\${state.message}'));
+        }
+        final price = widget.product.discountedPrice;
+        final totalPrice = (price - discountAmount) * selectedQuantity;
 
-    return BlocProvider(
-      create: (context) => CommentCubit(CommentRepository()),
-      child: BlocBuilder<ProductCubit, viewmodels.ProductState>(
-        builder: (context, state) {
-          // If the state is loaded, we can access the updated product
-          if (state is viewmodels.ProductLoaded) {
-            // Find the current product in the updated list
-            final currentProduct = state.products.firstWhere(
-              (p) => p.productName == widget.product.productName,
-              orElse: () => widget.product,
-            );
+        return BlocProvider(
+          create: (context) => CommentCubit(CommentRepository()),
+          child: BlocBuilder<ProductCubit, viewmodels.ProductState>(
+            builder: (context, state) {
+              // If the state is loaded, we can access the updated product
+              if (state is viewmodels.ProductLoaded) {
+                // Find the current product in the updated list
+                final currentProduct = state.products.firstWhere(
+                  (p) => p.productName == widget.product.productName,
+                  orElse: () => widget.product,
+                );
 
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Product Details'),
-                actions: [
-                  BlocBuilder<SavedProductCubit, SavedProductState>(
-                    builder: (context, savedState) {
-                      bool isProductSaved = false;
+                return Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Product Details'),
+                    actions: [
+                      BlocBuilder<SavedProductCubit, SavedProductState>(
+                        builder: (context, savedState) {
+                          bool isProductSaved = false;
 
-                      if (savedState is SavedProductDetailsLoaded) {
-                        isProductSaved = savedState.productDetails
-                            .any((p) => p.id == widget.product.id.toString());
-                      }
+                          if (savedState is SavedProductDetailsLoaded) {
+                            isProductSaved = savedState.productDetails.any(
+                                (p) => p.id == widget.product.id.toString());
+                          }
 
-                      return IconButton(
-                        icon: Icon(
-                          isProductSaved
-                              ? Icons.bookmark
-                              : Icons.bookmark_outline,
-                          color: isProductSaved ? kPrimaryColor : null,
-                        ),
-                        onPressed: isProductSaved
-                            ? null // Disable click when already saved
-                            : () {
-                                // Only allow saving if not already saved
-                                final savedProductCubit =
-                                    context.read<SavedProductCubit>();
-                                savedProductCubit
-                                    .saveProduct(widget.product.id.toString());
+                          return IconButton(
+                            icon: Icon(
+                              isProductSaved
+                                  ? Icons.bookmark
+                                  : Icons.bookmark_outline,
+                              color: isProductSaved ? kPrimaryColor : null,
+                            ),
+                            onPressed: isProductSaved
+                                ? null // Disable click when already saved
+                                : () {
+                                    // Only allow saving if not already saved
+                                    final savedProductCubit =
+                                        context.read<SavedProductCubit>();
+                                    savedProductCubit.saveProduct(
+                                        widget.product.id.toString());
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Text('Product saved'),
-                                    duration: const Duration(seconds: 2),
-                                    action: SnackBarAction(
-                                      label: 'View',
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        // Navigate to saved items screen
-                                        Navigator.pushNamed(context, '/saved');
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.share),
-                    onPressed: () {
-                      // Implement share functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sharing product...'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                  ),
-                  // Add edit button for product owner
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                      _showEditOptions(currentProduct);
-                    },
-                  ),
-                  // Comment Icon
-                  GestureDetector(
-                    onTap: () {
-                      _showComments();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        shape: BoxShape.circle,
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: const Text('Product saved'),
+                                        duration: const Duration(seconds: 2),
+                                        action: SnackBarAction(
+                                          label: 'View',
+                                          textColor: Colors.white,
+                                          onPressed: () {
+                                            // Navigate to saved items screen
+                                            Navigator.pushNamed(
+                                                context, '/saved');
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  },
+                          );
+                        },
                       ),
-                      child: Icon(
-                        Icons.comment,
-                        color: kPrimaryColor,
-                        size: 24,
+                      // Add edit button for product owner
+                      IconButton(
+                        icon: const Icon(Icons.more_vert),
+                        onPressed: () {
+                          _showEditOptions(currentProduct);
+                        },
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                ],
-              ),
-              body: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Product Image with error handling
-                    _buildProductImage(),
-
-                    // Product Info
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Seller Info
-                          Row(
+                  body: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Product Image with error handling
+                        _buildProductImage(),
+                        // Product Info
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                backgroundImage:
-                                    AssetImage(currentProduct.userImage),
-                                radius: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              // Seller Info
+                              Row(
                                 children: [
+                                  CircleAvatar(
+                                    backgroundImage:
+                                        AssetImage(currentProduct.userImage),
+                                    radius: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${currentProduct.userFirstName} ${currentProduct.userLastName}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      Text(
+                                        currentProduct.userUsername ?? '',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      // Get token (as in other screens)
+                                      final token =
+                                          await AuthSharedPrefLocalDataSource()
+                                              .getToken();
+                                      if (token == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content:
+                                                  Text('Not authenticated!')),
+                                        );
+                                        return;
+                                      }
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => BlocProvider(
+                                              create: (_) => DealCubit(
+                                                DealRepository(
+                                                  DealRemoteDataSource(Dio(
+                                                      BaseOptions(
+                                                          baseUrl:
+                                                              'https://zygotic-marys-herfa-c2dd67a8.koyeb.app'))),
+                                                ),
+                                              ),
+                                              child: MakeDealScreen(
+                                                  productId: currentProduct.id,
+                                                  token: token),
+                                            ),
+                                          ));
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: kPrimaryColor,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: const Text('Make Deal'),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // Product Name and Title
+                              Text(
+                                currentProduct.productName,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              if (currentProduct.title.isNotEmpty) ...[
+                                Text(
+                                  currentProduct.title,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+
+                              // Price information
+                              Row(
+                                children: [
+                                  ...[
+                                    Text(
+                                      '${currentProduct.originalPrice.toStringAsFixed(2)} EGP',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
                                   Text(
-                                    '${currentProduct.ownerFirstName} ${currentProduct.ownerLastName}',
-                                    style: const TextStyle(
+                                    '${(currentProduct.discountedPrice).toStringAsFixed(2)} EGP',
+                                    style: TextStyle(
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      // ignore: unnecessary_null_comparison
+                                      color:
+                                          currentProduct.discountedPrice != null
+                                              ? Colors.red
+                                              : Colors.black,
                                     ),
                                   ),
+                                  ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${(100 - (currentProduct.discountedPrice / currentProduct.originalPrice * 100)).toStringAsFixed(0)}% OFF',
+                                        style: TextStyle(
+                                          color: Colors.red.shade700,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // Description with expandable text
+                              _buildDescription(),
+
+                              const SizedBox(height: 24),
+
+                              // Quantity Selector
+                              const Text(
+                                'Quantity',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.grey.shade300),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.remove),
+                                          onPressed: _decreaseQuantity,
+                                          color: selectedQuantity > 1
+                                              ? kPrimaryColor
+                                              : Colors.grey,
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12),
+                                          child: Text(
+                                            '$selectedQuantity',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.add),
+                                          onPressed: selectedQuantity <
+                                                  currentProduct.quantity
+                                              ? _increaseQuantity
+                                              : null,
+                                          color: selectedQuantity <
+                                                  currentProduct.quantity
+                                              ? kPrimaryColor
+                                              : Colors.grey,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
                                   Text(
-                                    currentProduct.ownerUsername ?? '',
+                                    'Available: ${currentProduct.quantity}',
                                     style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 14,
+                                      color: currentProduct.quantity > 0
+                                          ? Colors.grey.shade600
+                                          : Colors.red,
+                                      fontWeight: currentProduct.quantity > 0
+                                          ? FontWeight.normal
+                                          : FontWeight.bold,
                                     ),
                                   ),
                                 ],
                               ),
-                              const Spacer(),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  // Get token (as in other screens)
-                                  final token =
-                                      await AuthSharedPrefLocalDataSource()
-                                          .getToken();
-                                  if (token == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('Not authenticated!')),
-                                    );
-                                    return;
-                                  }
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider(
-                                          create: (_) => DealCubit(
-                                            DealRepository(
-                                              DealRemoteDataSource(Dio(BaseOptions(
-                                                  baseUrl:
-                                                      'https://zygotic-marys-herfa-c2dd67a8.koyeb.app'))),
-                                            ),
-                                          ),
-                                          child: MakeDealScreen(
-                                              productId: currentProduct.id,
-                                              token: token),
-                                        ),
-                                      ));
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimaryColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
+
+                              const SizedBox(height: 24),
+
+                              // Coupon Code
+                              const Text(
+                                'Apply Coupon',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                child: const Text('Make Deal'),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _couponController,
+                                      decoration: InputDecoration(
+                                        hintText: 'Enter coupon code',
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 16),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  ElevatedButton(
+                                    onPressed: _applyCoupon,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: kPrimaryColor,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 16),
+                                    ),
+                                    child: const Text('Apply'),
+                                  ),
+                                ],
+                              ),
+
+                              if (couponCode != null) ...[
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.check_circle,
+                                        color: Colors.green, size: 16),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      'Coupon "$couponCode" applied: -${discountAmount.toStringAsFixed(2)}EGP',
+                                      style: const TextStyle(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          couponCode = null;
+                                          discountAmount = 0.0;
+                                          _couponController.clear();
+                                        });
+                                      },
+                                      child: const Text(
+                                        'Remove',
+                                        style: TextStyle(fontSize: 9),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+
+                              const SizedBox(height: 24),
+
+                              // Order Summary
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Order Summary',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Subtotal'),
+                                        Text(
+                                            '${(price * selectedQuantity).toStringAsFixed(2)} EGP'),
+                                      ],
+                                    ),
+                                    if (discountAmount > 0) ...[
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text('Discount'),
+                                          Text(
+                                              '-${(discountAmount * selectedQuantity).toStringAsFixed(2)} EGP'),
+                                        ],
+                                      ),
+                                    ],
+                                    const SizedBox(height: 8),
+                                    const Divider(),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Total',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${totalPrice.toStringAsFixed(2)} EGP',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 24),
-
-                          // Product Name and Title
-                          Text(
-                            currentProduct.productName,
+                        ),
+                      ],
+                    ),
+                  ),
+                  bottomNavigationBar: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade300,
+                          blurRadius: 10,
+                          offset: const Offset(0, -5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${totalPrice.toStringAsFixed(2)} EGP',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          if (currentProduct.title.isNotEmpty) ...[
-                            Text(
-                              currentProduct.title,
-                              style: TextStyle(
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            onPressed:
+                                currentProduct.quantity > 0 ? _addToCart : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: kPrimaryColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              disabledBackgroundColor: Colors.grey.shade400,
+                            ),
+                            child: Text(
+                              currentProduct.quantity > 0
+                                  ? (isInCart ? 'ADDED TO CART' : 'ADD TO CART')
+                                  : 'OUT OF STOCK',
+                              style: const TextStyle(
                                 fontSize: 16,
-                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                          ],
-
-                          // Price information
-                          Row(
-                            children: [
-                              ...[
-                                Text(
-                                  '${currentProduct.originalPrice.toStringAsFixed(2)} EGP',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    decoration: TextDecoration.lineThrough,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                              ],
-                              Text(
-                                '${(currentProduct.discountedPrice).toStringAsFixed(2)} EGP',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  // ignore: unnecessary_null_comparison
-                                  color: currentProduct.discountedPrice != null
-                                      ? Colors.red
-                                      : Colors.black,
-                                ),
-                              ),
-                              ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade100,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '${(100 - (currentProduct.discountedPrice / currentProduct.originalPrice * 100)).toStringAsFixed(0)}% OFF',
-                                    style: TextStyle(
-                                      color: Colors.red.shade700,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Description with expandable text
-                          _buildDescription(),
-
-                          const SizedBox(height: 24),
-
-                          // Quantity Selector
-                          const Text(
-                            'Quantity',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.remove),
-                                      onPressed: _decreaseQuantity,
-                                      color: selectedQuantity > 1
-                                          ? kPrimaryColor
-                                          : Colors.grey,
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12),
-                                      child: Text(
-                                        '$selectedQuantity',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.add),
-                                      onPressed: selectedQuantity <
-                                              currentProduct.quantity
-                                          ? _increaseQuantity
-                                          : null,
-                                      color: selectedQuantity <
-                                              currentProduct.quantity
-                                          ? kPrimaryColor
-                                          : Colors.grey,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Text(
-                                'Available: ${currentProduct.quantity}',
-                                style: TextStyle(
-                                  color: currentProduct.quantity > 0
-                                      ? Colors.grey.shade600
-                                      : Colors.red,
-                                  fontWeight: currentProduct.quantity > 0
-                                      ? FontWeight.normal
-                                      : FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Coupon Code
-                          const Text(
-                            'Apply Coupon',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _couponController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter coupon code',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton(
-                                onPressed: _applyCoupon,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimaryColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 16),
-                                ),
-                                child: const Text('Apply'),
-                              ),
-                            ],
-                          ),
-
-                          if (couponCode != null) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.check_circle,
-                                    color: Colors.green, size: 16),
-                                const SizedBox(width: 2),
-                                Text(
-                                  'Coupon "$couponCode" applied: -${discountAmount.toStringAsFixed(2)}EGP',
-                                  style: const TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const Spacer(),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      couponCode = null;
-                                      discountAmount = 0.0;
-                                      _couponController.clear();
-                                    });
-                                  },
-                                  child: const Text('Remove',style:TextStyle(fontSize: 9) ,),
-                                ),
-                              ],
-                            ),
-                          ],
-
-                          const SizedBox(height: 24),
-
-                          // Order Summary
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Order Summary',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text('Subtotal'),
-                                    Text(
-                                        '${(price * selectedQuantity).toStringAsFixed(2)} EGP'),
-                                  ],
-                                ),
-                                if (discountAmount > 0) ...[
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text('Discount'),
-                                      Text(
-                                          '-${(discountAmount * selectedQuantity).toStringAsFixed(2)} EGP'),
-                                    ],
-                                  ),
-                                ],
-                                const SizedBox(height: 8),
-                                const Divider(),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      'Total',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${totalPrice.toStringAsFixed(2)} EGP',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              bottomNavigationBar: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade300,
-                      blurRadius: 10,
-                      offset: const Offset(0, -5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${totalPrice.toStringAsFixed(2)} EGP',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed:
-                            currentProduct.quantity > 0 ? _addToCart : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          disabledBackgroundColor: Colors.grey.shade400,
-                        ),
-                        child: Text(
-                          currentProduct.quantity > 0
-                              ? (isInCart ? 'ADDED TO CART' : 'ADD TO CART')
-                              : 'OUT OF STOCK',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          }
+                  ),
+                );
+              }
 
-          // If the state is not loaded, show a loading indicator
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        },
-      ),
+              // If the state is not loaded, show a loading indicator
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

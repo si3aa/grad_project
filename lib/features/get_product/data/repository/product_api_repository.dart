@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:Herfa/features/get_product/data/models/all_product_data_model.dart';
 import 'package:dio/dio.dart';
 import 'package:Herfa/app_interceptors.dart';
+import 'package:Herfa/features/product_rating/token_helper.dart';
 
 class ProductApiRepository {
   final Dio _dio = Dio(BaseOptions(
@@ -135,6 +136,13 @@ class ProductApiRepository {
       developer.log('Updating product with ID: $productId', name: 'ProductAPI');
       developer.log('Update data: $productData', name: 'ProductAPI');
 
+      final token = await TokenHelper.getToken();
+      if (token == null) {
+        developer.log('No token found, cannot update product.',
+            name: 'ProductAPI');
+        return false;
+      }
+
       final response = await _dio.put(
         '/products/$productId',
         data: productData,
@@ -142,6 +150,7 @@ class ProductApiRepository {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'Authorization': 'Bearer $token',
           },
         ),
       );
