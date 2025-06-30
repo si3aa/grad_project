@@ -7,7 +7,6 @@ import 'package:Herfa/ui/provider/cubit/content_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/home_cubit.dart';
 import 'package:Herfa/features/get_product/viewmodels/product_cubit.dart';
 import 'package:Herfa/ui/provider/cubit/search_cubit.dart';
-
 import 'package:Herfa/features/add_new_product/viewmodels/cubit/new_post_viewmodel.dart';
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
 import 'package:Herfa/features/coupons/viewmodels/cubit/coupon_cubit.dart';
@@ -40,7 +39,6 @@ Future<void> main() async {
   );
 
   await FCMServices().initNotification();
- 
 
   final dio = Dio(
     BaseOptions(
