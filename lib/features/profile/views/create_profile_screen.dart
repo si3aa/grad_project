@@ -5,6 +5,7 @@ import '../data/models/merchant_profile.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
+import 'user_screen.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   final String token;
@@ -107,7 +108,28 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 ],
               ),
             );
-            Navigator.pop(context, true);
+            // If normal user, navigate to UserScreen after creation
+            if (widget.profile == null) {
+              // You may need to get userId from a provider or context
+              // For now, try to get it from ModalRoute arguments or fallback
+              final args = ModalRoute.of(context)?.settings.arguments as Map?;
+              final userId = args != null && args['userId'] != null
+                  ? args['userId'] as int
+                  : null;
+              if (userId != null) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        UserScreen(token: widget.token, userId: userId),
+                  ),
+                );
+              } else {
+                Navigator.pop(context, true);
+              }
+            } else {
+              Navigator.pop(context, true);
+            }
           }
         },
         child: Form(

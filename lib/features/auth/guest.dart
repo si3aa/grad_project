@@ -35,7 +35,7 @@ class _GuestScreenState extends State<GuestScreen> {
                     ),
                     const SizedBox(height: 80),
                     Container(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
                         // ignore: deprecated_member_use
                         color: Color(0x0fffffff).withOpacity(0.4),
@@ -64,7 +64,7 @@ class _GuestScreenState extends State<GuestScreen> {
                           ),
                           const SizedBox(height: 30),
                           const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 24.0),
+                            padding: EdgeInsets.symmetric(horizontal: 20.0),
                             child: Text(
                               'You can browse as a Guest to explore our handmade and craft products, but some features may require an account.',
                               style: TextStyle(

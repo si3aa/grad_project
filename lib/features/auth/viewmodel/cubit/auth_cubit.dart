@@ -1,3 +1,5 @@
+
+import 'package:Herfa/core/services/fcm_services.dart';
 import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
 import 'package:Herfa/features/auth/data/data_source/remote/auth_api_remote_data_source.dart';
 import 'package:Herfa/features/auth/data/models/login_request.dart';
@@ -61,10 +63,11 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> login(LoginRequest request) async {
     emit(AuthLoading());
     try {
+      final fcmToken = await FCMServices().getFCMToken();
       final response = await repository.login(request);
       developer.log('Full login response: ${response.toJson()}',
           name: 'AuthCubit');
-
+      developer.log('FCM Token: $fcmToken', name: 'AuthCubit');
       if (response.success == true && response.token != null) {
         await _localDataSource.saveToken(response.token!);
 

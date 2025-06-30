@@ -17,15 +17,17 @@ import 'package:Herfa/features/event/views/screens/event_products_screen.dart';
 import 'package:Herfa/features/event/views/event_comments_screen.dart';
 import 'package:Herfa/features/get_product/views/widgets/product_class.dart';
 import 'package:Herfa/features/get_product/views/product_detail_screen.dart';
+import 'package:Herfa/features/coupons/views/screens/create_coupon_screen.dart';
 import 'package:Herfa/ui/screens/home/views/cart_screen.dart';
 import 'package:Herfa/ui/screens/home/views/home_screen.dart';
-import 'package:Herfa/ui/screens/home/views/notification_sc.dart';
 import 'package:Herfa/features/saved_products/views/screens/saved_screen_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:Herfa/constants.dart';
 import 'package:Herfa/features/comments/viewmodels/comment_cubit.dart';
 import 'package:Herfa/features/comments/data/repository/comment_repository.dart';
+import 'package:Herfa/features/coupons/viewmodels/cubit/coupon_cubit.dart';
+import 'package:Herfa/features/coupons/views/screens/all_coupons_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings settings) {
@@ -58,10 +60,32 @@ class RouteGenerator {
             title: arguments?['title'] as String? ?? 'Success',
           ),
         );
-      case Routes.notificationRoute:
-        return MaterialPageRoute(builder: (_) => const NotificationScreen());
+      
       case Routes.newPostRoute:
         return MaterialPageRoute(builder: (_) => const NewPostScreen());
+      case Routes.createCouponRoute:
+        final productId = arguments?['productId'] as int?;
+        final productName = arguments?['productName'] as String?;
+        final couponCubit = arguments?['couponCubit'] as CouponCubit?;
+        if (productId != null && productName != null && couponCubit != null) {
+          return MaterialPageRoute(
+            builder: (context) => BlocProvider.value(
+              value: couponCubit,
+              child: CreateCouponScreen(
+                productId: productId,
+                productName: productName,
+              ),
+            ),
+          );
+        }
+        return _undefinedRoute();
+      case Routes.allCouponsRoute:
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider.value(
+            value: BlocProvider.of<CouponCubit>(context),
+            child: const AllCouponsScreen(),
+          ),
+        );
       case Routes.addProductRoute:
         // Check if we have arguments for edit mode
         final isEditMode = arguments?['isEditMode'] ?? false;

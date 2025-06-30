@@ -3,6 +3,7 @@ import '../data/models/merchant_profile.dart';
 import '../data/repository/profile_repository.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
+import '../data/models/merchant_profile.dart' show UserProfile;
 
 abstract class ProfileState {}
 
@@ -13,6 +14,11 @@ class ProfileLoading extends ProfileState {}
 class ProfileLoaded extends ProfileState {
   final MerchantProfile profile;
   ProfileLoaded(this.profile);
+}
+
+class UserProfileLoaded extends ProfileState {
+  final UserProfile userProfile;
+  UserProfileLoaded(this.userProfile);
 }
 
 class ProfileNotFound extends ProfileState {}
@@ -67,6 +73,26 @@ class ProfileCubit extends Cubit<ProfileState> {
     } catch (e) {
       emit(ProfileError('Failed to upload profile picture: $e'));
       return null;
+    }
+  }
+
+  Future<void> fetchUserProfile(String token, int userId) async {
+    emit(ProfileLoading());
+    try {
+      final userProfile = await repository.fetchUserProfile(token, userId);
+      if (userProfile != null) {
+        emit(UserProfileLoaded(userProfile));
+      } else {
+        emit(ProfileNotFound());
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        emit(ProfileNotFound());
+      } else {
+        emit(ProfileError(e.toString()));
+      }
+    } catch (e) {
+      emit(ProfileError(e.toString()));
     }
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "633074425550",
+    "project_id": "herfa-7628d",
+    "storage_bucket": "herfa-7628d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633074425550:android:480a608c2c03ffea85fa9f",
+        "android_client_info": {
+          "package_name": "com.example.g_p"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBquVlvprPUncCyGjRAfM3eYXGd97lc3pU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -37,4 +37,19 @@ class UserModel {
         resetOtp: json['resetOtp'] as dynamic,
         resetOtpExpiration: json['resetOtpExpiration'] as dynamic,
       );
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
+      'verified': verified,
+      'otp': otp,
+      'otpExpiration': otpExpiration?.toIso8601String(),
+      'resetOtp': resetOtp,
+      'resetOtpExpiration': resetOtpExpiration,
+    };
+  }
 }

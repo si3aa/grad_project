@@ -34,8 +34,9 @@ class MerchantProfile {
         profilePictureUrl: json['profilePictureUrl'],
         averageRating: (json['averageRating'] ?? 0).toDouble(),
         numberOfRatings: json['numberOfRatings'] ?? 0,
-        products:
-            (json['products'] as List).map((e) => ProductMerchant.fromJson(e)).toList(),
+        products: (json['products'] as List)
+            .map((e) => ProductMerchant.fromJson(e))
+            .toList(),
       );
 }
 
@@ -64,7 +65,8 @@ class ProductMerchant {
     required this.discountedPrice,
   });
 
-  factory ProductMerchant.fromJson(Map<String, dynamic> json) => ProductMerchant(
+  factory ProductMerchant.fromJson(Map<String, dynamic> json) =>
+      ProductMerchant(
         id: json['id'],
         name: json['name'],
         shortDescription: json['shortDescription'],
@@ -75,5 +77,35 @@ class ProductMerchant {
         active: json['active'],
         colors: List<String>.from(json['colors']),
         discountedPrice: (json['discountedPrice'] ?? 0).toDouble(),
+      );
+}
+
+class UserProfile {
+  final int id;
+  final String firstName;
+  final String lastName;
+  final String phone;
+  final String address;
+  final String bio;
+  final String? profilePictureUrl;
+
+  UserProfile({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.phone,
+    required this.address,
+    required this.bio,
+    this.profilePictureUrl,
+  });
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
+        id: json['id'],
+        firstName: json['firstName'],
+        lastName: json['lastName'],
+        phone: json['phone'],
+        address: json['address'],
+        bio: json['bio'],
+        profilePictureUrl: json['profilePictureUrl'],
       );
 }

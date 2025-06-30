@@ -14,6 +14,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as developer;
 import 'package:Herfa/features/saved_products/viewmodels/cubit/saved_product_cubit.dart';
+import 'package:Herfa/features/deals/data/repository/deal_repository.dart';
+import 'package:Herfa/features/deals/viewmodels/deal_cubit.dart';
+import 'package:Herfa/features/deals/views/make_deal_screen.dart';
+import 'package:dio/dio.dart';
+import 'package:Herfa/features/auth/data/data_source/local/auth_shared_pref_local_data_source.dart';
+import 'package:Herfa/features/deals/data/data_source/deal_remote_data_source.dart';
+import 'package:Herfa/ui/provider/cubit/cart_cubit.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -221,47 +228,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _addToCart() {
-    // Get the ProductCubit instance
-    final productCubit = context.read<ProductCubit>();
-
-    // Create a copy of the product with updated quantity
-    final updatedProduct = Product(
+    // Use CartCubit to add item to cart with quantity and coupon
+    final cartCubit = context.read<CartCubit>();
+    cartCubit.addItem(CartItem(
       id: widget.product.id,
-      ownerFirstName: widget.product.ownerFirstName,
-      ownerLastName: widget.product.ownerLastName,
-      ownerUsername: widget.product.ownerUsername,
-      userImage: widget.product.userImage,
-      productImage: widget.product.productImage,
-      productName: widget.product.productName,
-      originalPrice: widget.product.originalPrice,
-      discountedPrice: widget.product.discountedPrice,
-      likes: widget.product.likes,
-      comments: widget.product.comments,
-      title: widget.product.title,
-      description: widget.product.description,
-      quantity: widget.product.quantity -
-          selectedQuantity, // Decrease the available quantity
-    );
-
-    // Update the product in the state
-    productCubit.updateProductQuantity(updatedProduct);
-
+      name: widget.product.productName,
+      price: (widget.product.discountedPrice - discountAmount),
+      imageUrl: widget.product.productImage,
+      quantity: selectedQuantity,
+      couponCode: couponCode,
+    ));
     setState(() {
       isInCart = true;
-      // Reset selected quantity to 1 after adding to cart
       selectedQuantity = 1;
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${widget.product.productName} added to cart'),
-        action: SnackBarAction(
-          label: 'VIEW CART',
-          onPressed: () {
-            Navigator.pushNamed(context, '/cart');
-          },
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 48),
+            const SizedBox(height: 12),
+            Text(
+              'Added to Cart!',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: kPrimaryColor),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${widget.product.productName} x$selectedQuantity',
+              style: const TextStyle(fontSize: 16),
+            ),
+            if (couponCode != null) ...[
+              const SizedBox(height: 4),
+              Text('Coupon: $couponCode',
+                  style: const TextStyle(color: Colors.green)),
+            ],
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.shopping_cart_checkout),
+              label: const Text('Go to Cart'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kPrimaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/cart');
+              },
+            ),
+          ],
         ),
-        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -610,8 +638,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                               const Spacer(),
                               ElevatedButton(
-                                onPressed: () {
-                                  // Implement contact seller functionality
+                                onPressed: () async {
+                                  // Get token (as in other screens)
+                                  final token =
+                                      await AuthSharedPrefLocalDataSource()
+                                          .getToken();
+                                  if (token == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Not authenticated!')),
+                                    );
+                                    return;
+                                  }
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BlocProvider(
+                                          create: (_) => DealCubit(
+                                            DealRepository(
+                                              DealRemoteDataSource(Dio(BaseOptions(
+                                                  baseUrl:
+                                                      'https://zygotic-marys-herfa-c2dd67a8.koyeb.app'))),
+                                            ),
+                                          ),
+                                          child: MakeDealScreen(
+                                              productId: currentProduct.id,
+                                              token: token),
+                                        ),
+                                      ));
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: kPrimaryColor,
@@ -620,7 +674,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
-                                child: const Text('Contact Seller'),
+                                child: const Text('Make Deal'),
                               ),
                             ],
                           ),
@@ -652,19 +706,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             children: [
                               ...[
                                 Text(
-                                  '\$${currentProduct.originalPrice.toStringAsFixed(2)}',
+                                  '${currentProduct.originalPrice.toStringAsFixed(2)} EGP',
                                   style: const TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 16,
                                     decoration: TextDecoration.lineThrough,
                                     color: Colors.grey,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 6),
                               ],
                               Text(
-                                '\$${(currentProduct.discountedPrice).toStringAsFixed(2)}',
+                                '${(currentProduct.discountedPrice).toStringAsFixed(2)} EGP',
                                 style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                   // ignore: unnecessary_null_comparison
                                   color: currentProduct.discountedPrice != null
@@ -815,12 +869,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               children: [
                                 const Icon(Icons.check_circle,
                                     color: Colors.green, size: 16),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 2),
                                 Text(
-                                  'Coupon "$couponCode" applied: -\$${discountAmount.toStringAsFixed(2)}',
+                                  'Coupon "$couponCode" applied: -${discountAmount.toStringAsFixed(2)}EGP',
                                   style: const TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 12,
                                   ),
                                 ),
                                 const Spacer(),
@@ -832,7 +887,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       _couponController.clear();
                                     });
                                   },
-                                  child: const Text('Remove'),
+                                  child: const Text('Remove',style:TextStyle(fontSize: 9) ,),
                                 ),
                               ],
                             ),
@@ -864,7 +919,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   children: [
                                     const Text('Subtotal'),
                                     Text(
-                                        '\$${(price * selectedQuantity).toStringAsFixed(2)}'),
+                                        '${(price * selectedQuantity).toStringAsFixed(2)} EGP'),
                                   ],
                                 ),
                                 if (discountAmount > 0) ...[
@@ -875,7 +930,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     children: [
                                       const Text('Discount'),
                                       Text(
-                                          '-\$${(discountAmount * selectedQuantity).toStringAsFixed(2)}'),
+                                          '-${(discountAmount * selectedQuantity).toStringAsFixed(2)} EGP'),
                                     ],
                                   ),
                                 ],
@@ -893,7 +948,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       ),
                                     ),
                                     Text(
-                                      '\$${totalPrice.toStringAsFixed(2)}',
+                                      '${totalPrice.toStringAsFixed(2)} EGP',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -926,7 +981,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        '\$${totalPrice.toStringAsFixed(2)}',
+                        '${totalPrice.toStringAsFixed(2)} EGP',
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

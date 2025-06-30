@@ -28,27 +28,24 @@ class MeRepository {
         ),
       );
 
+      print('Raw /auth/me response: \\${response.data}');
+
       if (response.statusCode == 200 && response.data != null) {
         final myUserResponse = myUser.fromJson(response.data);
         if (myUserResponse.success == true && myUserResponse.data != null) {
           return myUserResponse.data;
         } else {
           print(
-              'API response indicates failure or no data: ${myUserResponse.message}');
+              'API response indicates failure or no data: \\${myUserResponse.message}');
           return null;
         }
       } else {
-        print('Failed to fetch user data: ${response.statusCode}');
+        print('Failed to fetch user data: \\${response.statusCode}');
         return null;
       }
-    } on DioException catch (e) {
-      print('Dio error fetching user data: ${e.message}');
-      if (e.response != null) {
-        print('Response data: ${e.response?.data}');
-      }
-      return null;
-    } catch (e) {
-      print('Error fetching user data: $e');
+    } catch (e, stack) {
+      print('Error fetching user data: \\${e}');
+      print(stack);
       return null;
     }
   }

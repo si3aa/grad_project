@@ -36,10 +36,10 @@ class Data {
   String? otpExpiration;
   Null? resetOtp;
   Null? resetOtpExpiration;
-  Null? profile;
+
   int? loyaltyPoints;
-  int? walletBalance;
-  int? reservedBalance;
+  double? walletBalance;
+  
 
   Data(
       {this.id,
@@ -53,10 +53,10 @@ class Data {
       this.otpExpiration,
       this.resetOtp,
       this.resetOtpExpiration,
-      this.profile,
+    
       this.loyaltyPoints,
       this.walletBalance,
-      this.reservedBalance});
+      });
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -70,10 +70,10 @@ class Data {
     otpExpiration = json['otpExpiration'];
     resetOtp = json['resetOtp'];
     resetOtpExpiration = json['resetOtpExpiration'];
-    profile = json['profile'];
+    
     loyaltyPoints = json['loyaltyPoints'];
     walletBalance = json['walletBalance'];
-    reservedBalance = json['reservedBalance'];
+    
   }
 
   Map<String, dynamic> toJson() {
@@ -89,10 +89,10 @@ class Data {
     data['otpExpiration'] = this.otpExpiration;
     data['resetOtp'] = this.resetOtp;
     data['resetOtpExpiration'] = this.resetOtpExpiration;
-    data['profile'] = this.profile;
+    
     data['loyaltyPoints'] = this.loyaltyPoints;
     data['walletBalance'] = this.walletBalance;
-    data['reservedBalance'] = this.reservedBalance;
+    
     return data;
   }
 }
